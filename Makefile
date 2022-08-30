@@ -69,7 +69,7 @@ Core/Src/rtc.c \
 Core/Src/adc.c \
 Core/Src/i2c.c \
 Core/Src/gpio.c \
-
+Core/Src/modulos/debug.c \
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f103xb.s
@@ -125,6 +125,7 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
+-ICore/Src/modulos/include \
 -ICore/Inc \
 -IDrivers/STM32F1xx_HAL_Driver/Inc \
 -IDrivers/STM32F1xx_HAL_Driver/Inc/Legacy \

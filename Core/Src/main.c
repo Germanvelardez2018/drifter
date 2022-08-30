@@ -27,6 +27,7 @@
 #include "spi.h"
 #include "adc.h"
 #include "i2c.h"
+#include "debug.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -126,6 +127,12 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
+  
+  modulo_debug_init();
+  #define MSG     "debug con DMA \n"
+  modulo_debug_print(MSG);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -133,6 +140,7 @@ int main(void)
   while (1)
   {
     HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
+
     HAL_Delay(500);
     /* USER CODE END WHILE */
 
