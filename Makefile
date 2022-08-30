@@ -66,6 +66,9 @@ Core/Src/uart.c \
 Core/Src/spi.c \
 Core/Src/watchdog.c \
 Core/Src/rtc.c \
+Core/Src/adc.c \
+Core/Src/i2c.c \
+Core/Src/gpio.c \
 
 # ASM sources
 ASM_SOURCES =  \
