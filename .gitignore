@@ -1,0 +1,6 @@
+# Carpetas y archivo a ser ignorados por git
+
+
+#Carpeta de generacion de archivo .o .bin .hex, ext
+build
+
