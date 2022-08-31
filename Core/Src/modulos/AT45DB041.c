@@ -147,7 +147,8 @@ PRIVATE  level_t   gpio_read (){
 
 PRIVATE  status_t  spi_write(uint8_t* buffer, size_t len ){
 
-            HAL_SPI_Transmit(AT45DB_SPI,buffer,len,100);
+          //  HAL_SPI_Transmit(AT45DB_SPI,buffer,len,100);
+            HAL_SPI_Transmit_DMA(AT45DB_SPI,buffer,len);
 
 
             return STATUS_OK;
@@ -155,7 +156,9 @@ PRIVATE  status_t  spi_write(uint8_t* buffer, size_t len ){
 
 PRIVATE  status_t  spi_read(uint8_t* buffer, size_t len){
 
-        HAL_SPI_Receive(AT45DB_SPI,buffer,len,100);       
+        //HAL_SPI_Receive(AT45DB_SPI,buffer,len,100);  
+        HAL_SPI_Receive_DMA(AT45DB_SPI,buffer,len);
+     
 
 
         return STATUS_OK;
@@ -298,6 +301,7 @@ uint8_t write_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
         spi_write(&cmd,4);
         delay(2);
         spi_write(data,len);
+        delay(10);
         gpio_write(1);
         at45db_wait(AT45DB_TIMEOUT);
         return ret;        
@@ -318,6 +322,7 @@ uint8_t read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
         spi_write(&cmd,5);
         delay(1);
         spi_read(data,len);
+        delay(10);
         gpio_write(1);
         //wait
         at45db_wait(AT45DB_TIMEOUT);
