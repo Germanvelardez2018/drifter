@@ -176,6 +176,7 @@ modulo_debug_print(buffer);
   #endif
   at45_sleep();
   
+  HAL_TIM_Base_Start_IT(&htim4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -183,7 +184,6 @@ modulo_debug_print(buffer);
   while (1)
   {
 
-     HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); // Para probar que funciona
 
     HAL_Delay(500);
     /* USER CODE END WHILE */
