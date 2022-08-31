@@ -123,15 +123,17 @@ int main(void)
   MX_I2C2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-  MX_IWDG_Init();
+  //MX_IWDG_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
   
   modulo_debug_init();
-  #define MSG     "debug con DMA \n"
+  #define MSG     "Init debug con DMA \n"
   modulo_debug_print(MSG);
+  uint8_t counter = 0;
 
+  uint8_t buffer[100]={0};
 
   /* USER CODE END 2 */
 
@@ -139,9 +141,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
+//    HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
+    sprintf(buffer,"counter:%d\n",counter);
+    modulo_debug_print(buffer);
 
     HAL_Delay(500);
+    counter ++;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -198,9 +203,6 @@ void SystemClock_Config(void)
 
 
 
-
-
-
 /**
   * Enable DMA controller clock
   */
@@ -222,6 +224,8 @@ static void MX_DMA_Init(void)
   HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 
 }
+
+
 
 /* USER CODE BEGIN 4 */
 
