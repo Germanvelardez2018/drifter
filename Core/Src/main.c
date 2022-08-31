@@ -27,7 +27,10 @@
 #include "spi.h"
 #include "adc.h"
 #include "i2c.h"
-#include "debug.h"
+
+// Modulos
+#include  "debug.h"
+#include  "AT45DB041.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,16 +72,8 @@ DMA_HandleTypeDef hdma_usart2_tx;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-//static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
-//static void MX_RTC_Init(void);
-//static void MX_SPI1_Init(void);
-//static void MX_ADC1_Init(void);
-//static void MX_I2C2_Init(void);
-//static void MX_USART1_UART_Init(void);
-//static void MX_USART2_UART_Init(void);
-//static void MX_IWDG_Init(void);
-//static void MX_TIM4_Init(void);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -128,25 +123,69 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   
+
+ // MENSAJE INICIAL
   modulo_debug_init();
-  #define MSG     "Init debug con DMA \n"
-  modulo_debug_print(MSG);
-  uint8_t counter = 0;
+  #define MSG_INIT     "Init debug con DMA \n"
+  
+  
+  #define MSG                 " Driver  AT45DB by Velardez German ::\n"
+  #define MSG_LEN             (strlen(MSG) +1)
 
-  uint8_t buffer[100]={0};
+  #define BUFFER_FLAG          (0)
+  #define FULL_ERASE           (0)
 
+
+
+
+uint8_t ready = 0;
+
+uint8_t buffer[100]={0};
+uint8_t  buffer1[100]={0};
+ 
+modulo_debug_print(MSG_INIT);
+
+
+
+ready = is_ready();
+sprintf(buffer," device %s \n",(ready)?"ready":"bussy");
+modulo_debug_print(buffer);
+
+
+ modulo_debug_print(" Driver  AT45DB by Velardez German \n");
+
+  at45_resumen();
+  #if (0)
+  //write_buffer1(MSG,MSG_LEN,0);
+  modulo_debug_print(" 3\n");
+  HAL_Delay(100);
+  read_buffer1(buffer1,MSG_LEN,0);
+  #else
+  write_page(MSG,MSG_LEN,0,0);
+  HAL_Delay(1000);
+  read_page(buffer1,MSG_LEN,0,0);
+  #endif
+  sprintf(buffer," \nData readed:%s\n",buffer1);
+  modulo_debug_print(buffer);
+  #if (0)
+  full_erase_memory();
+  read_page(buffer1,MSG_LEN,100,0);
+  sprintf(buffer," \nRead  page after full erase chip:%s\n",buffer1);
+  modulo_debug_print(buffer);
+
+  #endif
+  at45_sleep();
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//    HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
-    sprintf(buffer,"counter:%d\n",counter);
-    modulo_debug_print(buffer);
+
+     HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); // Para probar que funciona
 
     HAL_Delay(500);
-    counter ++;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

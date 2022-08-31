@@ -15,8 +15,8 @@
 #include "gpio.h"
 #include "spi.h"
 #include "AT45DB041.h"
-
-extern hspi2;
+#include "debug.h"
+extern   SPI_HandleTypeDef hspi1;
 
 
 
@@ -96,6 +96,13 @@ extern hspi2;
 
 
 
+#define AT45DB_SPI              &hspi1
+#define CS_Pin                  SPI1_CS_Pin
+#define CS_GPIO_Port            SPI1_CS_Port          
+
+
+
+
 
 
 
@@ -120,28 +127,36 @@ PRIVATE status_t gpio_init(){
 PRIVATE  status_t  gpio_write(level_t value){
         
         if(value){
-        HAL_GPIO_WritePin(SPI_CS_GPIO_Port,SPI_CS_Pin,1);
+        HAL_GPIO_WritePin(CS_GPIO_Port,CS_Pin,1);
         }
         else{
-        HAL_GPIO_WritePin(SPI_CS_GPIO_Port,SPI_CS_Pin,0);
+        HAL_GPIO_WritePin(CS_GPIO_Port,CS_Pin,0);
         }
         return STATUS_OK;
 }
 
 
 PRIVATE  level_t   gpio_read (){
+
+        // Aun no implementado, no se usa
+
+
         return LEVEL_LOW;
 }
 
 
 PRIVATE  status_t  spi_write(uint8_t* buffer, size_t len ){
-            HAL_SPI_Transmit(&hspi2,buffer,len,1000);
+
+            HAL_SPI_Transmit(AT45DB_SPI,buffer,len,100);
+
 
             return STATUS_OK;
 }
 
 PRIVATE  status_t  spi_read(uint8_t* buffer, size_t len){
-        HAL_SPI_Receive(&hspi2,buffer,len,1000);
+
+        HAL_SPI_Receive(AT45DB_SPI,buffer,len,100);       
+
 
         return STATUS_OK;
 }
@@ -245,8 +260,6 @@ uint8_t write_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
         spi_write(data,len);
         gpio_write(1);
         at45db_wait(AT45DB_TIMEOUT);
-
-
         return ret;
 
 }
@@ -264,14 +277,9 @@ uint8_t read_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
         cmd[3] = (address >> 8)  & 0xFF;
         gpio_write(0);
         spi_write(&cmd,4);
-        delay(1);
         spi_read(data,len);
-
         gpio_write(1);
         at45db_wait(AT45DB_TIMEOUT);
-
-
-
         return ret;
 
 }
@@ -288,18 +296,17 @@ uint8_t write_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
         cmd[3] = (address >> 8)  & 0xFF;
         gpio_write(0);
         spi_write(&cmd,4);
-        delay(1);
-        spi_read(data,len);
+        delay(2);
+        spi_write(data,len);
         gpio_write(1);
         at45db_wait(AT45DB_TIMEOUT);
-
         return ret;        
 }
 
 
 
 uint8_t read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
-        uint8_t ret=0;
+       uint8_t ret=0;
         uint32_t address =  (pag << 9) | pos ;   
         uint8_t cmd[5] ={0};
         cmd[0] = CMD_READPAGEHF;

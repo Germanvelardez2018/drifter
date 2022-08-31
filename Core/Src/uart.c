@@ -44,7 +44,6 @@ void USART2_IRQHandler(void){
      UNUSED(huart);
 
    
-    HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); // Para probar que funciona
 
 
 
