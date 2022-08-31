@@ -11,4 +11,35 @@
 
 
 
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __WDT_H
+#define __WDT_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------*/
+
+/**
+ * @brief Configura el hardware WDT. Tiene reloj aparte y esta configurado para maximo tiempo de espera disponible.
+ * 
+ * @return ** void 
+ */
 void MX_IWDG_Init(void);
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __WDT_H */
+
+
+
+
+

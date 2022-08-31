@@ -4,6 +4,7 @@
 
 
 
+extern TIM_HandleTypeDef htim4;
 
 
 
@@ -60,11 +61,6 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 }
 
 
-/**
-  * @brief TIM4 Initialization Function
-  * @param None
-  * @retval None
-  */
  void MX_TIM4_Init(void)
 {
 

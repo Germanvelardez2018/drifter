@@ -30,7 +30,7 @@ extern DMA_HandleTypeDef hdma_usart2_tx;
 
 void USART2_IRQHandler(void){
            
-            HAL_UART_IRQHandler(&huart2);
+     HAL_UART_IRQHandler(&huart2);
             
 }
 

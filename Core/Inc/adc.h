@@ -12,4 +12,35 @@
 
 
 
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __ADC1_H
+#define __ADC1_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------*/
+
+
+
+/**
+ * @brief Configuracion de hardware ADC1. Modo simple sin DMA e interrupciones.
+ * 
+ * @return ** void 
+ */
 void MX_ADC1_Init(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __ADC1_H */
+
+
+
+

@@ -12,4 +12,35 @@
 
 
 
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __RTC_H
+#define __RTC_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------*/
+
+
+
+/**
+ * @brief Configura el hardware de reloj de tiempo real
+ * 
+ * @return ** void 
+ */
 void MX_RTC_Init(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __RTC_H */
+
+
+

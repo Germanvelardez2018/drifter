@@ -7,6 +7,13 @@
 
 // Configurar PB8 para CS
 
+
+#define SPI1_CS_Pin   GPIO_PIN_8
+#define SPI1_CS_Port  GPIOB
+
+
+
+
 extern   SPI_HandleTypeDef hspi1;
 
 extern DMA_HandleTypeDef hdma_spi1_tx;

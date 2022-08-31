@@ -76,6 +76,10 @@ void Error_Handler(void);
 #define SIM7000G_RI_EXTI_IRQn EXTI15_10_IRQn
 /* USER CODE BEGIN Private defines */
 
+
+// Agregado manualmente
+#define SPI1_CS_Pin   GPIO_PIN_8
+#define SPI1_CS_Port  GPIOB
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

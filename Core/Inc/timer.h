@@ -10,8 +10,41 @@
  */
 
 
-extern TIM_HandleTypeDef htim4;
 
 
 
- void MX_TIM4_Init(void);
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __TIMER_H
+#define __TIMER_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------*/
+
+
+
+
+
+/**
+ * @brief Configura el haardware asociado a el timer TIM4 de 16 bits. Simple
+ * 
+ * @return ** void 
+ */
+void MX_TIM4_Init(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __TIMER_H */
+
+
+
+
+

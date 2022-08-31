@@ -2,6 +2,11 @@
 #include "gpio.h"
 
 
+// Nota. Voy a agregar manualmente la configuracion de PB8 como salida
+
+
+
+
 /**
   * @brief GPIO Initialization Function
   * @param None
@@ -21,7 +26,7 @@
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2|GPIO_PIN_13, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2|GPIO_PIN_13 | GPIO_PIN_8, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PA4 */
   GPIO_InitStruct.Pin = GPIO_PIN_4;
