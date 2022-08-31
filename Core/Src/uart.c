@@ -19,6 +19,41 @@ extern DMA_HandleTypeDef hdma_usart2_tx;
 
 
 
+// Notas importantisimas
+
+// El DMA necesita que el periferico UART tenga habilitadas las interrupciones. 
+// Solo dios sabe porque. Si no estan habilitadas, entonces dma corre una sola vez y
+// luego hay que mandar configuracion inicial de uart para que tome otra peticion
+
+
+
+
+void USART2_IRQHandler(void){
+           
+            HAL_UART_IRQHandler(&huart2);
+            
+}
+
+
+
+
+
+
+ HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+
+     UNUSED(huart);
+
+   
+    HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); // Para probar que funciona
+
+
+
+}
+
+
+
+
+
 /**
 * @brief UART MSP Initialization
 * This function configures the hardware resources used in this example
