@@ -31,6 +31,7 @@
 // Modulos
 #include  "debug.h"
 #include  "AT45DB041.h"
+#include  "MPU6050.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -132,9 +133,9 @@ int main(void)
   #define MSG                 " Driver  AT45DB by Velardez German \n"
   #define MSG_LEN             (strlen(MSG) +1)
 
-  #define BUFFER_FLAG          (0)
-  #define FULL_ERASE           (0)
-
+  #define BUFFER_FLAG          0
+  #define FULL_ERASE           0
+  #define CHECK_TEMP           1
 
 
 
@@ -172,22 +173,33 @@ modulo_debug_print(buffer);
   read_page(buffer1,MSG_LEN,100,0);
   sprintf(buffer," \nRead  page after full erase chip:%s\n",buffer1);
   modulo_debug_print(buffer);
-
   #endif
+
   at45_sleep();
   
+  
+  #if 1 
+  HAL_Delay(500);
+  status_t ret = mpu6050_test();
+  #endif
   HAL_TIM_Base_Start_IT(&htim4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int16_t x,y,z ;
+  float fx,fy,fz;
   while (1)
   {
-
-
-    HAL_Delay(500);
+    ret = mpu6050_get_acceleration(  &x,&y,&z);
+    if( ret == STATUS_ERROR)    modulo_debug_print("error en leer acelerometro\n");
+    fx = (float) (x/(16384.0/2.0)); //      
+    fy = (float) (y/(16384.0/2.0)); // 
+    fz = (float) (z/(16384.0/2.0)); // 
+    sprintf(buffer,"\n\t\t\nx:%.2f , y:%.2f , z:%.2f \n",fx,fy,fz);
+    modulo_debug_print(buffer);
+    HAL_Delay(1000);
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

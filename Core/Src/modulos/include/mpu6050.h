@@ -72,7 +72,7 @@ status_t mpu6050_sleep();
 
 
 /**
- * @brief Obtenemos la medicion del acelerometro
+ * @brief Obtener la medicion del acelerometro
  * 
  * @param x variable de 16b donde se almacena el valor de medicion del eje x
  * @param y variable de 16b donde se almacena el valor de medicion del eje y
@@ -83,6 +83,22 @@ status_t mpu6050_get_acceleration( int16_t* x, int16_t* y, int16_t* z);
 
 
 
+/**
+ * @brief Obtener la medicion de temperatura
+ * 
+ * @param temp 
+ * @return ** status_t 
+ */
+status_t mpu6050_get_temperature( int16_t* temp);
+
+
+
+/**
+ * @brief 
+ * 
+ * @return ** status_t 
+ */
+status_t mpu6050_test();
 
 
 #ifdef __cplusplus
