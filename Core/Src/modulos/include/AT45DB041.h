@@ -11,22 +11,6 @@
  */
 
 
-#include <stdio.h>
-
-
-
-// Private functions 
-
-
-typedef enum {
-    STATUS_ERROR = 0,
-    STATUS_OK
-} status_t;
-
-typedef enum {
-    LEVEL_LOW =0,
-    LEVEL_HIGH
-} level_t;
 
 
 typedef enum{

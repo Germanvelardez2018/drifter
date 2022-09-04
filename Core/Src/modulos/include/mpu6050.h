@@ -1,9 +1,9 @@
 /**
- * @file gpio.h
- * @author German Velardez (gvelardez@inti.gob.ar)
- * @brief  Archivo de configuracion del GPIO
+ * @file mpu6050.h
+ * @author German Velardez (you@domain.com)
+ * @brief  Archivo de configuracion del modulo MPU6050
  * @version 0.1
- * @date 2022-08-30
+ * @date 2022-09-02
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -13,17 +13,16 @@
 
 
 
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __GPIO_H
-#define __GPIO_H
+#ifndef __MPU6050_H
+#define __MPU6050_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "core.h"
+
 
 
 /*-----------------------------------------------------------------------------*/
@@ -31,18 +30,12 @@ extern "C" {
 
 
 
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
- void MX_GPIO_Init(void);
+
+
+
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __GPIO_H */
-
-
-
-
+#endif /* __MPU6050_H */

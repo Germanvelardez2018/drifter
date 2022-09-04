@@ -1,6 +1,7 @@
 # Carpetas y archivo a ser ignorados por git
 
-
+/.vscode
+.vscode
 #Carpeta de generacion de archivo .o .bin .hex, ext
 build
 

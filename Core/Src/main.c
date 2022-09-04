@@ -129,7 +129,7 @@ int main(void)
   #define MSG_INIT     "Init debug con DMA \n"
   
   
-  #define MSG                 " Driver  AT45DB by Velardez German ::\n"
+  #define MSG                 " Driver  AT45DB by Velardez German \n"
   #define MSG_LEN             (strlen(MSG) +1)
 
   #define BUFFER_FLAG          (0)
@@ -152,7 +152,7 @@ sprintf(buffer," device %s \n",(ready)?"ready":"bussy");
 modulo_debug_print(buffer);
 
 
- modulo_debug_print(" Driver  AT45DB by Velardez German \n");
+ modulo_debug_print(MSG);
 
   at45_resumen();
   #if (0)

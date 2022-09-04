@@ -1,11 +1,7 @@
-
-
-
-#include "main.h"
 #include "spi.h"
 
 
-// Configurar PB8 para CS
+//  Nota:Configurar  manualmente PB8 para CS
 
 
 
