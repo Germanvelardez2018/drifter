@@ -72,6 +72,7 @@ Core/Src/gpio.c \
 Core/Src/modulos/debug.c \
 Core/Src/modulos/AT45DB041.c \
 Core/Src/modulos/MPU6050.c \
+Core/Src/modulos/SIM7000G.c \
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f103xb.s

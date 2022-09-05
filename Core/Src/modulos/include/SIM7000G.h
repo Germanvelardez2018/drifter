@@ -1,7 +1,8 @@
+
 /**
- * @file debug.h
+ * @file SIM7000G.h
  * @author German Velardez (gvelardez@inti.gob.ar)
- * @brief  Modulo para debug mediante impresion de mensaje por uart. Usa DMA
+ * @brief  Modulo para el manejo del modulo de comunicacion SIM7000G
  * @version 0.1
  * @date 2022-08-30
  * 
@@ -10,31 +11,60 @@
  */
 
 
+
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __DEBUG_H
-#define __DEBUG_H
+#ifndef __SIM7000G_H
+#define __SIM7000G_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-
+#include "core.h"
 /* Definiciones --------------------------------------------------------------*/
 
 
 /*-----------------------------------------------------------------------------*/
 
 
-void  modulo_debug_init(void);
 
-void modulo_debug_print(char* string);
+
+
+status_t sim7000g_init();
+
+
+status_t sim7000g_set_mqtt_config();
+
+
+
+status_t sim7000g_mqtt_publis();
+
+status_t sim7000g_set_mqtt_subscribe();
+
+status_t sim7000g_set_mqtt_dessubscribe();
+
+
+
+status_t sim7000g_resume();
+
+
+status_t sim7000g_sleep();
+
+
+
+
+status_t sim7000g_get_NMEA( uint8_t* buffer, uint8_t len);
+
+
+
+status_t sim7000g_test();
+
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __DEBUG_H */
-
+#endif /* __SIM7000G_H */
 
