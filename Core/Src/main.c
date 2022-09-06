@@ -27,6 +27,7 @@
 #include "spi.h"
 #include "adc.h"
 #include "i2c.h"
+#include "dma.h"
 
 // Modulos
 #include  "debug.h"
@@ -46,6 +47,15 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+ #define MSG_INIT            "Init debug con DMA \n"
+  
+  
+  #define MSG                 " Driver  AT45DB by Velardez German \n"
+  #define MSG_LEN             (strlen(MSG) +1)
+
+  #define BUFFER_FLAG          0
+  #define FULL_ERASE           0
+  #define CHECK_TEMP           1
 
 /* USER CODE END PM */
 
@@ -65,50 +75,21 @@ DMA_HandleTypeDef hdma_usart2_tx;
 extern  TIM_HandleTypeDef htim4;
 
 
+
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_DMA_Init(void);
 
-/* USER CODE BEGIN PFP */
 
-/* USER CODE END PFP */
 
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
-{
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
+static void app_init(){
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_RTC_Init();
@@ -117,82 +98,42 @@ int main(void)
   MX_I2C2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-  //MX_IWDG_Init();
+  MX_IWDG_Init();
   MX_TIM4_Init();
+  // Necesario para evitar que el micro se reinicio por WDT
+  HAL_TIM_Base_Start_IT(&htim4);
+  // Inicio modulos
+  modulo_debug_init();
+  sim7000g_init();
+}
+
+
+
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+  // Configuracion inicial de los perifericos
+  app_init();
+
   /* USER CODE BEGIN 2 */
 
   
 
  // MENSAJE INICIAL
-  modulo_debug_init();
-  #define MSG_INIT     "Init debug con DMA \n"
-  
-  
-  #define MSG                 " Driver  AT45DB by Velardez German \n"
-  #define MSG_LEN             (strlen(MSG) +1)
-
-  #define BUFFER_FLAG          0
-  #define FULL_ERASE           0
-  #define CHECK_TEMP           1
-
-
-
-uint8_t ready = 0;
-
-uint8_t buffer[100]={0};
-uint8_t  buffer1[100]={0};
  
 modulo_debug_print(MSG_INIT);
 
 
 
-ready = is_ready();
-sprintf(buffer," device %s \n",(ready)?"ready":"bussy");
-//modulo_debug_print(buffer);
-
-
-// modulo_debug_print(MSG);
-
-  at45_resumen();
-  #if (0)
-  //write_buffer1(MSG,MSG_LEN,0);
-  modulo_debug_print(" 3\n");
-  HAL_Delay(100);
-  read_buffer1(buffer1,MSG_LEN,0);
-  #else
-  //write_page(MSG,MSG_LEN,0,0);
-  //HAL_Delay(1000);
-  //read_page(buffer1,MSG_LEN,0,0);
-  #endif
- // sprintf(buffer," \nData readed:%s\n",buffer1);
-  modulo_debug_print(buffer);
-  #if (0)
-  full_erase_memory();
-  read_page(buffer1,MSG_LEN,100,0);
-  sprintf(buffer," \nRead  page after full erase chip:%s\n",buffer1);
-  modulo_debug_print(buffer);
-  #endif
-
-  at45_sleep();
   
   
 // INICIO MODULO SIM
 
-sim7000g_init();
 
-
-
-  #if 0 
-  HAL_Delay(500);
-  status_t ret = mpu6050_test();
-  #endif
-  HAL_TIM_Base_Start_IT(&htim4);
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  int16_t x,y,z ;
-  float fx,fy,fz;
   status_t ret = STATUS_ERROR;
     ret =  sim7000g_check();
     if(ret == STATUS_OK)
@@ -206,14 +147,7 @@ sim7000g_init();
   {
 
     #if 0
-    ret = mpu6050_get_acceleration(  &x,&y,&z);
-    if( ret == STATUS_ERROR)    modulo_debug_print("error en leer acelerometro\n");
-    fx = (float) (x/(16384.0/2.0)); //      
-    fy = (float) (y/(16384.0/2.0)); // 
-    fz = (float) (z/(16384.0/2.0)); // 
-    sprintf(buffer,"\n\t\t\nx:%.2f , y:%.2f , z:%.2f \n",fx,fy,fz);
-    modulo_debug_print(buffer);
-  
+   
     #endif
    
 
@@ -272,27 +206,6 @@ void SystemClock_Config(void)
 
 
 
-/**
-  * Enable DMA controller clock
-  */
-static void MX_DMA_Init(void)
-{
-
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
-
-  /* DMA interrupt init */
-  /* DMA1_Channel2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
-  /* DMA1_Channel3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
-  /* DMA1_Channel7_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
-
-}
 
 
 

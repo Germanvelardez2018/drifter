@@ -61,6 +61,7 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c \
 Core/Src/system_stm32f1xx.c \
+Core/Src/system_clock.c \
 Core/Src/timer.c \
 Core/Src/uart.c \
 Core/Src/spi.c \
@@ -69,6 +70,7 @@ Core/Src/rtc.c \
 Core/Src/adc.c \
 Core/Src/i2c.c \
 Core/Src/gpio.c \
+Core/Src/dma.c \
 Core/Src/modulos/debug.c \
 Core/Src/modulos/AT45DB041.c \
 Core/Src/modulos/MPU6050.c \
