@@ -3,7 +3,7 @@
 
 
 
-extern TIM_HandleTypeDef htim4;
+ TIM_HandleTypeDef htim4;
 extern IWDG_HandleTypeDef hiwdg;
 
 

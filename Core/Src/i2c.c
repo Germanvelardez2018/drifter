@@ -1,7 +1,7 @@
 #include "i2c.h"
 
 
-extern I2C_HandleTypeDef hi2c2;
+ I2C_HandleTypeDef hi2c2;
 
 
 

@@ -2,7 +2,7 @@
 
 
 
-extern RTC_HandleTypeDef hrtc;
+ RTC_HandleTypeDef hrtc;
 
 
 

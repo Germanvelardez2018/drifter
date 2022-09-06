@@ -2,7 +2,7 @@
 
 
 
-extern ADC_HandleTypeDef hadc1;
+ ADC_HandleTypeDef hadc1;
 
 
 

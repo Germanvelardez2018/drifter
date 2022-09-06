@@ -50,23 +50,20 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc1;
 
-I2C_HandleTypeDef hi2c2;
 
-IWDG_HandleTypeDef hiwdg;
+// Peticiones dma
 
-RTC_HandleTypeDef hrtc;
-
-SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
 DMA_HandleTypeDef hdma_spi1_rx;
-
-TIM_HandleTypeDef htim4;
-
-UART_HandleTypeDef huart1;
-UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_tx;
+
+
+
+
+// en timer.c
+extern  TIM_HandleTypeDef htim4;
+
 
 /* USER CODE BEGIN PV */
 

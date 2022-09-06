@@ -1,7 +1,7 @@
 #include "watchdog.h"
 
 
-extern IWDG_HandleTypeDef hiwdg;
+IWDG_HandleTypeDef hiwdg;
 
 
 

@@ -1,8 +1,8 @@
 #include "uart.h"
 
 
-extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart2;
+ UART_HandleTypeDef huart1;
+ UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_usart2_tx;
 
 
