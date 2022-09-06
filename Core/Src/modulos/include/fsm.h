@@ -54,7 +54,8 @@ status_t fsm_set_callbacks( callback_function on_field,
 
 
 /**
- * @brief  Entramos en loop infinito
+ * @brief  Entramos en loop infinito. 
+ * Debe llamarse a fsm_set_callback primero
  * 
  * @return ** void 
  */

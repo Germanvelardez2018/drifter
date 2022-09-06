@@ -79,6 +79,9 @@ return ret;
 
 
 void fsm_loop(){
+    fsm_init();
+    
+     
     while (1){
         switch (__DEVICE_STATE_IN_SRAM__)
         {
