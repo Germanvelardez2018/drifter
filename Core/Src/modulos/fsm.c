@@ -1,5 +1,5 @@
 #include "fsm.h"
-
+#include "power_save.h"
 
 
 PRIVATE fsm_state_t __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED; // Antes de inicializar
@@ -10,6 +10,11 @@ PRIVATE callback_function   CALL_ON_DOWNLOAD_MEMORY;
 
 
 
+
+
+PRIVATE delay(uint32_t time){
+    HAL_Delay(time);
+}
 
 PRIVATE fsm_state_t fsm_get_state_from_flash(){
     // Funcion dummy por el momento
@@ -78,6 +83,8 @@ return ret;
 
 
 
+
+
 void fsm_loop(){
     fsm_init();
     
@@ -98,7 +105,8 @@ void fsm_loop(){
         }
 
         // SLEEP
-
+   // delay(2000);
+    pwr_sleep();
 
     }
 

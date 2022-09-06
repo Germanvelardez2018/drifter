@@ -6,6 +6,20 @@
 
 
 
+
+
+/**
+  * @brief This function handles RTC alarm interrupt through EXTI line 17.
+  */
+void RTC_Alarm_IRQHandler(void)
+{
+ HAL_RTC_AlarmIRQHandler(&hrtc);  
+}
+
+
+
+
+
 /**
 * @brief RTC MSP Initialization
 * This function configures the hardware resources used in this example
@@ -80,6 +94,9 @@ void HAL_RTC_MspDeInit(RTC_HandleTypeDef* hrtc)
     Error_Handler();
   }
   /* USER CODE BEGIN RTC_Init 2 */
+
+  HAL_NVIC_SetPriority(RTC_Alarm_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(RTC_Alarm_IRQn);
 
   /* USER CODE END RTC_Init 2 */
 

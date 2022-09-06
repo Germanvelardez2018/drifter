@@ -33,16 +33,12 @@ extern "C" {
 
 
 
-typedef enum{
-    RUN_MODE = 0,
-    SLEEP_MODE = 1
-} pws_mode_t;
-
-
-
-
 /*-----------------------------------------------------------------------------*/
 
+void pwr_init();
+
+
+void pwr_sleep();
 
 #ifdef __cplusplus
 }
