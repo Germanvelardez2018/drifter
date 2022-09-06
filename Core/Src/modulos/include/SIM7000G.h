@@ -28,7 +28,7 @@ extern "C" {
 /*-----------------------------------------------------------------------------*/
 
 
-
+status_t sim7000g_check();
 
 
 status_t sim7000g_init();
@@ -38,7 +38,7 @@ status_t sim7000g_set_mqtt_config();
 
 
 
-status_t sim7000g_mqtt_publis();
+status_t sim7000g_mqtt_publish();
 
 status_t sim7000g_set_mqtt_subscribe();
 

@@ -32,6 +32,7 @@
 #include  "debug.h"
 #include  "AT45DB041.h"
 #include  "MPU6050.h"
+#include "SIM7000G.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -150,10 +151,10 @@ modulo_debug_print(MSG_INIT);
 
 ready = is_ready();
 sprintf(buffer," device %s \n",(ready)?"ready":"bussy");
-modulo_debug_print(buffer);
+//modulo_debug_print(buffer);
 
 
- modulo_debug_print(MSG);
+// modulo_debug_print(MSG);
 
   at45_resumen();
   #if (0)
@@ -162,11 +163,11 @@ modulo_debug_print(buffer);
   HAL_Delay(100);
   read_buffer1(buffer1,MSG_LEN,0);
   #else
-  write_page(MSG,MSG_LEN,0,0);
-  HAL_Delay(1000);
-  read_page(buffer1,MSG_LEN,0,0);
+  //write_page(MSG,MSG_LEN,0,0);
+  //HAL_Delay(1000);
+  //read_page(buffer1,MSG_LEN,0,0);
   #endif
-  sprintf(buffer," \nData readed:%s\n",buffer1);
+ // sprintf(buffer," \nData readed:%s\n",buffer1);
   modulo_debug_print(buffer);
   #if (0)
   full_erase_memory();
@@ -178,7 +179,13 @@ modulo_debug_print(buffer);
   at45_sleep();
   
   
-  #if 1 
+// INICIO MODULO SIM
+
+sim7000g_init();
+
+
+
+  #if 0 
   HAL_Delay(500);
   status_t ret = mpu6050_test();
   #endif
@@ -189,8 +196,19 @@ modulo_debug_print(buffer);
   /* USER CODE BEGIN WHILE */
   int16_t x,y,z ;
   float fx,fy,fz;
+  status_t ret = STATUS_ERROR;
+    ret =  sim7000g_check();
+    if(ret == STATUS_OK)
+    {
+       modulo_debug_print("sim7000g ready\n");
+    } else{
+       modulo_debug_print("sim7000g NOT ready\n");
+    }
+    
   while (1)
   {
+
+    #if 0
     ret = mpu6050_get_acceleration(  &x,&y,&z);
     if( ret == STATUS_ERROR)    modulo_debug_print("error en leer acelerometro\n");
     fx = (float) (x/(16384.0/2.0)); //      
@@ -198,7 +216,10 @@ modulo_debug_print(buffer);
     fz = (float) (z/(16384.0/2.0)); // 
     sprintf(buffer,"\n\t\t\nx:%.2f , y:%.2f , z:%.2f \n",fx,fy,fz);
     modulo_debug_print(buffer);
-    HAL_Delay(1000);
+  
+    #endif
+   
+
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
   }
