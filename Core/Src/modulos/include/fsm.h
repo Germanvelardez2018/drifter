@@ -35,7 +35,30 @@ typedef enum{
 } fsm_state_t;
 
 
+typedef void (*callback_function)(void);
+
 /*-----------------------------------------------------------------------------*/
+
+
+/**
+ * @brief 
+ *  Agrego las funciones que necesito 
+ *  que se ejecuten segun estado de maquina de estado.
+ *   
+ * @param on_field         funcion que se ejecuta si estamos en campo tomando mediciones
+ * @param memory_download  funcion que se ejecuta si estamos online enviando datos
+ * @return ** status_t 
+ */
+status_t fsm_set_callbacks( callback_function on_field,
+                            callback_function memory_download);
+
+
+/**
+ * @brief  Entramos en loop infinito
+ * 
+ * @return ** void 
+ */
+void fsm_loop();
 
 
 /**

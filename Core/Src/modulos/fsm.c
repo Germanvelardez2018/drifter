@@ -1,25 +1,28 @@
 #include "fsm.h"
 
 
+
+PRIVATE fsm_state_t __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED; // Antes de inicializar
+
+PRIVATE callback_function   CALL_ON_FIELD;
+PRIVATE callback_function   CALL_ON_DOWNLOAD_MEMORY;
+
+
+
+
+
 PRIVATE fsm_state_t fsm_get_state_from_flash(){
     // Funcion dummy por el momento
     fsm_state_t state = FSM_ON_FIELD;
     return state;
 }
 
+
 PRIVATE status_t fsm_set_state_into_flash(fsm_state_t new_state){
     status_t ret= STATUS_OK;
     // Logica para cargar estado en flash
     return ret;
 }
-
-
-
-
-
-fsm_state_t __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED; // Antes de inicializar
-
-
 
 
 status_t fsm_init(){
@@ -43,10 +46,6 @@ status_t fsm_load_from_flash(){
 }
 
 
-
-
-
-
 status_t fsm_set_state( fsm_state_t new_state){
     status_t ret = STATUS_ERROR;
     // Cargo el nuevo estado en memoria
@@ -57,9 +56,49 @@ status_t fsm_set_state( fsm_state_t new_state){
 }
 
 
-
-
  fsm_state_t fsm_get_state(void){
     return __DEVICE_STATE_IN_SRAM__;
  }
 
+
+status_t fsm_set_callbacks( callback_function on_field,
+                            callback_function memory_download){
+status_t ret = STATUS_ERROR;
+// Verifico parametros validos
+if( on_field != NULL & memory_download != NULL) ret = STATUS_OK;
+// Cargo callbacks
+CALL_ON_FIELD = on_field;
+CALL_ON_DOWNLOAD_MEMORY = memory_download;
+return ret;
+
+}
+
+
+
+
+
+
+void fsm_loop(){
+    while (1){
+        switch (__DEVICE_STATE_IN_SRAM__)
+        {
+        case FSM_ON_FIELD:
+            /* code */
+            if(CALL_ON_FIELD != NULL) CALL_ON_FIELD();
+            break;
+        case FSM_MEMORY_DOWNLOAD:
+        /* code */
+            if(CALL_ON_DOWNLOAD_MEMORY != NULL) CALL_ON_DOWNLOAD_MEMORY();
+            break;
+        default:
+            break;
+        }
+
+        // SLEEP
+
+
+    }
+
+
+
+}
