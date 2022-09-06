@@ -4,6 +4,7 @@
 
 
 extern TIM_HandleTypeDef htim4;
+extern IWDG_HandleTypeDef hiwdg;
 
 
 
@@ -33,7 +34,8 @@ void TIM4_IRQHandler(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 
-
+    //Reset a WDT 
+    HAL_IWDG_Refresh(&hiwdg);
     HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); // Para probar que funciona
 
 
