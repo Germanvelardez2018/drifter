@@ -179,7 +179,6 @@ status_t sim7000g_check(){
     ret = send_command(CMD_AT,CMD_OK);
     while ( ret == STATUS_ERROR){
         ret = send_command(CMD_VERSION,CMD_OK);
-        delay(2000);
         modulo_debug_print("...waiting\n");
 
     }
@@ -200,13 +199,7 @@ status_t sim7000g_init(){
 
     PWRKEY_set(LEVEL_HIGH);
     BAT_ENA_set(LEVEL_HIGH);
-    delay(10000);
    
-   
-
-   
-
-
     return ret;
 }
 

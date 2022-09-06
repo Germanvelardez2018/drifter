@@ -86,9 +86,10 @@ return ret;
 
 
 void fsm_loop(){
+
+    // cargamos estado desde flash
     fsm_init();
     
-     
     while (1){
         switch (__DEVICE_STATE_IN_SRAM__)
         {
@@ -103,10 +104,24 @@ void fsm_loop(){
         default:
             break;
         }
-
-        // SLEEP
-   // delay(2000);
+               // SLEEP
+    modulo_debug_print("sleep\n");
     pwr_sleep();
+ 
+     pwr_mode_t state = pwr_get_mode();
+    if(state == SLEEP){
+      modulo_debug_print("timer me desperto\n");
+      HAL_SuspendTick();
+      HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+      modulo_debug_print("nose se durmio el micro\n");
+
+  }
+  else{
+      modulo_debug_print("siempre en run?\n");
+  }
+
+    
+
 
     }
 

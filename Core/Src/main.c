@@ -48,7 +48,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
- #define MSG_INIT            "Init debug con DMA \n"
+ #define MSG_INIT            "test  \n"
   
   
   #define MSG                 " Driver  AT45DB by Velardez German \n"
@@ -67,6 +67,7 @@ DMA_HandleTypeDef hdma_spi1_tx;
 DMA_HandleTypeDef hdma_spi1_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
 
+extern IWDG_HandleTypeDef hiwdg;
 
 // en timer.c
 extern  TIM_HandleTypeDef htim4;
@@ -111,14 +112,15 @@ static void app_init(){
   MX_I2C2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-  //MX_IWDG_Init();
   MX_TIM4_Init();
   // Necesario para evitar que el micro se reinicio por WDT
-  //HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_Base_Start_IT(&htim4);
   // Inicio modulos
   modulo_debug_init();
   sim7000g_init();
   pwr_init();
+ //MX_IWDG_Init();
+
 }
 
 
@@ -131,29 +133,10 @@ static void app_init(){
 int main(void)
 {
   // Configuracion inicial de los perifericos
+ 
+
   app_init();
-  /* USER CODE BEGIN 2 */
-  // MENSAJE INICIAL
   modulo_debug_print(MSG_INIT);
-
-
-
-  
-  
-// INICIO MODULO SIM
-
-
-  status_t ret = STATUS_ERROR;
-    ret =  sim7000g_check();
-    if(ret == STATUS_OK)
-    {
-       modulo_debug_print("sim7000g ready\n");
-    } else{
-       modulo_debug_print("sim7000g NOT ready\n");
-    }
-    
-
-
   fsm_set_callbacks(on_field,on_download);
 
   fsm_loop();
@@ -161,6 +144,7 @@ int main(void)
 
   while (1)
   {   
+  
   }
   /* USER CODE END 3 */
 }

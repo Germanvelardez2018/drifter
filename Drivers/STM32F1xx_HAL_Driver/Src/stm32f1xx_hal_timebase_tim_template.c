@@ -159,6 +159,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   HAL_IncTick();
 }
 
+
+
+
+
+
 /**
   * @brief  This function handles TIM interrupt request.
   * @retval None

@@ -31,13 +31,23 @@ extern "C" {
 
 /* Definiciones --------------------------------------------------------------*/
 
-
+typedef enum{
+    SLEEP = 0,
+    RUN   = 1
+} pwr_mode_t;
 
 /*-----------------------------------------------------------------------------*/
 
+
+
+pwr_mode_t pwr_get_mode();
+
+
+// Inicio el modulo, ponggo el rtc en 0:0:0
 void pwr_init();
 
 
+// mando a dormir y me levanto un intervalo despues
 void pwr_sleep();
 
 #ifdef __cplusplus
