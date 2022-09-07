@@ -2,12 +2,7 @@
 #include "rtc.h"
 #include "debug.h"
 
-
 extern  RTC_HandleTypeDef hrtc;
-
-
-
-
 PRIVATE  pwr_mode_t __PWR_FLAG__= RUN; 
 
 
@@ -23,7 +18,6 @@ PRIVATE status_t set_time(uint8_t hours, uint8_t minutes, uint8_t seconds){
     }
     return ret;
 }
-
 
 
 PRIVATE status_t get_time(uint8_t* hours, uint8_t* minutes, uint8_t* seconds){  
@@ -68,10 +62,12 @@ PRIVATE uint8_t interval_from_flash(){
 
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc){
-        HAL_ResumeTick();
-        modulo_debug_print("rtc iqr\n");
-       __PWR_FLAG__= RUN;
-       HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); // Para probar que funciona
+    HAL_ResumeTick();
+    modulo_debug_print("rtc iqr\n");
+    __PWR_FLAG__= RUN;
+    HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,1);
+
+
 
 
 }
@@ -86,22 +82,36 @@ void pwr_init(){
 
 
 
-void pwr_sleep(){    
-     // leo intervalor from flash (dummy por el momento)
-    uint8_t interval = interval_from_flash();
-    uint8_t* buffer[100];
-    //leo tiempo    
-    uint8_t h,m,s ;
-    // leo intervalor from flash (dummy por el momento)
-    interval = interval_from_flash();
-    get_time(&h,&m,&s);
+static void _set_alarm(){
+
+      // leo intervalor from flash (dummy por el momento)
+ uint8_t interval = interval_from_flash();
+ uint8_t* buffer[100];
+ //leo tiempo    
+ uint8_t h,m,s ;
+ // leo intervalor from flash (dummy por el momento)
+ interval = interval_from_flash();
+ get_time(&h,&m,&s);
    
-    //configuro alarma
-    __PWR_FLAG__ = SLEEP;
-    set_alarm(h,m,s+15);
-    sprintf(buffer,"%d:%d:%d=>%d:%d:%d\n",h,m,s,h,m,s+15);
-    modulo_debug_print(buffer);
+ //configuro alarma
+ set_alarm(h,m+interval,s);
+ sprintf(buffer,"%d:%d:%d=>%d:%d:%d\n",h,m,s,h,m+interval,s);
+ modulo_debug_print(buffer);
+
+
+
+}
+
+
+void pwr_sleep(){    
+    if(__PWR_FLAG__ == RUN){
+        _set_alarm();
+        __PWR_FLAG__ = SLEEP;
+    }
+       
     HAL_SuspendTick();
+    HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,0);
+
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
     // A dormir o un intervalo en minutos
 

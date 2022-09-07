@@ -28,6 +28,8 @@
 #include "adc.h"
 #include "i2c.h"
 #include "dma.h"
+#include "power_save.h"
+
 
 // Modulos
 #include "fsm.h"
@@ -70,7 +72,7 @@ DMA_HandleTypeDef hdma_usart2_tx;
 extern IWDG_HandleTypeDef hiwdg;
 
 // en timer.c
-extern  TIM_HandleTypeDef htim4;
+extern  TIM_HandleTypeDef htim1;
 
 
 
@@ -95,8 +97,6 @@ static void on_download(){
 
 
 
-/* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
 
 
 
@@ -112,14 +112,15 @@ static void app_init(){
   MX_I2C2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-  MX_TIM4_Init();
+  MX_TIM1_Init();
   // Necesario para evitar que el micro se reinicio por WDT
-  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_Base_Start_IT(&htim1);
   // Inicio modulos
   modulo_debug_init();
   sim7000g_init();
   pwr_init();
- //MX_IWDG_Init();
+ MX_IWDG_Init();
+  fsm_init();
 
 }
 
@@ -137,13 +138,52 @@ int main(void)
 
   app_init();
   modulo_debug_print(MSG_INIT);
-  fsm_set_callbacks(on_field,on_download);
-
-  fsm_loop();
-
-
+  fsm_state_t device = fsm_get_state();
+  pwr_mode_t  modo ;
   while (1)
   {   
+      HAL_IWDG_Refresh(&hiwdg);
+  modo = pwr_get_mode();
+  if(modo == RUN){
+
+      switch (device)
+      {
+       case FSM_ON_FIELD:
+        /* code */
+          on_field();
+        break;
+       case FSM_MEMORY_DOWNLOAD:
+       /* code */
+          on_download();
+        break;
+        default:
+        //nothing
+        break;
+      }
+
+  }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+    // SLEEP
+    modulo_debug_print("sleep\n");
+    pwr_sleep();
+    // Si me levanto el timmer, vuelvo a dormir
+
+    
+
+
   
   }
   /* USER CODE END 3 */

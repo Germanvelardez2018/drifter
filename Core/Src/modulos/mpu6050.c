@@ -5,45 +5,31 @@
 extern I2C_HandleTypeDef hi2c2;
 
 
-#define MPU6050_INSTANCE                          (&hi2c2)
-#define MPU6050_ADDRESS                           (0xD0)
-#define MPU6050_AVAILABLE                         (0x68)
-
-#define ACCEL_XOUT_H                             (0x3B)
-#define ACCEL_XOUT_L                             (0x3C)
-#define ACCEL_YOUT_H                             (0x3D)
-#define ACCEL_YOUT_L                             (0x3E)
-#define ACCEL_ZOUT_H                             (0x3F)
-#define ACCEL_ZOUT_L                             (0x40)
-#define ACCEL_TOUT_H                             (0x41)
-#define ACCEL_TOUT_L                             (0x42)
-
-
-
-
+#define MPU6050_INSTANCE                            (&hi2c2)
+#define MPU6050_ADDRESS                             (0xD0)
+#define MPU6050_AVAILABLE                           (0x68)
+#define ACCEL_XOUT_H                                (0x3B)
+#define ACCEL_XOUT_L                                (0x3C)
+#define ACCEL_YOUT_H                                (0x3D)
+#define ACCEL_YOUT_L                                (0x3E)
+#define ACCEL_ZOUT_H                                (0x3F)
+#define ACCEL_ZOUT_L                                (0x40)
+#define ACCEL_TOUT_H                                (0x41)
+#define ACCEL_TOUT_L                                (0x42)
 #define CONFIG                                      (0x1A)
 #define GYRO_CONFIG                                 (0x1B)
 #define ACCEL_CONFIG                                (0x1C)
-
 #define USER_CTRL                                   (0x6A)
-
-
 #define SMPLRT_DIV                                  (0x19)
-
 #define INT_PIN_CFG                                 (0x37)
 #define INT_ENABLE                                  (0x38)
 #define INT_STATUS                                  (0x3A)
-
 #define FIFO_EN                                     (0x23)
 #define FIFO_COUNTER_H                              (0x72)
 #define FIFO_COUNTER_L                              (0x73)
 #define FIFO_BUFFER                                 (0x74)
-
-
-
 #define PWR_MGMT_1                                  (0x6B)
 #define PWR_MGMT_2                                  (0x6C)
-
 #define WHO_I_AM                                    (0x75) // Default: 0x68
 
 

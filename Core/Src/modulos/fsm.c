@@ -2,12 +2,7 @@
 #include "power_save.h"
 
 
-PRIVATE fsm_state_t __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED; // Antes de inicializar
-
-PRIVATE callback_function   CALL_ON_FIELD;
-PRIVATE callback_function   CALL_ON_DOWNLOAD_MEMORY;
-
-
+PRIVATE fsm_state_t __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED; // Antes de inicializa
 
 
 
@@ -66,17 +61,6 @@ status_t fsm_set_state( fsm_state_t new_state){
  }
 
 
-status_t fsm_set_callbacks( callback_function on_field,
-                            callback_function memory_download){
-status_t ret = STATUS_ERROR;
-// Verifico parametros validos
-if( on_field != NULL & memory_download != NULL) ret = STATUS_OK;
-// Cargo callbacks
-CALL_ON_FIELD = on_field;
-CALL_ON_DOWNLOAD_MEMORY = memory_download;
-return ret;
-
-}
 
 
 
@@ -85,46 +69,33 @@ return ret;
 
 
 
-void fsm_loop(){
-
-    // cargamos estado desde flash
-    fsm_init();
-    
-    while (1){
-        switch (__DEVICE_STATE_IN_SRAM__)
-        {
-        case FSM_ON_FIELD:
-            /* code */
-            if(CALL_ON_FIELD != NULL) CALL_ON_FIELD();
-            break;
-        case FSM_MEMORY_DOWNLOAD:
-        /* code */
-            if(CALL_ON_DOWNLOAD_MEMORY != NULL) CALL_ON_DOWNLOAD_MEMORY();
-            break;
-        default:
-            break;
-        }
-               // SLEEP
-    modulo_debug_print("sleep\n");
-    pwr_sleep();
- 
-     pwr_mode_t state = pwr_get_mode();
-    if(state == SLEEP){
-      modulo_debug_print("timer me desperto\n");
-      HAL_SuspendTick();
-      HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-      modulo_debug_print("nose se durmio el micro\n");
-
-  }
-  else{
-      modulo_debug_print("siempre en run?\n");
-  }
-
-    
-
-
-    }
 
 
 
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

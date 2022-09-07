@@ -20,6 +20,8 @@ IWDG_HandleTypeDef hiwdg;
   hiwdg.Init.Reload = 4095;
   if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
   {
+        modulo_debug_print("MURIO WDT\n");
+
     Error_Handler();
   }
 

@@ -36,7 +36,7 @@ extern "C" {
  * 
  * @return ** void 
  */
-void MX_TIM4_Init(void);
+ void MX_TIM1_Init(void);
 
 #ifdef __cplusplus
 }
