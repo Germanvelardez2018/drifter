@@ -113,7 +113,7 @@ PRIVATE void mpu6050_calibration(int16_t x_e, int16_t y_e, int16_t z_e){
 
 
 status_t mpu6050_init(){
-     MX_I2C2_Init();
+    MX_I2C2_Init();
     // SET clock source
     status_t ret = STATUS_ERROR;
     uint8_t config = 0;
@@ -128,6 +128,8 @@ status_t mpu6050_init(){
     if( ret == STATUS_ERROR)    modulo_debug_print("error en configuracion de escala\n");
     // Calibramos
     mpu6050_calibration(0, 0, (SCALA_DIV / 2.0));   // ESPERAMOS X=0G , Y=0G y Z=1G
+
+    ret = mpu6050_sleep();
     return ret;
 }
 
@@ -225,6 +227,36 @@ status_t mpu6050_get_temperature( int16_t* temp){
     (*temp) = (int16_t)((int16_t)(data[0] << 8) | ((int16_t)data[1]));
     return ret;
 }
+
+
+
+
+status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
+    status_t ret = STATUS_OK;
+    static uint8_t counter = 0;
+    // resume
+
+    mpu6050_resume();
+    int16_t temp =0;
+    ret = mpu6050_get_temperature(  &temp);
+    if( ret == STATUS_ERROR)    modulo_debug_print("error en leer temp\n");
+    float ft = (float)  ((temp/340.0)+ 36.53);
+    int16_t x,y,z ;
+    ret = mpu6050_get_acceleration(  &x,&y,&z);
+    if( ret == STATUS_ERROR)    modulo_debug_print("error en leer acelerometro\n");
+    float fx = (float) (x/(SCALA_DIV/2.0)); //      
+    float fy = (float) (y/(SCALA_DIV/2.0)); // 
+    float fz = (float) (z/(SCALA_DIV/2.0)); // 
+    sprintf(buffer,"\ncounter:%d , t:%.2f , x:%.2f , y:%.2f , z:%.2f \n",counter,ft,fx,fy,fz);
+    modulo_debug_print(buffer);
+    
+    //sleep
+    mpu6050_sleep();
+    counter ++;
+    
+    return ret;
+}
+
 
 
 

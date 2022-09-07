@@ -147,8 +147,8 @@ PRIVATE  level_t   gpio_read (){
 
 PRIVATE  status_t  spi_write(uint8_t* buffer, size_t len ){
 
-          //  HAL_SPI_Transmit(AT45DB_SPI,buffer,len,100);
-            HAL_SPI_Transmit_DMA(AT45DB_SPI,buffer,len);
+            HAL_SPI_Transmit(AT45DB_SPI,buffer,len,1000);
+          //  HAL_SPI_Transmit_DMA(AT45DB_SPI,buffer,len);
 
 
             return STATUS_OK;
@@ -156,8 +156,8 @@ PRIVATE  status_t  spi_write(uint8_t* buffer, size_t len ){
 
 PRIVATE  status_t  spi_read(uint8_t* buffer, size_t len){
 
-        //HAL_SPI_Receive(AT45DB_SPI,buffer,len,100);  
-        HAL_SPI_Receive_DMA(AT45DB_SPI,buffer,len);
+        HAL_SPI_Receive(AT45DB_SPI,buffer,len,1000);  
+        //HAL_SPI_Receive_DMA(AT45DB_SPI,buffer,len);
      
 
 
@@ -291,6 +291,7 @@ uint8_t read_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
 
 uint8_t write_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
         uint8_t ret=0;
+        uint8_t _len = len;  // 
         uint32_t address =  (pag << 9) | pos ;   // position into the buffer
         uint8_t cmd[4] ={0};
         cmd[0] = CMD_WRITEPAGE_B1;
@@ -299,9 +300,11 @@ uint8_t write_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
         cmd[3] = (address >> 8)  & 0xFF;
         gpio_write(0);
         spi_write(&cmd,4);
-        delay(2);
-        spi_write(data,len);
-        delay(10);
+        delay(1);
+        spi_write(&_len,1);
+        delay(1);
+        spi_write(data,_len);
+        delay(1);
         gpio_write(1);
         at45db_wait(AT45DB_TIMEOUT);
         return ret;        
@@ -313,6 +316,7 @@ uint8_t read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
        uint8_t ret=0;
         uint32_t address =  (pag << 9) | pos ;   
         uint8_t cmd[5] ={0};
+        uint8_t _len = 0;
         cmd[0] = CMD_READPAGEHF;
         cmd[1] = (address >> 24) & 0xFF;
         cmd[2] = (address >> 16) & 0xFF;
@@ -321,8 +325,10 @@ uint8_t read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
         gpio_write(0);
         spi_write(&cmd,5);
         delay(1);
-        spi_read(data,len);
-        delay(10);
+        spi_read(&_len,1);
+        delay(1);
+        spi_read(data,_len);
+        delay(1);
         gpio_write(1);
         //wait
         at45db_wait(AT45DB_TIMEOUT);
@@ -331,6 +337,35 @@ uint8_t read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
 }
 
 
+
+
+
+
+
+
+
+status_t at45db_save_measure(uint8_t* buffer){
+        status_t ret;
+        at45_resumen();
+        write_page(buffer,strlen(buffer+1),0,0);
+
+        at45_sleep();        
+
+
+        return ret;
+}
+
+
+status_t at45db_download_measure(uint8_t* buffer, uint8_t len){
+        status_t ret;
+        at45_resumen();
+        ret = read_page(buffer,len,0,0);
+        at45_sleep();     
+        
+        
+        return ret;
+
+}
 
 
 uint8_t full_erase_memory(){

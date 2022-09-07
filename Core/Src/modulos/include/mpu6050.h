@@ -36,6 +36,10 @@ typedef enum {
 /*-----------------------------------------------------------------------------*/
 
 
+
+status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len);
+
+
 /**
  * @brief Configuramos el periferico y el modulo a utilizar
  * 

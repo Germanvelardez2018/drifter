@@ -57,7 +57,7 @@ pwr_mode_t pwr_get_mode(){
 PRIVATE uint8_t interval_from_flash(){
     // Funcion dummy por el momento
     // Por default dejamos el intervalo en 5
-    return 1;
+    return 8;
 }
 
 
@@ -94,8 +94,8 @@ static void _set_alarm(){
  get_time(&h,&m,&s);
    
  //configuro alarma
- set_alarm(h,m+interval,s);
- sprintf(buffer,"%d:%d:%d=>%d:%d:%d\n",h,m,s,h,m+interval,s);
+ set_alarm(h,m,s+interval);
+ sprintf(buffer,"%d:%d:%d=>%d:%d:%d\n",h,m,s,h,m,s+interval);
  modulo_debug_print(buffer);
 
 

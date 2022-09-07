@@ -74,6 +74,8 @@ extern IWDG_HandleTypeDef hiwdg;
 // en timer.c
 extern  TIM_HandleTypeDef htim1;
 
+PRIVATE  fsm_state_t device;
+ PRIVATE uint8_t buffer[255];
 
 
 
@@ -82,12 +84,32 @@ extern  TIM_HandleTypeDef htim1;
 
 static void on_field(){
   modulo_debug_print("FSM: ON FIELD\n");
+  mpu6050_get_measure(buffer,255);
+  at45db_save_measure(buffer);
+  device = FSM_MEMORY_DOWNLOAD;
+  
+
+  
+
+  // Secuencia:
+  //Obtengo datos de sensores
+  //Guardo datos de sensores
+  //Automento contador de muestras almacenadas
 
 }
 
 
 static void on_download(){
-  modulo_debug_print("FSM: DOWNLOAD");
+  modulo_debug_print("FSM: DOWNLOAD\n");
+  memset(buffer,0,255);
+  at45db_download_measure(buffer,255);
+  modulo_debug_print("download dummy:");
+  modulo_debug_print(buffer);  
+  device = FSM_ON_FIELD;   
+
+  //Me conecto a servidor
+  //Leo las muestras y las envio al servidor
+
 
 }
 
@@ -119,9 +141,12 @@ static void app_init(){
   modulo_debug_init();
   sim7000g_init();
   pwr_init();
- MX_IWDG_Init();
+  MX_IWDG_Init();
   fsm_init();
-
+  // Sensor
+  mpu6050_init();
+  // Memoria
+  HAL_Delay(1000);
 }
 
 
@@ -134,11 +159,10 @@ static void app_init(){
 int main(void)
 {
   // Configuracion inicial de los perifericos
- 
-
   app_init();
+ 
   modulo_debug_print(MSG_INIT);
-  fsm_state_t device = fsm_get_state();
+  device = fsm_get_state();
   pwr_mode_t  modo ;
   while (1)
   {   
@@ -149,42 +173,17 @@ int main(void)
       switch (device)
       {
        case FSM_ON_FIELD:
-        /* code */
           on_field();
-        break;
+          break;
        case FSM_MEMORY_DOWNLOAD:
-       /* code */
           on_download();
-        break;
+          break;
         default:
         //nothing
         break;
       }
-
   }
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-    // SLEEP
-    modulo_debug_print("sleep\n");
     pwr_sleep();
-    // Si me levanto el timmer, vuelvo a dormir
-
-    
-
-
-  
   }
   /* USER CODE END 3 */
 }

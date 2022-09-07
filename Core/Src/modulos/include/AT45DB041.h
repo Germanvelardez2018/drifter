@@ -19,6 +19,20 @@ typedef enum{
 } size_page_t;
 
 
+/**
+ * @brief 
+ * 
+ */
+status_t at45db_download_measure(uint8_t* buffer, uint8_t len);
+
+/**
+ * @brief 
+ * 
+ * @param buffer 
+ * @param len 
+ * @return ** status_t 
+ */
+status_t at45db_save_measure(uint8_t* buffer);
 
 
 

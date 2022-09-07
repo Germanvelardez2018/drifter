@@ -38,7 +38,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     
 
        HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,1); // led encendido en modo run
-       modulo_debug_print("timer\n");
+      // modulo_debug_print("timer\n");
 
        //NO LLAMAR A REFRESH WDT DESDE UNA INTERRUPCION. CRASHEA 
 }
