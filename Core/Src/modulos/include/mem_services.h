@@ -42,8 +42,8 @@ status_t mem_s_get_interval(uint32_t* interval);
 status_t mem_s_set_interval(uint32_t* interval);
 
 
-status_t mem_s_get_max_amount_data(uint32_t* max_amount_data);
-status_t mem_s_set_max_amount_data(uint32_t* max_amount_data);
+status_t mem_s_get_max_amount_data(uint8_t* max_amount_data);
+status_t mem_s_set_max_amount_data(uint8_t* max_amount_data);
 
 
 status_t mem_s_get_battery_state(battery_state_t* battery_state);
@@ -53,9 +53,6 @@ status_t mem_s_set_battery_state(battery_state_t* battery_state);
 status_t mem_s_get_max_accelerometer_offset(int16_t* x,int16_t* y, int16_t* z );
 status_t mem_s_set_max_accelerometer_offset(int16_t* x, int16_t* y,int16_t* z);
 
-
-status_t mem_s_get_max_data(uint8_t* data_buffer);
-status_t mem_s_set_max_data(uint8_t* data_buffer);
 
 
 

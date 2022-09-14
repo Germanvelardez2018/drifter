@@ -32,7 +32,7 @@
 // Flag de estado de conexion
 #define MMAP_F_CONNECTION                                   (MMAP_OFFSET_CONFIG + 3)
 // Flag de estado de bateria: 3 Normal, 2 medio, 1 baja
-#define MMAP_F_BATERRY_STATE                                (MMAP_OFFSET_CONFIG + 4)
+#define MMAP_F_BATTERY_STATE                                (MMAP_OFFSET_CONFIG + 4)
 
 
 
@@ -47,4 +47,10 @@
 // De 48 a 2047 // Datos almacenado
 #define MMAP_DATA_OFSSET                                    (48)
 #define MMAP_DATA_ADDRESS(pos)                              (pos + MMAP_DATA_OFSSET)
+
+
+#define MMAP_DEFAULT_INTERVAL                               (1)
+#define MMAP_DEFAULT_MAX_AMOUNT_DATA                        (20)
+#define MMAP_DEFAULT_BATTERY                                ((battery_state_t )NIVEL_MEDIO)
+#define MMAP_DEFAULT_OFFSET_ACCELEROMETER                   ((int16_t)0)
 
