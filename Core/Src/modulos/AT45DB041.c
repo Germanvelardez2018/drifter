@@ -289,24 +289,6 @@ uint8_t read_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
 
 
 
-//dumy , borrar
-
-status_t read_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
-        status_t ret=STATUS_ERROR;
-        uint32_t address =  pos ;   // position into the buffer
-        uint8_t cmd[4] ={0};
-        cmd[0] = CMD_READBUFF1;
-        cmd[1] = (address >> 24) & 0xFF;
-        cmd[2] = (address >> 16) & 0xFF;
-        cmd[3] = (address >> 8)  & 0xFF;
-        gpio_write(0);
-        ret = spi_write(&cmd,4);
-        ret = spi_read(data,len);
-        gpio_write(1);
-        at45db_wait(AT45DB_TIMEOUT);
-        return ret;
-
-}
 
 
 

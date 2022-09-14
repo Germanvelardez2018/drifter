@@ -2,14 +2,9 @@
 #include "rtc.h"
 #include "debug.h"
 
-
 extern  RTC_HandleTypeDef hrtc;
 
-
-
-
 PRIVATE  pwr_mode_t __PWR_FLAG__= RUN; 
-
 
 PRIVATE status_t set_time(uint8_t hours, uint8_t minutes, uint8_t seconds){  
     status_t ret = STATUS_ERROR;
@@ -25,7 +20,6 @@ PRIVATE status_t set_time(uint8_t hours, uint8_t minutes, uint8_t seconds){
 }
 
 
-
 PRIVATE status_t get_time(uint8_t* hours, uint8_t* minutes, uint8_t* seconds){  
     status_t ret = STATUS_ERROR;
     RTC_TimeTypeDef sTime = {0};
@@ -37,7 +31,6 @@ PRIVATE status_t get_time(uint8_t* hours, uint8_t* minutes, uint8_t* seconds){
     }        
     return ret;
 }
-
 
 
 PRIVATE status_t set_alarm(uint8_t hours, uint8_t minutes, uint8_t seconds){  
@@ -71,8 +64,6 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc){
         HAL_ResumeTick();
         modulo_debug_print("rtc iqr\n");
        __PWR_FLAG__= RUN;
-
-
 }
 
 
@@ -93,8 +84,7 @@ void pwr_sleep(){
     uint8_t h,m,s ;
     // leo intervalor from flash (dummy por el momento)
     interval = interval_from_flash();
-    get_time(&h,&m,&s);
-   
+    get_time(&h,&m,&s);  
     //configuro alarma
     __PWR_FLAG__ = SLEEP;
     set_alarm(h,m,s+15);
