@@ -1,15 +1,30 @@
 /**
- * @file AT45DB041.h
- * @author your name (you@domain.com)
- * @brief  Driver for AT45DB041E memory flash extern (SPI) LOW LEVEL
+ * @file fsm.h
+ * @author German Velardez (gvelardez@inti.gob.ar)
+ * @brief  Driver de bajo nivel para manejo de memoria externa AT45DB041
  * @version 0.1
- * @date 2022-08-24
+ * @date 2022-09-06
  * 
  * @copyright Copyright (c) 2022
  * 
- *
  */
 
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __AT45DB_H
+#define __AT45DB_H
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+
+#include "core.h"
+
+/* Definiciones --------------------------------------------------------------*/
 
 
 
@@ -19,11 +34,15 @@ typedef enum{
 } size_page_t;
 
 
+/*-----------------------------------------------------------------------------*/
+
+
 /**
  * @brief 
  * 
  */
 status_t at45db_download_measure(uint8_t* buffer, uint8_t len);
+
 
 /**
  * @brief 
@@ -35,14 +54,12 @@ status_t at45db_download_measure(uint8_t* buffer, uint8_t len);
 status_t at45db_save_measure(uint8_t* buffer);
 
 
-
 /**
  * @brief Get the status object
  * 
  * @return ** uint8_t 
  */
  uint8_t get_status(void);
-
 
 
 /**
@@ -53,8 +70,6 @@ status_t at45db_save_measure(uint8_t* buffer);
  uint8_t is_ready(void);
 
 
-
-
 /**
  * @brief  The memory page size for default its 264 bytes per page. 
  * 
@@ -62,8 +77,6 @@ status_t at45db_save_measure(uint8_t* buffer);
  * @return ** uint8_t 
  */
  uint8_t at45db_set_size_page( size_page_t size);
-
-
 
 
 /**
@@ -77,7 +90,6 @@ status_t at45db_save_measure(uint8_t* buffer);
  uint8_t write_buffer1(uint8_t* data,uint16_t len, uint16_t pos);
 
 
-
 /**
  * @brief Read en buffer 1, en SRAM ...volatile
  * 
@@ -87,9 +99,6 @@ status_t at45db_save_measure(uint8_t* buffer);
  * @return ** uint8_t 
  */
 uint8_t read_buffer1(uint8_t* data,uint16_t len, uint16_t pos);
-
-
-
 
 
 /**
@@ -123,9 +132,32 @@ uint8_t read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos);
  */
 void at45_resumen();
 
+
 /**
  * @brief  Sleep mode
  * 
  * @return ** void 
  */
 void at45_sleep();
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __AT45DB_H */
+
+
+
+
+
+
+
+
+
+
+
+
+
+

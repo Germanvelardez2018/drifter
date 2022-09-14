@@ -62,6 +62,14 @@ typedef enum {
 } level_t;
 
 
+typedef enum {
+    NIVEL_BAJO   = 1,
+    NIVEL_MEDIO  = 2,
+    NIVEL_NORMAL = 3
+} battery_state_t;
+
+
+
 /*-----------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
