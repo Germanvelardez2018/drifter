@@ -78,25 +78,6 @@ static uint8_t buff_counter =0;
 
 
 
-PRIVATE void delay(uint32_t time){
-        HAL_Delay(time);
-}
-
-
-PRIVATE void PWRKEY_set(level_t level){
-   
-    HAL_GPIO_WritePin(SIM7000G_PWRKEY_GPIO_Port,SIM7000G_PWRKEY_Pin,(GPIO_PinState)level) ;
-   
-    
-}
-
-
-PRIVATE void BAT_ENA_set(level_t level){
-   
-    HAL_GPIO_WritePin(SIM7000G_BAT_ENA_GPIO_Port,SIM7000G_BAT_ENA_Pin,(GPIO_PinState)level) ;
-    
-}
-
 
 
 
@@ -115,12 +96,35 @@ PRIVATE  uint8_t* _get_buffer(){
 
 
 
+
+
+
+PRIVATE void delay(uint32_t time){
+    HAL_Delay(time);
+}
+
+
+
+
+
+
+
+PRIVATE void PWRKEY_set(level_t level){
+    HAL_GPIO_WritePin(SIM7000G_PWRKEY_GPIO_Port,SIM7000G_PWRKEY_Pin,(GPIO_PinState)level) ;
+}
+
+
+PRIVATE void BAT_ENA_set(level_t level){
+    HAL_GPIO_WritePin(SIM7000G_BAT_ENA_GPIO_Port,SIM7000G_BAT_ENA_Pin,(GPIO_PinState)level) ;
+}
+
+
 PRIVATE status_t uart_write(uint8_t* buffer,uint8_t len){
     HAL_StatusTypeDef res = HAL_UART_Transmit(SIM7000G_UART,buffer,len,SIM7000G_TIMEOUT) ;
     status_t ret = (res == HAL_OK)?STATUS_OK:STATUS_ERROR;
     return ret;
-
 }
+
 
 PRIVATE status_t uart_read(uint8_t* buffer,uint8_t len){
     memset(SIM7000G_BUFFER,0,SIM_BUFFER_SIZE);
@@ -128,6 +132,12 @@ PRIVATE status_t uart_read(uint8_t* buffer,uint8_t len){
     status_t ret = ( res == HAL_OK)?STATUS_OK:STATUS_ERROR;
     return ret;
 }
+
+
+
+
+
+
 
 PRIVATE status_t check_response(char* response){
     status_t ret = STATUS_ERROR;

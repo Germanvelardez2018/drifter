@@ -28,6 +28,15 @@ extern "C" {
 /*-----------------------------------------------------------------------------*/
 
 
+
+// Nota POWERKEY MODIFICADO PB13 A PA12...CAMBIARLO EN SOFTWARE
+
+
+
+
+
+
+
 status_t sim7000g_check();
 
 
