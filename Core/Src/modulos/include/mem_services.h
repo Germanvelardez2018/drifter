@@ -38,8 +38,8 @@ status_t mem_s_init();
 
 
 // Interval
-status_t mem_s_get_interval(uint32_t* interval);
-status_t mem_s_set_interval(uint32_t* interval);
+status_t mem_s_get_interval(uint8_t* interval);
+status_t mem_s_set_interval(uint8_t* interval);
 
 
 status_t mem_s_get_max_amount_data(uint8_t* max_amount_data);
@@ -54,6 +54,14 @@ status_t mem_s_get_max_accelerometer_offset(int16_t* x,int16_t* y, int16_t* z );
 status_t mem_s_set_max_accelerometer_offset(int16_t* x, int16_t* y,int16_t* z);
 
 
+
+// Los datos se guardan como lifo
+status_t mem_s_load_data(uint8_t* string );
+
+
+// Para leer todos los datos almacenados recomienda usar dentro 
+// de un bucle while con condicion (ret = mem_s_download_data(buffer) != STATUS__ERROR)
+status_t mem_s_download_data(uint8_t* string);
 
 
 

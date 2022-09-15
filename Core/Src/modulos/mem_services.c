@@ -4,6 +4,10 @@
 #include "mmap.h"
 
 
+// Contador de memorias almacenadas. Se guarda en SRAM del buffer de memoria
+PRIVATE uint8_t counter = 0;
+
+
 
 PRIVATE void delay(uint32_t timeout){
 
@@ -29,6 +33,29 @@ PRIVATE status_t mem_write_buffer(uint8_t* data, uint16_t len){
 }
 
 
+
+PRIVATE status_t mem_load_string(uint8_t* string , uint16_t len, uint16_t pag){
+    status_t ret = STATUS_ERROR;
+    // Formato, primer byte es len, luego buffer string
+    uint8_t _len = len;
+    ret = write_page(_len,1,pag,0);
+    ret = write_page(string ,len,pag,1);
+    return ret;
+
+}
+
+
+
+PRIVATE status_t mem_download_string(uint8_t* string , uint16_t pag){
+    status_t ret = STATUS_ERROR;
+    // Formato, primer byte es len, luego buffer string
+    uint8_t _len = 0;
+    ret = read_page(_len,1,pag,0);
+    ret = read_page(string ,_len,pag,1);
+    return ret;
+
+}
+
 PRIVATE status_t mem_resume(){
 
 }
@@ -40,6 +67,15 @@ PRIVATE status_t mem_sleep(){
 
 
 
+PRIVATE status_t mem_get_counter(){
+
+}
+
+PRIVATE status_t mem_set_counter(uint8_t* counter){
+
+}
+
+
 
 //------------------------------------------------------
 
@@ -49,18 +85,19 @@ status_t mem_s_init(){
     //iniciar periferico y pines gpio
 
     // Iniciar memoria
+
+    // Cargar contador
+    ret = mem_get_counter(counter);
+    // si obtengo error en lectura, cargo valor por default
+    if( ret == STATUS_ERROR) counter = MMAP_DEFAULT_COUNTER;
     
     //sleep memoria
-
-
-
-    
     return ret;
 }
 
 
 // Interval
-status_t mem_s_get_interval(uint32_t* interval){
+status_t mem_s_get_interval(uint8_t* interval){
     status_t ret = STATUS_OK;
     ret = mem_read_page(interval,1,MMAP_INTERVAL,0);
     // Si ocurre error de lectura, enviar valor por default
@@ -71,7 +108,7 @@ status_t mem_s_get_interval(uint32_t* interval){
 }
 
 
-status_t mem_s_set_interval(uint32_t* interval){
+status_t mem_s_set_interval(uint8_t* interval){
     status_t ret = STATUS_OK;
     ret = mem_write_page(interval,1,MMAP_INTERVAL,0);
     return ret;
@@ -144,30 +181,72 @@ status_t mem_s_get_max_accelerometer_offset(int16_t* x,int16_t* y, int16_t* z ){
 
 
 status_t mem_s_set_max_accelerometer_offset(int16_t* x, int16_t* y,int16_t* z){
-   status_t ret = STATUS_OK;
-   #define MEM_SIZE  (6)
+    status_t ret = STATUS_OK;
+    #define MEM_SIZE  (6)
     uint8_t data[MEM_SIZE]={0};
-
-    // se guarda primero H despues L
-// REVISAR
+    uint8_t* p_data;
+    data[0] = ((*x) >> 8) & 0xff;
+    data[1] = (*x) & 0xff;
+    data[2] = ((*y) >> 8) & 0xff;
+    data[3] = (*y) & 0xff;
+    data[4] = ((*z) >> 8) & 0xff;
+    data[5] = (*z) & 0xff;
    
-    //data[0] = (int8_t)(x >> 8 );
-    //data[1] = ( int8_t )(x); 
-    //data[2] = (int8_t)(y >> 8 );
-    //data[3] = ( int8_t )(y); 
-    //data[4] =  (int8_t)(z >> 8 );
-    //data[5] = ( int8_t )(z); 
+
+
+
+    // |   x H L       |      y H L           |       z H L          |
+   
     
 
    
    ret = mem_write_page(data,MEM_SIZE,MMAP_OFFSET_ACELEROMETER,0);
-   // Si ocurre error de lectura, enviar valor por default
-
-  
-   
-
-    
+   // Si ocurre error de lectura, enviar valor por default    
     return ret;
 }
 
+
+
+
+
+
+
+
+
+// Los datos se guardan como lifo, ultimo entrar primero en salir
+status_t mem_s_load_data(uint8_t* string ){
+    status_t ret = STATUS_ERROR;
+    // verifico parametros
+    if(string == NULL)          return ret;
+    uint16_t len = strlen(string) + 1;
+    if(len > 255)    return ret;
+    // cargo contador
+    uint8_t counter = MMAP_DEFAULT_COUNTER;
+    ret = mem_get_counter(counter);
+    if(ret == STATUS_ERROR) return ret;
+    // escribo en pagina correspondiente
+    ret = mem_load_string(string,len,counter);
+    // incremento contador
+    counter ++;
+    // guardo contador
+    mem_set_counter(&counter);    
+    return ret;
+}
+
+
+status_t mem_s_download_data(uint8_t* buffer){
+    status_t ret = STATUS_ERROR;
+    uint16_t counter = MMAP_DEFAULT_COUNTER;
+    ret = mem_get_counter(&counter);
+    // No se puede leer el contador, error
+    if(ret == STATUS_ERROR) return ret;
+    ret = mem_download_string(buffer, counter);
+    if( ret == STATUS_OK){
+        counter --;
+        ret = mem_set_counter(&counter);
+        if(counter == 0 ) return STATUS_ERROR;
+
+    } 
+    return ret;
+}
 
