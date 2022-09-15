@@ -192,13 +192,7 @@ status_t mem_s_set_max_accelerometer_offset(int16_t* x, int16_t* y,int16_t* z){
     data[4] = ((*z) >> 8) & 0xff;
     data[5] = (*z) & 0xff;
    
-
-
-
     // |   x H L       |      y H L           |       z H L          |
-   
-    
-
    
    ret = mem_write_page(data,MEM_SIZE,MMAP_OFFSET_ACELEROMETER,0);
    // Si ocurre error de lectura, enviar valor por default    

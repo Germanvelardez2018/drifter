@@ -88,9 +88,6 @@ static void on_field(){
   at45db_save_measure(buffer);
   device = FSM_MEMORY_DOWNLOAD;
   
-
-  
-
   // Secuencia:
   //Obtengo datos de sensores
   //Guardo datos de sensores
@@ -109,8 +106,6 @@ static void on_download(){
 
   //Me conecto a servidor
   //Leo las muestras y las envio al servidor
-
-
 }
 
 
@@ -136,7 +131,7 @@ static void app_init(){
   MX_USART2_UART_Init();
   MX_TIM1_Init();
   // Necesario para evitar que el micro se reinicio por WDT
-  HAL_TIM_Base_Start_IT(&htim1);
+ // HAL_TIM_Base_Start_IT(&htim1);
   // Inicio modulos
   modulo_debug_init();
   sim7000g_init();
@@ -184,6 +179,7 @@ int main(void)
       }
   }
     pwr_sleep();
+    //HAL_Delay(15000);
   }
   /* USER CODE END 3 */
 }
