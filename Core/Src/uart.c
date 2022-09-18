@@ -16,11 +16,58 @@ extern DMA_HandleTypeDef hdma_usart2_tx;
 
 
 
+PRIVATE driver_status_t __DRIVER_STARTED_DEBUG__  = DRIVER_NO_STARTED;
+PRIVATE driver_status_t __DRIVER_STARTED_SIMCOM__ = DRIVER_NO_STARTED;
+
+
+void UART_SIMCOM_init(void){
+  if(__DRIVER_STARTED_SIMCOM__ == DRIVER_NO_STARTED){
+    MX_USART1_UART_Init();
+    __DRIVER_STARTED_SIMCOM__ = DRIVER_STARTED;
+  } 
+}
+  
+
+void UART_SIMCOM_deinit(void){
+if(__DRIVER_STARTED_SIMCOM__ == DRIVER_STARTED){
+   if (HAL_UART_DeInit(&huart1) == HAL_OK)
+   {
+      __DRIVER_STARTED_SIMCOM__ = DRIVER_NO_STARTED;
+   }
+   else{
+      Error_Handler();
+   }
+}
+}
+
+
+
+void UART_DEBUG_init(void){
+  if(__DRIVER_STARTED_DEBUG__ == DRIVER_NO_STARTED){
+    MX_USART2_UART_Init();
+    __DRIVER_STARTED_DEBUG__ = DRIVER_STARTED;
+  } 
+}
+  
+
+void UART_DEBUG_deinit(void){
+if(__DRIVER_STARTED_DEBUG__ == DRIVER_STARTED){
+   if (HAL_UART_DeInit(&huart2) == HAL_OK)
+   {
+      __DRIVER_STARTED_DEBUG__ = DRIVER_NO_STARTED;
+   }
+   else{
+      Error_Handler();
+   }
+}
+}
+
+
+
+
 
 void USART2_IRQHandler(void){
-           
      HAL_UART_IRQHandler(&huart2);
-            
 }
 
 
@@ -29,13 +76,7 @@ void USART2_IRQHandler(void){
 
 
  HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
-
      UNUSED(huart);
-
-   
-
-
-
 }
 
 

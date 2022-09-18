@@ -28,12 +28,25 @@ extern "C" {
 
 /*-----------------------------------------------------------------------------*/
 
+
+
 /**
  * @brief Configura el hardware del SPI1 . DMA normal mode e interrupciones (agregado manualmente, no MXCube)
  * 
  * @return ** void 
  */
-void MX_SPI1_Init(void);
+void SPI_init(void);
+
+
+void SPI_deinit(void);
+
+
+
+
+
+
+
+
 
 #ifdef __cplusplus
 }

@@ -28,16 +28,15 @@ extern "C" {
 
 /*-----------------------------------------------------------------------------*/
 
-
-void GPIO_init(void);
-
-
 /**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
   */
- void MX_GPIO_Init(void);
+void GPIO_init(void);
+
+void GPIO_deinit(void);
+
 #ifdef __cplusplus
 }
 #endif

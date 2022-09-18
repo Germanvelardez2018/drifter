@@ -40,14 +40,32 @@ extern "C" {
  * 
  * @return ** void 
  */
- void MX_USART1_UART_Init(void);
+ void UART_SIMCOM_init(void);
+
+
+/**
+ * @brief Desconfigura el hardware
+ * 
+ * @return ** void 
+ */
+  void UART_SIMCOM_deinit(void);
+
  
  /**
   * @brief Configura el hardware del UART 2. Activando DMA e interrupciones. Leer NOTAS EN uart.c
   * 
   * @return ** void 
   */
- void MX_USART2_UART_Init(void);
+ void UART_DEBUG_init(void);
+
+
+/**
+ * @brief  Desconfiguro el hardware
+ * 
+ * @return ** void 
+ */
+  void UART_DEBUG_deinit(void);
+
 
 
 

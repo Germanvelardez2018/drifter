@@ -25,9 +25,20 @@ extern "C" {
 
 /*-----------------------------------------------------------------------------*/
 
-
+/**
+ * @brief  Inicio el modulo para imprimir mensaje de debug
+ * 
+ * @return ** void 
+ */
 void  modulo_debug_init(void);
 
+
+/**
+ * @brief Imprimo un mensaje de debug
+ * 
+ * @param string array de char, tiene que ser un string con /0 al final.
+ * @return ** void 
+ */
 void modulo_debug_print(char* string);
 
 

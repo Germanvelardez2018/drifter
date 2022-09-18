@@ -18,13 +18,40 @@ extern DMA_HandleTypeDef hdma_spi1_rx;
 
 
 
+PRIVATE driver_status_t __DRIVER_INITED__ = DRIVER_NO_STARTED;
 
 
- void SPI1_IRQHandler(void){
-           
-   HAL_SPI_IRQHandler(&hspi1);
-   
+void SPI_init(void){
+  if(__DRIVER_INITED__ == DRIVER_NO_STARTED){ 
+    MX_SPI1_Init();
+    __DRIVER_INITED__ = DRIVER_STARTED;
+  }
+} 
+
+ 
+ 
+ 
+  
+
+void SPI_deinit(void){
+if(__DRIVER_INITED__ == DRIVER_STARTED){
+   if (HAL_SPI_DeInit(&hspi1) == HAL_OK)
+   {
+      __DRIVER_INITED__ = DRIVER_NO_STARTED;
    }
+   else{
+      Error_Handler();
+   }
+}
+}
+
+
+
+
+
+ void SPI1_IRQHandler(void){          
+   HAL_SPI_IRQHandler(&hspi1);
+}
 
 
 /**
@@ -61,10 +88,6 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     __HAL_AFIO_REMAP_SPI1_ENABLE();
-
-
-
-
     /* SPI1 DMA Init */
     /* SPI1_TX Init */
      hdma_spi1_tx.Instance = DMA1_Channel3;

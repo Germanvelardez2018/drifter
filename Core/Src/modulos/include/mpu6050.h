@@ -97,14 +97,6 @@ status_t mpu6050_get_temperature( int16_t* temp);
 
 
 
-/**
- * @brief 
- * 
- * @return ** status_t 
- */
-status_t mpu6050_test();
-
-
 #ifdef __cplusplus
 }
 #endif

@@ -11,6 +11,26 @@ void GPIO_init(void){
   } 
 }
 
+
+
+ // Dummy, apagar todos los gpio es complejo y no lo veo necesario
+ // Dejo funcion para mantener coherencia con otros drivers
+void GPIO_deinit(void){
+if(__DRIVER_INITED__ == DRIVER_STARTED){
+   if(1) 
+   {
+      __DRIVER_INITED__ = DRIVER_NO_STARTED;
+   }
+   else{
+      Error_Handler();
+   }
+}
+}
+
+
+
+
+
 /**
   * @brief GPIO Initialization Function
   * @param None

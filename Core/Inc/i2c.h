@@ -38,6 +38,13 @@ extern "C" {
  */
 void I2C_init(void);
 
+/**
+ * @brief Desconfigura el hardware del I2C2. 
+ * 
+ * @return ** void 
+ */
+void I2C_deinit(void);
+
 
 #ifdef __cplusplus
 }

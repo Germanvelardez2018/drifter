@@ -19,6 +19,23 @@ void I2C_init(void){
 
 
 
+
+  
+
+void I2C_deinit(void){
+if(__DRIVER_INITED__ == DRIVER_STARTED){
+   if (HAL_I2C_DeInit(&hi2c2) == HAL_OK)
+   {
+      __DRIVER_INITED__ = DRIVER_NO_STARTED;
+   }
+   else{
+      Error_Handler();
+   }
+}
+}
+
+
+
 /**
 * @brief I2C MSP Initialization
 * This function configures the hardware resources used in this example

@@ -124,6 +124,15 @@ PRIVATE void BAT_ENA_set(level_t level){
 }
 
 
+
+PRIVATE status_t uart_init(){
+    status_t ret = STATUS_OK;
+    UART_SIMCOM_init();
+    return ret;
+}
+
+
+
 PRIVATE status_t uart_write(uint8_t* buffer,uint8_t len){
     HAL_StatusTypeDef res = HAL_UART_Transmit(SIM7000G_UART,buffer,len,SIM7000G_TIMEOUT) ;
     status_t ret = (res == HAL_OK)?STATUS_OK:STATUS_ERROR;
@@ -207,13 +216,14 @@ status_t sim7000g_check(){
 
 
 status_t sim7000g_init(){
-
+    uart_init();
     // Necesario para alimentar la placa y encender el sim7000g   
     status_t ret = STATUS_OK;
     modulo_debug_print("SIM7000G ON\n");
 
     PWRKEY_set(LEVEL_HIGH);
     BAT_ENA_set(LEVEL_HIGH);
+
    
     return ret;
 }
