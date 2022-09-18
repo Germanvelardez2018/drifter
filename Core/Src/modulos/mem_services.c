@@ -10,36 +10,45 @@ PRIVATE uint8_t counter = 0;
 
 
 PRIVATE void delay(uint32_t timeout){
-
+    HAL_Delay(timeout);
 }
 
-PRIVATE status_t mem_write_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
-
-}
-
-
-PRIVATE status_t mem_read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
-
-}
-
-
-PRIVATE status_t mem_read_buffer(uint8_t* data, uint16_t len){
+PRIVATE status_t mem_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
+   status_t ret = STATUS_ERROR;
+   ret = at45db_write_page(data,  len, pag, pos);
+   return ret;
 
 }
 
 
-PRIVATE status_t mem_write_buffer(uint8_t* data, uint16_t len){
+PRIVATE status_t mem_read_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
+   status_t ret = STATUS_ERROR;
+   ret =  at45db_read_page(data,len,pag,pos);
+    return ret;
+}
 
+
+PRIVATE status_t mem_read_buffer(uint8_t* data, uint8_t len,uint8_t pos){
+   status_t ret = STATUS_ERROR;
+   ret =  at45db_write_buffer1(data,len,pos);
+    return ret;
+}
+
+
+PRIVATE status_t mem_write_buffer(uint8_t* data, uint8_t len,uint8_t pos){
+   status_t ret = STATUS_ERROR;
+   ret =  at45db_read_buffer1(data,len,pos);
+    return ret;
 }
 
 
 
-PRIVATE status_t mem_load_string(uint8_t* string , uint16_t len, uint16_t pag){
+PRIVATE status_t mem_load_string(uint8_t* string , uint8_t len, uint16_t pag){
     status_t ret = STATUS_ERROR;
     // Formato, primer byte es len, luego buffer string
     uint8_t _len = len;
-    ret = write_page(_len,1,pag,0);
-    ret = write_page(string ,len,pag,1);
+    ret = at45db_write_page(_len,1,pag,0);
+    ret = at45db_write_page(string ,len,pag,1);
     return ret;
 
 }
@@ -50,8 +59,8 @@ PRIVATE status_t mem_download_string(uint8_t* string , uint16_t pag){
     status_t ret = STATUS_ERROR;
     // Formato, primer byte es len, luego buffer string
     uint8_t _len = 0;
-    ret = read_page(_len,1,pag,0);
-    ret = read_page(string ,_len,pag,1);
+    ret = at45db_read_page(_len,1,pag,0);
+    ret = at45db_read_page(string ,_len,pag,1);
     return ret;
 
 }

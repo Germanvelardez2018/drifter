@@ -22,21 +22,21 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "timer.h"
-#include "uart.h"
 #include "watchdog.h"
-#include "spi.h"
 #include "adc.h"
-#include "i2c.h"
-#include "dma.h"
+
+
 #include "power_save.h"
 
 
 // Modulos
 #include "fsm.h"
 #include  "debug.h"
-#include  "AT45DB041.h"
 #include  "MPU6050.h"
 #include "SIM7000G.h"
+
+
+#include "mem_services.h" // esto es lo que va no AT45
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,12 +50,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
- #define MSG_INIT            "test  \n"
-  
-  
-  #define MSG                 " Driver  AT45DB by Velardez German \n"
-  #define MSG_LEN             (strlen(MSG) +1)
-
+ #define MSG_INIT            "test drifter modular \n"
+    
   #define BUFFER_FLAG          0
   #define FULL_ERASE           0
   #define CHECK_TEMP           1
@@ -68,14 +64,12 @@
 DMA_HandleTypeDef hdma_spi1_tx;
 DMA_HandleTypeDef hdma_spi1_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
-
+// en wdt.c
 extern IWDG_HandleTypeDef hiwdg;
-
 // en timer.c
 extern  TIM_HandleTypeDef htim1;
-
 PRIVATE  fsm_state_t device;
- PRIVATE uint8_t buffer[255];
+PRIVATE  uint8_t     buffer[255];
 
 
 
@@ -124,9 +118,9 @@ static void app_init(){
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_RTC_Init();
-  MX_SPI1_Init();
+//  MX_SPI1_Init(); 
   MX_ADC1_Init();
-  MX_I2C2_Init();
+//  MX_I2C2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_TIM1_Init();

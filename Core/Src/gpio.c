@@ -1,10 +1,15 @@
 #include "gpio.h"
 
 
-// Nota. Voy a agregar manualmente la configuracion de PB8 como salida
+PRIVATE driver_status_t __DRIVER_INITED__ = DRIVER_NO_STARTED;
 
 
-
+void GPIO_init(void){
+  if(__DRIVER_INITED__ == DRIVER_NO_STARTED){
+    MX_GPIO_Init();
+    __DRIVER_INITED__ = DRIVER_STARTED;
+  } 
+}
 
 /**
   * @brief GPIO Initialization Function
@@ -22,13 +27,13 @@
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4 | GPIO_PIN_12, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2|GPIO_PIN_13 | GPIO_PIN_8, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PA4 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  /*Configure GPIO pin : PA12  // Modificacion manual*/
+  GPIO_InitStruct.Pin =  GPIO_PIN_12 | GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

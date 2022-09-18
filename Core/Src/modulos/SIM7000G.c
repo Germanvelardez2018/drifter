@@ -71,8 +71,13 @@ static uint8_t buff_counter =0;
 #define SIM7000G_BAT_ENA_Pin GPIO_PIN_4
 #define SIM7000G_BAT_ENA_GPIO_Port GPIOA
 
-#define SIM7000G_PWRKEY_Pin GPIO_PIN_13
-#define SIM7000G_PWRKEY_GPIO_Port GPIOB
+
+
+
+
+
+#define SIM7000G_PWRKEY_Pin GPIO_PIN_12
+#define SIM7000G_PWRKEY_GPIO_Port GPIOA
 
 
 

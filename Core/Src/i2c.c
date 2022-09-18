@@ -7,6 +7,16 @@
 
 
 
+PRIVATE driver_status_t __DRIVER_INITED__ = DRIVER_NO_STARTED;
+
+
+void I2C_init(void){
+  if(__DRIVER_INITED__ == DRIVER_NO_STARTED){
+    MX_I2C2_Init();
+    __DRIVER_INITED__ = DRIVER_STARTED;
+  } 
+}
+
 
 
 /**

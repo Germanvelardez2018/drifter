@@ -115,38 +115,28 @@ PRIVATE void delay(uint32_t time){
 
 
 PRIVATE status_t spi_init(){
+        MX_SPI1_Init();
+
         return STATUS_OK;
 }
 
 
 PRIVATE status_t gpio_init(){
+        GPIO_init();
+
         return STATUS_OK;
 }
 
 
 PRIVATE  status_t  gpio_write(level_t value){
-        
         HAL_GPIO_WritePin(CS_GPIO_Port,CS_Pin,(GPIO_PinState)value);
-      
         return STATUS_OK;
 }
 
 
-PRIVATE  level_t   gpio_read (){
-
-        // Aun no implementado, no se usa
-
-
-        return LEVEL_LOW;
-}
-
-
 PRIVATE  status_t  spi_write(uint8_t* buffer, size_t len ){
-
             HAL_SPI_Transmit(AT45DB_SPI,buffer,len,1000);
           //  HAL_SPI_Transmit_DMA(AT45DB_SPI,buffer,len);
-
-
             return STATUS_OK;
 }
 
@@ -154,9 +144,6 @@ PRIVATE  status_t  spi_read(uint8_t* buffer, size_t len){
 
         HAL_SPI_Receive(AT45DB_SPI,buffer,len,1000);  
         //HAL_SPI_Receive_DMA(AT45DB_SPI,buffer,len);
-     
-
-
         return STATUS_OK;
 }
 
@@ -175,7 +162,6 @@ PRIVATE uint8_t  at45db_get_status(){
         spi_read(&first_byte_status,2); // Leo los 2 bytes de registro de status
         gpio_write(1);
         return first_byte_status[0];
-
 }
 
 
@@ -223,7 +209,7 @@ PRIVATE uint8_t  at45db_check_id(){
         gpio_write(0);
         static uint8_t at45db_pgsize_cmd[] = {0x3D, 0x2A, 0x80, 0xA6};  // 256
         if( size == SIZE_PAGE_264){
-        at45db_pgsize_cmd[3] = 0xA7; // 264 It's the default mode
+                at45db_pgsize_cmd[3] = 0xA7; // 264 It's the default mode
         }
         spi_write(at45db_set_size_page,4);
         gpio_write(1);
@@ -245,7 +231,7 @@ uint8_t is_ready(){
 }
 
 
-uint8_t write_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
+uint8_t at45db_write_buffer1(uint8_t* data,uint8_t len, uint8_t pos){
         uint8_t ret=0;
         uint32_t address =  pos ;   // position into the buffer
         uint8_t cmd[4] ={0};
@@ -260,13 +246,12 @@ uint8_t write_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
         gpio_write(1);
         at45db_wait(AT45DB_TIMEOUT);
         return ret;
-
 }
 
 
 
 
-uint8_t read_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
+uint8_t at45db_read_buffer1(uint8_t* data,uint8_t len, uint8_t pos){
         uint8_t ret=0;
         uint32_t address =  pos ;   // position into the buffer
         uint8_t cmd[4] ={0};
@@ -280,7 +265,6 @@ uint8_t read_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
         gpio_write(1);
         at45db_wait(AT45DB_TIMEOUT);
         return ret;
-
 }
 
 
@@ -299,9 +283,9 @@ uint8_t read_buffer1(uint8_t* data,uint16_t len, uint16_t pos){
 
 
 
-uint8_t write_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
+uint8_t at45db_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
         uint8_t ret=0;
-        uint8_t _len = len;  // 
+        uint8_t _len = len ;  // 
         uint32_t address =  (pag << 9) | pos ;   // position into the buffer
         uint8_t cmd[4] ={0};
         cmd[0] = CMD_WRITEPAGE_B1;
@@ -322,7 +306,7 @@ uint8_t write_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
 
 
 
-uint8_t read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
+uint8_t at45db_read_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
        uint8_t ret=0;
         uint32_t address =  (pag << 9) | pos ;   
         uint8_t cmd[5] ={0};
@@ -342,7 +326,6 @@ uint8_t read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
         gpio_write(1);
         //wait
         at45db_wait(AT45DB_TIMEOUT);
-
         return ret;        
 }
 
@@ -356,30 +339,23 @@ uint8_t read_page(uint8_t* data, uint16_t len, uint16_t pag,uint16_t pos){
 
 status_t at45db_save_measure(uint8_t* buffer){
         status_t ret;
-        at45_resumen();
-        write_page(buffer,strlen(buffer+1),0,0);
-
-        at45_sleep();        
-
-
+        at45db_resumen();
+        at45db_write_page(buffer,strlen(buffer+1),0,0);
+        at45db_sleep();        
         return ret;
 }
 
 
 status_t at45db_download_measure(uint8_t* buffer, uint8_t len){
         status_t ret;
-        at45_resumen();
-        ret = read_page(buffer,len,0,0);
-        at45_sleep();     
-        
-        
+        at45db_resumen();
+        ret = at45db_read_page(buffer,len,0,0);
+        at45db_sleep();     
         return ret;
-
 }
 
 
-uint8_t full_erase_memory(){
-
+uint8_t at45db_full_erase_memory(){
         uint8_t ret =0;
         uint8_t cmd[4]={0};
         cmd[0] = 0xC7;
@@ -394,7 +370,7 @@ uint8_t full_erase_memory(){
 }
 
 
-void at45_resumen(){
+void at45db_resumen(){
         uint8_t ret =0;
         uint8_t cmd=CMD_RESUMEN;
         gpio_write(0);
@@ -404,13 +380,11 @@ void at45_resumen(){
 }
 
 
-void at45_sleep(){
+void at45db_sleep(){
         uint8_t ret =0;
         uint8_t cmd=CMD_LOWPOWER;
         gpio_write(0);
         spi_write(&cmd,1);
         gpio_write(1);
         return ret;
-
-
 }

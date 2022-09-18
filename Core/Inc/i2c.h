@@ -31,14 +31,12 @@ extern "C" {
 
 /*-----------------------------------------------------------------------------*/
 
-
-
 /**
  * @brief Configura el hardware del I2C2. Modo simple sin DMA y sin interrupciones
  * 
  * @return ** void 
  */
- void MX_I2C2_Init(void);
+void I2C_init(void);
 
 
 #ifdef __cplusplus

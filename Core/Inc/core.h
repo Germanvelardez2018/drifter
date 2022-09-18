@@ -51,6 +51,12 @@ extern "C" {
 
 
 
+
+typedef enum {
+    DRIVER_STARTED      = 0,
+    DRIVER_NO_STARTED   = 1
+} driver_status_t;
+
 typedef enum {
     STATUS_ERROR = 0,
     STATUS_OK

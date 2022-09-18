@@ -113,7 +113,7 @@ PRIVATE void mpu6050_calibration(int16_t x_e, int16_t y_e, int16_t z_e){
 
 
 status_t mpu6050_init(){
-    MX_I2C2_Init();
+    I2C_init();
     // SET clock source
     status_t ret = STATUS_ERROR;
     uint8_t config = 0;
