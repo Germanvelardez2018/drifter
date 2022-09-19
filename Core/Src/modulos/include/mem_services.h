@@ -37,6 +37,13 @@ extern "C" {
 status_t mem_s_init();
 
 
+
+
+status_t mem_s_get_counter(uint8_t* counter);
+status_t mem_s_set_counter(uint8_t* counter);
+
+
+
 // Interval
 status_t mem_s_get_interval(uint8_t* interval);
 status_t mem_s_set_interval(uint8_t* interval);
@@ -62,6 +69,20 @@ status_t mem_s_load_data(uint8_t* string );
 // Para leer todos los datos almacenados recomienda usar dentro 
 // de un bucle while con condicion (ret = mem_s_download_data(buffer) != STATUS__ERROR)
 status_t mem_s_download_data(uint8_t* string);
+
+
+
+
+
+
+
+
+ status_t  mem_load_string(uint8_t* string , uint8_t len, uint16_t pag);
+
+
+
+ status_t  mem_download_string(uint8_t* string , uint16_t pag);
+
 
 
 

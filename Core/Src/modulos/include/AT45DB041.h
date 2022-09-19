@@ -37,6 +37,13 @@ typedef enum{
 /*-----------------------------------------------------------------------------*/
 
 
+
+
+
+
+
+void at45db_init();
+
 /**
  * @brief 
  * 
@@ -100,6 +107,29 @@ status_t at45db_save_measure(uint8_t* buffer);
  */
 uint8_t at45db_read_buffer1(uint8_t* data,uint8_t len, uint8_t pos);
 
+
+
+
+/**
+ * @brief Write in buffer 1, SRAM....volatile
+ * 
+ * @param data  bytes array 
+ * @param len   lenght of the array
+ * @param pos   Initial position into the buffer1
+ * @return ** uint8_t 
+ */
+ uint8_t at45db_write_buffer2(uint8_t* data,uint8_t len, uint8_t pos);
+
+
+/**
+ * @brief Read en buffer 1, en SRAM ...volatile
+ * 
+ * @param data  bytes array
+ * @param len  lenght of the array
+ * @param pos Initial position into the buffer1
+ * @return ** uint8_t 
+ */
+uint8_t at45db_read_buffer2(uint8_t* data,uint8_t len, uint8_t pos);
 
 /**
  * @brief 

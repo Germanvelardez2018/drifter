@@ -45,7 +45,7 @@
 // Formato para almacenar en paginar
 #define FORMAT_MSG                                          ("\nx:%.2f, y:%.2f , z:%.2f , t:%.2f\n,\nGPS:%s\n")
 // De 48 a 2047 // Datos almacenado
-#define MMAP_DATA_OFSSET                                    (48)
+#define MMAP_DATA_OFSSET                                    ((uint16_t)48)
 #define MMAP_DATA_ADDRESS(pos)                              (pos + MMAP_DATA_OFSSET)
 
 

@@ -34,8 +34,9 @@
 #include  "debug.h"
 #include  "MPU6050.h"
 #include "SIM7000G.h"
+#include "AT45DB041.h"
 
-
+#include "mmap.h"
 #include "mem_services.h" // esto es lo que va no AT45
 /* USER CODE END Includes */
 
@@ -70,33 +71,108 @@ extern IWDG_HandleTypeDef hiwdg;
 extern  TIM_HandleTypeDef htim1;
 PRIVATE  fsm_state_t device;
 PRIVATE  uint8_t     buffer[255];
+PRIVATE uint8_t      counter = 0;
 
 
 
 // callbacks
 
 
-static void on_field(){
-  modulo_debug_print("FSM: ON FIELD\n");
-  mpu6050_get_measure(buffer,255);
-  at45db_save_measure(buffer);
-  device = FSM_MEMORY_DOWNLOAD;
-  
-  // Secuencia:
-  //Obtengo datos de sensores
-  //Guardo datos de sensores
-  //Automento contador de muestras almacenadas
+
+
+
+
+static void inline write_data(uint8_t* buffer, uint16_t page){
+
+    uint8_t len =  strlen(buffer)+1;
+    uint8_t _len = len;
+    at45db_resumen();
+    at45db_write_page(&(_len),1,(page+ MMAP_DATA_OFSSET),0);
+    at45db_write_page(buffer ,len,(page+ MMAP_DATA_OFSSET),1);
+    at45db_sleep();
 
 }
 
 
-static void on_download(){
-  modulo_debug_print("FSM: DOWNLOAD\n");
+
+
+
+
+static void inline read_data(uint8_t* buffer, uint16_t page){
+   at45db_resumen();
+    uint8_t len=0;
+//    at45db_read_page((&len),1,(page + MMAP_DATA_OFSSET),0);
+//    at45db_read_page(buffer ,len,(page + MMAP_DATA_OFSSET),1);
+    at45db_sleep();
+
+}
+
+
+
+
+
+
+
+
+
+static void inline on_field(){
+  modulo_debug_print("FSM: ON FIELD\n");
+  
+  // Secuencia:
+  //Obtengo datos de sensores
+  mem_s_get_counter(&counter);
+  sprintf(buffer," medicion numero:%d '  \n",counter);
+  modulo_debug_print("dato insertado=>");
+  modulo_debug_print(buffer);
+  //Guardo datos de sensores
+  
+  //mem_load_string(buffer,strlen(buffer)+1,counter);
+   write_data(buffer,counter);
+  
+  
   memset(buffer,0,255);
-  at45db_download_measure(buffer,255);
-  modulo_debug_print("download dummy:");
-  modulo_debug_print(buffer);  
-  device = FSM_ON_FIELD;   
+
+  //Automento contador de muestras almacenadas
+  counter = counter +1 ;
+  mem_s_set_counter(&counter);
+
+  if( counter >= 4){
+      device = FSM_MEMORY_DOWNLOAD;   
+  }
+
+}
+
+
+static void inline on_download(void){
+  modulo_debug_print("FSM: DOWNLOAD\n");
+  status_t ret = STATUS_ERROR;
+  uint8_t counter = 0 ;
+  mem_s_get_counter(&counter);
+  sprintf(buffer,"extraer :%d datos\n",counter);
+  modulo_debug_print(buffer);
+  memset(buffer,0,255);
+
+
+  while(counter > 0){
+    sprintf(buffer,"\ncounter:%d\n",counter);
+    modulo_debug_print(buffer);
+   read_data(buffer,1);
+
+     
+    modulo_debug_print("enviando datos:");
+    modulo_debug_print(buffer);
+    memset(buffer,0,200);
+
+    
+    counter = counter -1 ;
+    HAL_Delay(100);
+
+  }
+
+   counter = 0;
+   mem_s_set_counter(&counter);
+   device = FSM_ON_FIELD;   
+   modulo_debug_print("\n-> on field again\n");
 
   //Me conecto a servidor
   //Leo las muestras y las envio al servidor
@@ -115,14 +191,10 @@ static void app_init(){
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
   SystemClock_Config();
-  MX_GPIO_Init();
+  mem_s_init();
   MX_DMA_Init();
   MX_RTC_Init();
-//  MX_SPI1_Init(); 
-  MX_ADC1_Init();
-//  MX_I2C2_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
+
   MX_TIM1_Init();
   // Necesario para evitar que el micro se reinicio por WDT
  // HAL_TIM_Base_Start_IT(&htim1);
@@ -136,6 +208,8 @@ static void app_init(){
   mpu6050_init();
   // Memoria
   HAL_Delay(1000);
+ 
+
 }
 
 
@@ -149,8 +223,16 @@ int main(void)
 {
   // Configuracion inicial de los perifericos
   app_init();
- 
+  uint8_t c= 0;
+  mem_s_set_counter(&c);
+
   modulo_debug_print(MSG_INIT);
+
+
+
+
+
+
   device = fsm_get_state();
   pwr_mode_t  modo ;
   while (1)
@@ -172,8 +254,10 @@ int main(void)
         break;
       }
   }
-    pwr_sleep();
-    //HAL_Delay(15000);
+    //pwr_sleep();
+    HAL_Delay(3500);
+        modulo_debug_print("\n-> desperto\n");
+
   }
   /* USER CODE END 3 */
 }
