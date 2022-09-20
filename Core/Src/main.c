@@ -68,62 +68,11 @@ DMA_HandleTypeDef hdma_usart2_tx;
 // en wdt.c
 extern IWDG_HandleTypeDef hiwdg;
 // en timer.c
-extern  TIM_HandleTypeDef htim1;
-PRIVATE  fsm_state_t device;
-PRIVATE  uint8_t     buffer[255];
-PRIVATE uint8_t      counter = 0;
-
-
-
-// callbacks
-
-
-
-
-
-
-static void inline write_data(uint8_t* buffer, uint32_t page){
-
-    uint8_t len =  strlen(buffer)+1;
-    uint8_t _len = len;
-    at45db_resumen();
-    uint32_t newpage = page + MMAP_DATA_OFSSET;
-    uint8_t buff[100];
-   // sprintf(buff,"pagina escrita:%d\n",newpage);
-    at45db_write_page(&(_len),1,(page+ MMAP_DATA_OFSSET),0);
-    at45db_write_page(buffer ,len,(page+ MMAP_DATA_OFSSET),1);
-    at45db_sleep();
-    //sprintf(buff,"write_data:%s\n",buffer);
-    //modulo_debug_print(buff);
-
-}
-
-
-
-
-
-
-static void inline read_data(uint8_t* buffer, uint32_t page){
-   at45db_resumen();
-    memset(buffer,0,200);
-    uint8_t len=0;
-    uint32_t newpage = page + MMAP_DATA_OFSSET;
-    uint8_t buff[100];
- //   sprintf(buff,"pagina leida:%d\n",newpage);
-   // modulo_debug_print(buff);
-    at45db_read_page((&len),1,(page + MMAP_DATA_OFSSET),0);
-    at45db_read_page(buffer ,len,(page + MMAP_DATA_OFSSET),1);
-    at45db_sleep();
-   // sprintf(buff,"read_data:%s\n",buffer);
-   // modulo_debug_print(buff);
-    
-
-}
-
-
-
-
-
+extern  TIM_HandleTypeDef  htim1;
+PRIVATE  fsm_state_t       device;
+PRIVATE  uint8_t           buffer[255];
+PRIVATE  uint8_t           counter = 0;
+PRIVATE  uint8_t           max_counter = 0;
 
 
 
@@ -133,56 +82,40 @@ static void inline on_field(){
   // Secuencia:
   //Obtengo datos de sensores
   mem_s_get_counter(&counter);
- 
   //Guardo datos de sensores
-  sprintf(buffer,"memmoria escrita en :%d\n",counter);
-  //mem_load_string(buffer,strlen(buffer)+1,counter);
-   write_data(buffer,counter);
-  
-  
+  mpu6050_get_measure(buffer,255);
+  write_data(buffer,counter);
   memset(buffer,0,255);
-
   //Automento contador de muestras almacenadas
-  counter = counter +1 ;
-  mem_s_set_counter(&counter);
-
-  if( counter >= 10){
+  if( counter >= max_counter){
       device = FSM_MEMORY_DOWNLOAD;   
+  }else{
+    counter = counter +1 ;
+    mem_s_set_counter(&counter);
   }
-
 }
 
 
 static void inline on_download(void){
   modulo_debug_print("FSM: DOWNLOAD\n");
   status_t ret = STATUS_ERROR;
-  uint8_t counter = 0 ;
+  
   mem_s_get_counter(&counter);
   sprintf(buffer,"extraer :%d datos\n",counter);
   modulo_debug_print(buffer);
-  memset(buffer,0,255);
-
-  counter = counter -1;
+  
   while(counter > 0){
-
-    sprintf(buffer,"\n|counter:%d|\n",counter);
-    modulo_debug_print(buffer);
+    counter = counter -1;
     memset(buffer,0,200);
     read_data(buffer,counter);
- 
- 
     modulo_debug_print(buffer);
-    modulo_debug_print("<= \n");
-    
-    HAL_Delay(1000);
-    counter = counter - 1;
-
+    modulo_debug_print("<=");
+    HAL_Delay(100);
   }
-
    counter = 0;
    mem_s_set_counter(&counter);
    device = FSM_ON_FIELD;   
-   modulo_debug_print("\n-> on field again\n");
+   
 
   //Me conecto a servidor
   //Leo las muestras y las envio al servidor
@@ -207,7 +140,7 @@ static void app_init(){
 
   MX_TIM1_Init();
   // Necesario para evitar que el micro se reinicio por WDT
- // HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_Base_Start_IT(&htim1);
   // Inicio modulos
   modulo_debug_init();
   sim7000g_init();
@@ -233,8 +166,43 @@ int main(void)
 {
   // Configuracion inicial de los perifericos
   app_init();
+
+
+//write_data("hola mundo\n",13);
+#ifdef test
+    at45db_resumen();
+    at45db_write_buffer2("stm32\n",8,0);
+    at45db_sleep();
+
+    memset(buffer,0,255);
+
+    at45db_resumen();
+    at45db_read_buffer2(buffer,8,0);
+
+    at45db_sleep();
+
+    //read_data(buffer,13);
+    modulo_debug_print("obtenido de buffer: ");
+    modulo_debug_print(buffer);
+#endif
+
+
+
+
   uint8_t c= 0;
+  uint8_t max = 5;
   mem_s_set_counter(&c);
+
+  mem_s_set_max_amount_data(&max);
+
+  mem_s_get_max_amount_data(&max_counter);
+  sprintf(buffer, " max counter:%d\n",max_counter);
+  modulo_debug_print(buffer);
+
+  mem_s_get_counter(&counter);
+  sprintf(buffer, "  counter:%d\n",counter);
+  modulo_debug_print(buffer);
+
 
   modulo_debug_print(MSG_INIT);
 
@@ -247,7 +215,7 @@ int main(void)
   pwr_mode_t  modo ;
   while (1)
   {   
-      HAL_IWDG_Refresh(&hiwdg);
+    HAL_IWDG_Refresh(&hiwdg);
   modo = pwr_get_mode();
   if(modo == RUN){
 
@@ -264,9 +232,9 @@ int main(void)
         break;
       }
   }
-    //pwr_sleep();
+    pwr_sleep();
     HAL_Delay(1000);
-        modulo_debug_print("\n-> desperto\n");
+    modulo_debug_print("\n-> wake up\n");
 
   }
   /* USER CODE END 3 */

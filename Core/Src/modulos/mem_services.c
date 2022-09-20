@@ -11,18 +11,17 @@ PRIVATE void delay(uint32_t timeout){
 
 
 
-PRIVATE status_t mem_resume(){
+PRIVATE status_t inline mem_resume(){
     at45db_resumen();
 }
 
 
-PRIVATE status_t mem_sleep(){
+PRIVATE status_t inline mem_sleep(){
     at45db_sleep();
 }
 
-PRIVATE void mem_init(){
+PRIVATE void inline mem_init(){
     at45db_init();
-    mem_resume();
 }
 
 
@@ -30,7 +29,6 @@ PRIVATE status_t mem_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t
    status_t ret = STATUS_ERROR;
    ret = at45db_write_page(data,  len, pag, pos);
    return ret;
-
 }
 
 
@@ -56,46 +54,45 @@ PRIVATE status_t mem_write_buffer(uint8_t* data, uint8_t len,uint8_t pos){
 
 
 
- status_t  mem_load_string(uint8_t* string , uint8_t len, uint16_t pag){
+
+
+
+status_t   write_data(uint8_t* buffer, uint32_t page){
     status_t ret = STATUS_ERROR;
-    // Formato, primer byte es len, luego buffer string
+    uint8_t len =  strlen(buffer)+1;
     uint8_t _len = len;
     at45db_resumen();
-    ret = at45db_write_page(&(_len),1,(pag+ MMAP_DATA_OFSSET),0);
-    ret = at45db_write_page(string ,len,(pag+ MMAP_DATA_OFSSET),1);
+    ret = at45db_write_page(&(_len),1,(page+ MMAP_DATA_OFSSET),0);
+    ret = at45db_write_page(buffer ,len,(page+ MMAP_DATA_OFSSET),1);
     at45db_sleep();
     return ret;
 }
 
 
 
- status_t  mem_download_string(uint8_t* string , uint16_t pag){
+
+
+
+status_t   read_data(uint8_t* buffer, uint32_t page){
     status_t ret = STATUS_ERROR;
-    // Formato, primer byte es len, luego buffer string
-    at45db_resumen();
     uint8_t len=0;
-    ret = at45db_read_page((&len),1,(pag+MMAP_DATA_OFSSET),0);
-    ret = at45db_read_page(string ,len,(pag+MMAP_DATA_OFSSET),1);
+    at45db_resumen();
+    at45db_read_page((&len),1,(page + MMAP_DATA_OFSSET),0);
+    at45db_read_page(buffer ,len,(page + MMAP_DATA_OFSSET),1);
     at45db_sleep();
-
-
-
     return ret;
-
 }
-
-
 
 PRIVATE status_t mem_get_counter(uint8_t* counter){
    status_t ret = STATUS_OK;
-   ret = at45db_read_buffer1(counter, 1,0);
+   ret = mem_read_buffer(counter, 1,0);
    return ret;
 }
 
 
-PRIVATE status_t mem_set_counter(uint8_t* counter){
+PRIVATE status_t  mem_set_counter(uint8_t* counter){
     status_t ret = STATUS_OK;
-    ret = at45db_write_buffer1(counter, 1,0);
+    ret = mem_write_buffer(counter, 1,0);
     return ret;
 }
 
@@ -107,10 +104,7 @@ status_t mem_s_init(){
     status_t ret = STATUS_OK;
     // Iniciar memoria
     mem_init();
-    // Cargar contador
-    at45db_sleep();
-
-    //sleep memoria
+   
     return ret;
 }
 
@@ -138,39 +132,50 @@ status_t mem_s_get_counter(uint8_t* counter){
 
 
 
+
 // Interval
 status_t mem_s_get_interval(uint8_t* interval){
     status_t ret = STATUS_OK;
+    mem_resumen();
     ret = mem_read_page(interval,1,MMAP_INTERVAL,0);
     // Si ocurre error de lectura, enviar valor por default
     if(ret == STATUS_ERROR){
         (*interval) = MMAP_DEFAULT_INTERVAL;
     } 
+    mem_sleep();
     return ret;
 }
 
 
 status_t mem_s_set_interval(uint8_t* interval){
     status_t ret = STATUS_OK;
+    mem_resume();
     ret = mem_write_page(interval,1,MMAP_INTERVAL,0);
+    mem_sleep();
     return ret;
 }
 
 
 status_t mem_s_get_max_amount_data(uint8_t* max_amount_data){
     status_t ret = STATUS_OK;
+    mem_resume();
     ret = mem_read_page(max_amount_data,1,MMAP_MAX_AMOUNT_DATA,0);
     // Si ocurre error de lectura, enviar valor por default
     if(ret == STATUS_ERROR){
         (*max_amount_data) = MMAP_DEFAULT_MAX_AMOUNT_DATA;
     } 
+    mem_sleep();
     return ret;
 }
 
 
 status_t mem_s_set_max_amount_data(uint8_t* max_amount_data){
      status_t ret = STATUS_OK;
+        
+     mem_resume();
+
       ret = mem_write_page(max_amount_data,1,MMAP_MAX_AMOUNT_DATA,0);    
+      mem_sleep();
     return ret;
 }
 

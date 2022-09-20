@@ -75,14 +75,14 @@ status_t mem_s_download_data(uint8_t* string);
 
 
 
+status_t write_data(uint8_t* buffer, uint32_t page);
 
 
- status_t  mem_load_string(uint8_t* string , uint8_t len, uint16_t pag);
 
 
 
- status_t  mem_download_string(uint8_t* string , uint16_t pag);
 
+status_t read_data(uint8_t* buffer, uint32_t page);
 
 
 

@@ -24,7 +24,7 @@ extern   SPI_HandleTypeDef hspi1;
 
 // READ FUNCTIONS
 #define      CMD_READBUFF1                    (0xD4)
-#define      CMD_READBUFF2                    (0xD6)
+#define      CMD_READBUFF2                    (0xD6) // D3 low frecuenccia
 #define      CMD_READPAGE                     (0x52)      
 #define      CMD_READPAGEHF                   (0x0B)  // Read page in high freq.
 #define      CMD_READPAGELF                   (0x03)  // Read pafe in low freq.
@@ -32,8 +32,8 @@ extern   SPI_HandleTypeDef hspi1;
 //WRITE FUNCTIONS
 #define    CMD_WRITEPAGE_B1                   (0x82)
 #define    CMD_WRITEPAGE_B2                   (0x85)
-#define    CMD_WRITEBUFF1                     (0x84)
-#define    CMD_WRITEBUFF2                     (0x87)
+#define    CMD_WRITEBUFF1                     (0x84) //
+#define    CMD_WRITEBUFF2                     (0x87) //
 #define    CMD_PAGETOBUFF1                    (0x53)
 #define    CMD_PAGETOBUFF2                    (0x55)
 
@@ -154,12 +154,6 @@ PRIVATE  status_t  spi_read(uint8_t* buffer, size_t len){
 }
 
 
-
-
-
-// PRIVATE FUNCTION API
-
-
 PRIVATE uint8_t  at45db_get_status(){
         uint8_t first_byte_status[2] = {0};
         uint8_t cmd = CMD_GETSTATUS;
@@ -208,13 +202,13 @@ PRIVATE uint8_t  at45db_check_id(){
 
 
 
+// PRIVATE FUNCTION API
 
 
 
 
 void at45db_init(){
         hardware_init();
-        at45db_resumen();
         at45db_set_size_page(SIZE_PAGE_256);
 }
 
@@ -249,12 +243,11 @@ uint8_t is_ready(){
 
 uint8_t at45db_write_buffer2(uint8_t* data,uint8_t len, uint8_t pos){
         uint8_t ret=0;
-        uint32_t address =  pos ;   // position into the buffer
         uint8_t cmd[4] ={0};
         cmd[0] = CMD_WRITEBUFF2;
-        cmd[1] = (address >> 24) & 0xFF;
-        cmd[2] = (address >> 16) & 0xFF;
-        cmd[3] = (address >> 8)  & 0xFF;
+        cmd[1] = 0;
+        cmd[2] = 0;
+        cmd[3] = pos ;
         gpio_write(0);
         spi_write(cmd,4);
         spi_write(data,len);
@@ -266,12 +259,12 @@ uint8_t at45db_write_buffer2(uint8_t* data,uint8_t len, uint8_t pos){
 
 uint8_t at45db_read_buffer2(uint8_t* data,uint8_t len, uint8_t pos){
         uint8_t ret=0;
-        uint32_t address =   (uint32_t)pos ;   // position into the buffer
         uint8_t cmd[5] ={0};
         cmd[0] = CMD_READBUFF2;
-        cmd[1] = (address >> 24) & 0xFF;
-        cmd[2] = (address >> 16) & 0xFF;
-        cmd[3] = (address >> 8)  & 0xFF;
+        cmd[1] = 0;
+        cmd[2] = 0;
+        cmd[3] =  pos  ;
+        gpio_write(0);
         spi_write(cmd,5);
         spi_read(data,len);
         gpio_write(1);
@@ -282,14 +275,14 @@ uint8_t at45db_read_buffer2(uint8_t* data,uint8_t len, uint8_t pos){
 
 uint8_t at45db_write_buffer1(uint8_t* data,uint8_t len, uint8_t pos){
         uint8_t ret=0;
-        uint32_t address =   (uint32_t)pos ;   // position into the buffer
         uint8_t cmd[4] ={0};
         cmd[0] = CMD_WRITEBUFF1;
-        cmd[1] = (address >> 24) & 0xFF;
-        cmd[2] = (address >> 16) & 0xFF;
-        cmd[3] = (address >> 8)  & 0xFF;
+        cmd[1] = 0;
+        cmd[2] = 0;
+        cmd[3] =  pos  ;
         gpio_write(0);
         spi_write(cmd,4);
+        delay(1);
         spi_write(data,len);
         gpio_write(1);
         at45db_wait(AT45DB_TIMEOUT);
@@ -301,14 +294,14 @@ uint8_t at45db_write_buffer1(uint8_t* data,uint8_t len, uint8_t pos){
 
 uint8_t at45db_read_buffer1(uint8_t* data,uint8_t len, uint8_t pos){
         uint8_t ret=0;
-        uint32_t address =  (uint32_t)pos ;   // position into the buffer
         uint8_t cmd[5] ={0};
         cmd[0] = CMD_READBUFF1;
-        cmd[1] = (address >> 24) & 0xFF;
-        cmd[2] = (address >> 16) & 0xFF;
-        cmd[3] = (address >> 8)  & 0xFF;
+        cmd[1] = 0;
+        cmd[2] = 0;
+        cmd[3] = pos ;
         gpio_write(0);
         spi_write(cmd,5);
+        delay(1);
         spi_read(data,len);
         gpio_write(1);
         at45db_wait(AT45DB_TIMEOUT);
@@ -371,25 +364,6 @@ uint8_t at45db_read_page(uint8_t* data, uint8_t len, uint32_t pag,uint8_t pos){
 
 
 
-
-
-
-status_t at45db_save_measure(uint8_t* buffer){
-        status_t ret;
-        at45db_resumen();
-        at45db_write_page(buffer,strlen(buffer+1),0,0);
-        at45db_sleep();        
-        return ret;
-}
-
-
-status_t at45db_download_measure(uint8_t* buffer, uint8_t len){
-        status_t ret;
-        at45db_resumen();
-        ret = at45db_read_page(buffer,len,0,0);
-        at45db_sleep();     
-        return ret;
-}
 
 
 uint8_t at45db_full_erase_memory(){
