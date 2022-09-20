@@ -317,15 +317,18 @@ uint8_t at45db_read_buffer1(uint8_t* data,uint8_t len, uint8_t pos){
 
 
 
-uint8_t at45db_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
+
+
+
+uint8_t at45db_write_page(uint8_t* data, uint8_t len, uint32_t pag,uint8_t pos){
         uint8_t ret=0;
         uint8_t _len = len ;  // 
-        uint32_t address =  (pag << 9) | pos ;   // position into the buffer
+        uint32_t address =  (pag << 8) | (uint32_t)pos ;   //          | xxxx xxxx |  xxxx xppp |pppp pppp |oooo oooo |
         uint8_t cmd[4] ={0};
         cmd[0] = CMD_WRITEPAGE_B1;
-        cmd[1] = (address >> 24) & 0xFF;
-        cmd[2] = (address >> 16) & 0xFF;
-        cmd[3] = (address >> 8)  & 0xFF;
+        cmd[1] = (address >> 16) & 0xFF;
+        cmd[2] = (address >> 8) & 0xFF;
+        cmd[3] =  address & 0xFF;
         gpio_write(0);
         spi_write(cmd,4);
         delay(1);
@@ -340,15 +343,15 @@ uint8_t at45db_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
 
 
 
-uint8_t at45db_read_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
+uint8_t at45db_read_page(uint8_t* data, uint8_t len, uint32_t pag,uint8_t pos){
        uint8_t ret=0;
-        uint32_t address =  (pag << 9) | pos ;   
+        uint32_t address =  (pag << 8) | (uint32_t)pos ;       //
         uint8_t cmd[5] ={0};
         uint8_t _len = 0;
         cmd[0] = CMD_READPAGEHF;
-        cmd[1] = (address >> 24) & 0xFF;
-        cmd[2] = (address >> 16) & 0xFF;
-        cmd[3] = (address >> 8)  & 0xFF;
+        cmd[1] = (address >> 16) & 0xFF;
+        cmd[2] = (address >> 8) & 0xFF;
+        cmd[3] =  address  & 0xFF;
         cmd[4] = dummyByte;
         gpio_write(0);
         spi_write(cmd,5);

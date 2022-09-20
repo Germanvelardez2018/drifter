@@ -140,7 +140,7 @@ uint8_t at45db_read_buffer2(uint8_t* data,uint8_t len, uint8_t pos);
  * @param pos   Initial position in the page
  * @return ** uint8_t 
  */
-uint8_t at45db_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos);
+uint8_t at45db_write_page(uint8_t* data, uint8_t len, uint32_t pag,uint8_t pos);
 
 
 /**
@@ -152,7 +152,7 @@ uint8_t at45db_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos);
  * @param pos   Initial position in the page
  * @return ** uint8_t  
  */
-uint8_t at45db_read_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos);
+uint8_t at45db_read_page(uint8_t* data, uint8_t len, uint32_t pag,uint8_t pos);
 
 
 /**

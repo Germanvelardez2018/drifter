@@ -82,14 +82,19 @@ PRIVATE uint8_t      counter = 0;
 
 
 
-static void inline write_data(uint8_t* buffer, uint16_t page){
+static void inline write_data(uint8_t* buffer, uint32_t page){
 
     uint8_t len =  strlen(buffer)+1;
     uint8_t _len = len;
     at45db_resumen();
+    uint32_t newpage = page + MMAP_DATA_OFSSET;
+    uint8_t buff[100];
+   // sprintf(buff,"pagina escrita:%d\n",newpage);
     at45db_write_page(&(_len),1,(page+ MMAP_DATA_OFSSET),0);
     at45db_write_page(buffer ,len,(page+ MMAP_DATA_OFSSET),1);
     at45db_sleep();
+    //sprintf(buff,"write_data:%s\n",buffer);
+    //modulo_debug_print(buff);
 
 }
 
@@ -98,12 +103,20 @@ static void inline write_data(uint8_t* buffer, uint16_t page){
 
 
 
-static void inline read_data(uint8_t* buffer, uint16_t page){
+static void inline read_data(uint8_t* buffer, uint32_t page){
    at45db_resumen();
+    memset(buffer,0,200);
     uint8_t len=0;
-//    at45db_read_page((&len),1,(page + MMAP_DATA_OFSSET),0);
-//    at45db_read_page(buffer ,len,(page + MMAP_DATA_OFSSET),1);
+    uint32_t newpage = page + MMAP_DATA_OFSSET;
+    uint8_t buff[100];
+ //   sprintf(buff,"pagina leida:%d\n",newpage);
+   // modulo_debug_print(buff);
+    at45db_read_page((&len),1,(page + MMAP_DATA_OFSSET),0);
+    at45db_read_page(buffer ,len,(page + MMAP_DATA_OFSSET),1);
     at45db_sleep();
+   // sprintf(buff,"read_data:%s\n",buffer);
+   // modulo_debug_print(buff);
+    
 
 }
 
@@ -117,15 +130,12 @@ static void inline read_data(uint8_t* buffer, uint16_t page){
 
 static void inline on_field(){
   modulo_debug_print("FSM: ON FIELD\n");
-  
   // Secuencia:
   //Obtengo datos de sensores
   mem_s_get_counter(&counter);
-  sprintf(buffer," medicion numero:%d '  \n",counter);
-  modulo_debug_print("dato insertado=>");
-  modulo_debug_print(buffer);
+ 
   //Guardo datos de sensores
-  
+  sprintf(buffer,"memmoria escrita en :%d\n",counter);
   //mem_load_string(buffer,strlen(buffer)+1,counter);
    write_data(buffer,counter);
   
@@ -136,7 +146,7 @@ static void inline on_field(){
   counter = counter +1 ;
   mem_s_set_counter(&counter);
 
-  if( counter >= 4){
+  if( counter >= 10){
       device = FSM_MEMORY_DOWNLOAD;   
   }
 
@@ -152,20 +162,20 @@ static void inline on_download(void){
   modulo_debug_print(buffer);
   memset(buffer,0,255);
 
-
+  counter = counter -1;
   while(counter > 0){
-    sprintf(buffer,"\ncounter:%d\n",counter);
-    modulo_debug_print(buffer);
-   read_data(buffer,1);
 
-     
-    modulo_debug_print("enviando datos:");
+    sprintf(buffer,"\n|counter:%d|\n",counter);
     modulo_debug_print(buffer);
     memset(buffer,0,200);
-
+    read_data(buffer,counter);
+ 
+ 
+    modulo_debug_print(buffer);
+    modulo_debug_print("<= \n");
     
-    counter = counter -1 ;
-    HAL_Delay(100);
+    HAL_Delay(1000);
+    counter = counter - 1;
 
   }
 
@@ -207,7 +217,7 @@ static void app_init(){
   // Sensor
   mpu6050_init();
   // Memoria
-  HAL_Delay(1000);
+  HAL_Delay(500);
  
 
 }
@@ -255,7 +265,7 @@ int main(void)
       }
   }
     //pwr_sleep();
-    HAL_Delay(3500);
+    HAL_Delay(1000);
         modulo_debug_print("\n-> desperto\n");
 
   }

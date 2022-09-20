@@ -43,14 +43,14 @@ PRIVATE status_t mem_read_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t 
 
 PRIVATE status_t mem_read_buffer(uint8_t* data, uint8_t len,uint8_t pos){
    status_t ret = STATUS_ERROR;
-   ret =  at45db_read_buffer1(data,len,pos);
+   ret =  at45db_read_buffer2(data,len,pos);
     return ret;
 }
 
 
 PRIVATE status_t mem_write_buffer(uint8_t* data, uint8_t len,uint8_t pos){
    status_t ret = STATUS_ERROR;
-   ret =  at45db_write_buffer1(data,len,pos);
+   ret =  at45db_write_buffer2(data,len,pos);
     return ret;
 }
 
