@@ -85,14 +85,14 @@ status_t   read_data(uint8_t* buffer, uint32_t page){
 
 PRIVATE status_t mem_get_counter(uint8_t* counter){
    status_t ret = STATUS_OK;
-   ret = mem_read_buffer(counter, 1,0);
+   ret = mem_read_buffer(counter, 1,10);
    return ret;
 }
 
 
 PRIVATE status_t  mem_set_counter(uint8_t* counter){
     status_t ret = STATUS_OK;
-    ret = mem_write_buffer(counter, 1,0);
+    ret = mem_write_buffer(counter, 1,10);
     return ret;
 }
 
@@ -160,10 +160,6 @@ status_t mem_s_get_max_amount_data(uint8_t* max_amount_data){
     status_t ret = STATUS_OK;
     mem_resume();
     ret = mem_read_page(max_amount_data,1,MMAP_MAX_AMOUNT_DATA,0);
-    // Si ocurre error de lectura, enviar valor por default
-    if(ret == STATUS_ERROR){
-        (*max_amount_data) = MMAP_DEFAULT_MAX_AMOUNT_DATA;
-    } 
     mem_sleep();
     return ret;
 }

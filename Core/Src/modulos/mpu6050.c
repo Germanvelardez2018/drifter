@@ -226,7 +226,6 @@ status_t mpu6050_get_temperature( int16_t* temp){
 
 status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
     status_t ret = STATUS_OK;
-    static uint8_t counter = 0;
     mpu6050_resume();
     int16_t temp =0;
     ret = mpu6050_get_temperature(  &temp);
@@ -238,10 +237,9 @@ status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
     float fx = (float) (x/(SCALA_DIV/2.0)); //      
     float fy = (float) (y/(SCALA_DIV/2.0)); // 
     float fz = (float) (z/(SCALA_DIV/2.0)); // 
-    sprintf(buffer,"\ncounter:%d , t:%.2f , x:%.2f , y:%.2f , z:%.2f \n",counter,ft,fx,fy,fz);
+    sprintf(buffer,"\n t:%.2f , x:%.2f , y:%.2f , z:%.2f \n",ft,fx,fy,fz);
     modulo_debug_print(buffer);
     mpu6050_sleep();
-    counter ++;
     return ret;
 }
 

@@ -106,6 +106,8 @@ static void inline on_download(void){
   
   while(counter > 0){
     counter = counter -1;
+    sprintf(buffer,"counter :%d \n",counter);
+    modulo_debug_print(buffer);
     memset(buffer,0,200);
     read_data(buffer,counter);
     modulo_debug_print(buffer);
@@ -138,14 +140,14 @@ static void app_init(){
   MX_DMA_Init();
   MX_RTC_Init();
 
-  MX_TIM1_Init();
+  //MX_TIM1_Init();
   // Necesario para evitar que el micro se reinicio por WDT
-  HAL_TIM_Base_Start_IT(&htim1);
+ // HAL_TIM_Base_Start_IT(&htim1);
   // Inicio modulos
   modulo_debug_init();
   sim7000g_init();
   pwr_init();
-  MX_IWDG_Init();
+  //MX_IWDG_Init();
   fsm_init();
   // Sensor
   mpu6050_init();
@@ -168,29 +170,11 @@ int main(void)
   app_init();
 
 
-//write_data("hola mundo\n",13);
-#ifdef test
-    at45db_resumen();
-    at45db_write_buffer2("stm32\n",8,0);
-    at45db_sleep();
-
-    memset(buffer,0,255);
-
-    at45db_resumen();
-    at45db_read_buffer2(buffer,8,0);
-
-    at45db_sleep();
-
-    //read_data(buffer,13);
-    modulo_debug_print("obtenido de buffer: ");
-    modulo_debug_print(buffer);
-#endif
-
 
 
 
   uint8_t c= 0;
-  uint8_t max = 5;
+  uint8_t max = 7;
   mem_s_set_counter(&c);
 
   mem_s_set_max_amount_data(&max);
@@ -215,7 +199,7 @@ int main(void)
   pwr_mode_t  modo ;
   while (1)
   {   
-    HAL_IWDG_Refresh(&hiwdg);
+    //HAL_IWDG_Refresh(&hiwdg);
   modo = pwr_get_mode();
   if(modo == RUN){
 
@@ -233,8 +217,8 @@ int main(void)
       }
   }
     pwr_sleep();
-    HAL_Delay(1000);
-    modulo_debug_print("\n-> wake up\n");
+   // HAL_Delay(1000);
+   // modulo_debug_print("\n-> wake up\n");
 
   }
   /* USER CODE END 3 */
