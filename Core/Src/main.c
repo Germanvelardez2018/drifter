@@ -60,7 +60,6 @@
 /* USER CODE END PM */
 /* Private variables ---------------------------------------------------------*/
 
-
 // Peticiones dma
 DMA_HandleTypeDef hdma_spi1_tx;
 DMA_HandleTypeDef hdma_spi1_rx;
@@ -127,11 +126,6 @@ static void inline on_download(void){
 
 
 
-
-
-
-
-
 static void app_init(){
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
@@ -140,14 +134,14 @@ static void app_init(){
   MX_DMA_Init();
   MX_RTC_Init();
 
-  //MX_TIM1_Init();
+  MX_TIM1_Init();
   // Necesario para evitar que el micro se reinicio por WDT
- // HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_Base_Start_IT(&htim1);
   // Inicio modulos
   modulo_debug_init();
   sim7000g_init();
   pwr_init();
-  //MX_IWDG_Init();
+  MX_IWDG_Init();
   fsm_init();
   // Sensor
   mpu6050_init();
@@ -169,8 +163,9 @@ int main(void)
   // Configuracion inicial de los perifericos
   app_init();
 
+#define DEFAULT_VALUES
 
-
+#ifdef DEFAULT_VALUES
 
 
   uint8_t c= 0;
@@ -182,13 +177,13 @@ int main(void)
   mem_s_get_max_amount_data(&max_counter);
   sprintf(buffer, " max counter:%d\n",max_counter);
   modulo_debug_print(buffer);
-
   mem_s_get_counter(&counter);
   sprintf(buffer, "  counter:%d\n",counter);
   modulo_debug_print(buffer);
 
+#endif
 
-  modulo_debug_print(MSG_INIT);
+ // modulo_debug_print(MSG_INIT);
 
 
 
@@ -199,8 +194,9 @@ int main(void)
   pwr_mode_t  modo ;
   while (1)
   {   
-    //HAL_IWDG_Refresh(&hiwdg);
+  HAL_IWDG_Refresh(&hiwdg);
   modo = pwr_get_mode();
+
   if(modo == RUN){
 
       switch (device)

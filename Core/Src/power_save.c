@@ -2,6 +2,10 @@
 #include "rtc.h"
 #include "debug.h"
 
+
+//define aqui el intervalo
+#define INTERVAL(h,m,s,i)                 h,m+i,s
+
 extern  RTC_HandleTypeDef hrtc;
 
 PRIVATE  pwr_mode_t __PWR_FLAG__= RUN; 
@@ -70,28 +74,31 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc){
 
 
 void pwr_init(){
-  //  HAL_PWR_EnableSleepOnExit();
-        set_time(0,0,0);
+    set_time(0,0,0);
 }
 
 
 
 void pwr_sleep(){    
-     // leo intervalor from flash (dummy por el momento)
+    
+    //configuro alarma si flag no es SLEEP,
+    if(__PWR_FLAG__ == RUN){
+         // leo intervalor from flash (dummy por el momento)
     uint8_t interval = interval_from_flash();
     uint8_t* buffer[100];
     //leo tiempo    
     uint8_t h,m,s ;
-    // leo intervalor from flash (dummy por el momento)
-    interval = interval_from_flash();
     get_time(&h,&m,&s);  
-    //configuro alarma
     __PWR_FLAG__ = SLEEP;
-    set_alarm(h,m,s+15);
-    sprintf(buffer,"%d:%d:%d=>%d:%d:%d\n",h,m,s,h,m,s+15);
+    set_alarm(INTERVAL(h,m,s,interval));
+    sprintf(buffer,"%d:%d:%d=>%d:%d:%d\n",h,m,s,INTERVAL(h,m,s,interval));
     modulo_debug_print(buffer);
+    
+    }
     HAL_SuspendTick();
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+
+    
     // A dormir o un intervalo en minutos
 
 }
