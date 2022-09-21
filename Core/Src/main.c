@@ -40,6 +40,17 @@
 #include "mem_services.h" // esto es lo que va no AT45
 /* USER CODE END Includes */
 
+
+#define COUNTER                (0)
+#define MAX_COUNTER           (10)
+#define INTERVAL              (1)
+
+
+//si esta definido default value, recargamos flash con valores default
+#define DEFAULT_VALUES
+
+
+
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
@@ -79,12 +90,15 @@ PRIVATE  uint8_t           max_counter = 0;
 static void inline on_field(){
   modulo_debug_print("FSM: ON FIELD\n");
   // Secuencia:
+  memset(buffer,0,255);
+
   //Obtengo datos de sensores
   mem_s_get_counter(&counter);
   //Guardo datos de sensores
-  mpu6050_get_measure(buffer,255);
+  //mpu6050_get_measure(buffer,255);
+  sim7000g_get_NMEA(buffer,255);
+  modulo_debug_print(buffer);
   write_data(buffer,counter);
-  memset(buffer,0,255);
   //Automento contador de muestras almacenadas
   if( counter >= max_counter){
       device = FSM_MEMORY_DOWNLOAD;   
@@ -96,9 +110,7 @@ static void inline on_field(){
 
 
 static void inline on_download(void){
-  modulo_debug_print("FSM: DOWNLOAD\n");
-  status_t ret = STATUS_ERROR;
-  
+  modulo_debug_print("FSM: DOWNLOAD\n");  
   mem_s_get_counter(&counter);
   sprintf(buffer,"extraer :%d datos\n",counter);
   modulo_debug_print(buffer);
@@ -107,17 +119,15 @@ static void inline on_download(void){
     counter = counter -1;
     sprintf(buffer,"counter :%d \n",counter);
     modulo_debug_print(buffer);
-    memset(buffer,0,200);
+    memset(buffer,0,255);
     read_data(buffer,counter);
     modulo_debug_print(buffer);
     modulo_debug_print("<=");
-    HAL_Delay(100);
+    HAL_Delay(10);
   }
    counter = 0;
    mem_s_set_counter(&counter);
    device = FSM_ON_FIELD;   
-   
-
   //Me conecto a servidor
   //Leo las muestras y las envio al servidor
 }
@@ -133,7 +143,6 @@ static void app_init(){
   mem_s_init();
   MX_DMA_Init();
   MX_RTC_Init();
-
   MX_TIM1_Init();
   // Necesario para evitar que el micro se reinicio por WDT
   HAL_TIM_Base_Start_IT(&htim1);
@@ -141,14 +150,11 @@ static void app_init(){
   modulo_debug_init();
   sim7000g_init();
   pwr_init();
-  MX_IWDG_Init();
   fsm_init();
   // Sensor
   mpu6050_init();
   // Memoria
   HAL_Delay(500);
- 
-
 }
 
 
@@ -162,28 +168,40 @@ int main(void)
 {
   // Configuracion inicial de los perifericos
   app_init();
+// Sirve para cargar valores por defecto a memoria flash
 
-#define DEFAULT_VALUES
 
 #ifdef DEFAULT_VALUES
 
 
-  uint8_t c= 0;
-  uint8_t max = 7;
-  mem_s_set_counter(&c);
 
+  //uint8_t c= COUNTER;
+  uint8_t max = MAX_COUNTER;
+  uint8_t interval = INTERVAL;
+  //mem_s_set_counter(&c);
   mem_s_set_max_amount_data(&max);
+  mem_s_set_interval(&interval);
 
   mem_s_get_max_amount_data(&max_counter);
-  sprintf(buffer, " max counter:%d\n",max_counter);
-  modulo_debug_print(buffer);
   mem_s_get_counter(&counter);
-  sprintf(buffer, "  counter:%d\n",counter);
+  mem_s_get_interval(&interval);
+
+
+  sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \n",counter,max_counter,interval);
   modulo_debug_print(buffer);
 
 #endif
 
- // modulo_debug_print(MSG_INIT);
+
+sim7000g_check();
+sim7000g_get_signal();
+sim7000g_get_operator();
+simg7000g_set_gps(1);
+
+sim7000g_sleep();
+
+MX_IWDG_Init();
+
 
 
 
@@ -202,7 +220,9 @@ int main(void)
       switch (device)
       {
        case FSM_ON_FIELD:
-          on_field();
+            sim7000g_resume();
+            on_field();
+            sim7000g_sleep();
           break;
        case FSM_MEMORY_DOWNLOAD:
           on_download();
@@ -213,9 +233,7 @@ int main(void)
       }
   }
     pwr_sleep();
-   // HAL_Delay(1000);
-   // modulo_debug_print("\n-> wake up\n");
-
+  
   }
   /* USER CODE END 3 */
 }

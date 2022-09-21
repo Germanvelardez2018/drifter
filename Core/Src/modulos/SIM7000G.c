@@ -1,9 +1,57 @@
 
-#include "SIM7000G.h"
+#include "sim7000g.h"
 #include "uart.h"
 #include "gpio.h"
 #include <string.h>
 #include "debug.h"
+
+
+
+
+
+
+
+#define CREDENTIALS_MQTT_TOPIC                 "X1111"
+#define CREDENTIALS_MQTT_URL                   "simointi.cloud.shiftr.io"
+#define CREDENTIALS_MQTT_PASS                  "fdZY5b69OhOVsAns"
+#define CREDENTIALS_MQTT_ID                    "simointi"
+#define CREDENTIALS_MQTT_QOS                    "0"
+
+
+
+
+
+
+
+#define CMD_OPEN_APN_TUENTI                          "AT+CNACT=1,\"internet.movil\"\r\n"
+#define CMD_OPEN_APN_PERSONAL                        "AT+CNACT=1,\"datos.personal.com\"\r\n"
+
+#define CMD_GET_APN                                  "AT+CNACT?"       
+
+
+
+
+
+// ! Modo sleep y resume
+#define CMD_LOW_PWR_ON                              "AT+CPSMS=1\r\n"
+#define CMD_LOW_PWR_OFF                             "AT+CPSMS=0\r\n"
+      
+
+
+
+//! Configuracion MQTT
+ #define CMD_MQTT               "AT+SMCONF="
+ #define CMD_MQTT_URL           " \"URL\""
+ #define CMD_MQTT_USER          "\"USERNAME\""
+ #define CMD_MQTT_PASSWORD      "\"PASSWORD\""
+ #define CMD_MQTT_QOS           "\"QOS\""
+ #define CMD_MQTT_COMMIT        "AT+SMCONN\r\n"
+ #define CMD_MQTT_PUBLISH       "AT+SMPUB=\"%s\",\"%d\",1,1 \r\n" 
+#define CMD_MQTT_SUBSCRIBE      "AT+SMSUB=\"%s\",%d \r\n"   // topic , QoS
+
+#define CMD_MQTT_TOPIC_CONFIG   "SIMO_CONFIG"
+
+
 
 
 
@@ -13,8 +61,8 @@
 #define  CMD_ECHO_ON                                   "ATE1\r\n"
 #define  CMD_ECHO_OFF                                  "ATE0\r\n"
 #define  CMD_GET_SIGNAL                                "AT+CSQ\r\n"
-#define  CMD_PWR_GPS_ON                                "AT+CGNSPWR=1\r\n"
-#define  CMD_PWR_GPS_OFF                               "AT+CGNSPWR=0\r\n"
+#define  CMD_GPS_ON                                "AT+CGNSPWR=1\r\n"
+#define  CMD_GPS_OFF                               "AT+CGNSPWR=0\r\n"
 #define  CMD_GETGPSINFO                                "AT+CGNSINF\r\n"
 #define  CMD_GETOPERATOR                               "AT+COPS?\r\n"
 
@@ -56,7 +104,7 @@
 extern UART_HandleTypeDef huart1;
 
 
-#define SIM_BUFFER_SIZE                               (250)
+#define SIM_BUFFER_SIZE                               (254)
 static uint8_t buffer[SIM_BUFFER_SIZE]={0};
 static uint8_t buff_counter =0;
 
@@ -204,6 +252,7 @@ status_t sim7000g_check(){
     while ( ret == STATUS_ERROR){
         ret = send_command(CMD_VERSION,CMD_OK);
         modulo_debug_print("...waiting\n");
+        delay(5000);
 
     }
     
@@ -255,18 +304,41 @@ status_t sim7000g_set_mqtt_dessubscribe(){
 
 status_t sim7000g_resume(){
     status_t ret = STATUS_ERROR;
+      ret = send_command(CMD_LOW_PWR_OFF,CMD_OK);
     return ret;
 }
 
 
 status_t sim7000g_sleep(){
     status_t ret = STATUS_ERROR;
+     ret = send_command(CMD_LOW_PWR_ON,CMD_OK);
     return ret;
 }
 
 
-status_t sim7000g_get_NMEA( uint8_t* buffer, uint8_t len){
+
+
+status_t simg7000g_set_gps(uint8_t value){
+    
     status_t ret = STATUS_ERROR;
+
+    if(value == 0){
+        //off gps
+     ret = send_command(CMD_GPS_OFF,CMD_OK);
+    }
+    else{
+        //on gps
+         ret = send_command(CMD_GPS_ON,CMD_OK);
+
+    }
+    return ret;
+}
+
+status_t sim7000g_get_NMEA( uint8_t* buff, uint8_t len){
+    status_t ret = STATUS_ERROR;
+    send_command(CMD_GETGPSINFO,CMD_OK);
+    uint8_t len_response = strlen(SIM7000G_BUFFER);
+    strcpy(buff,SIM7000G_BUFFER);
     return ret;
 }
 
@@ -275,4 +347,24 @@ status_t sim7000g_get_NMEA( uint8_t* buffer, uint8_t len){
 status_t sim7000g_test(){
     status_t ret = STATUS_ERROR;
     return ret;
+}
+
+
+
+
+
+status_t sim7000g_get_operator(){
+    return send_command(CMD_GETOPERATOR,CMD_OK);;
+}
+
+
+
+status_t sim7000g_get_signal(){
+    return send_command(CMD_GET_SIGNAL,CMD_OK);
+}
+
+
+
+status_t sim7000g_open_apn(){
+    return send_command(CMD_OPEN_APN_PERSONAL,CMD_OK);
 }

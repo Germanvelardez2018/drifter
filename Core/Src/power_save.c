@@ -1,14 +1,31 @@
 #include "power_save.h"
 #include "rtc.h"
 #include "debug.h"
-
+#include "mem_services.h"
 
 //define aqui el intervalo
-#define INTERVAL(h,m,s,i)                 h,m+i,s
+#define INTERVAL(h,m,s,i)                 h,m+1,s
+
 
 extern  RTC_HandleTypeDef hrtc;
 
 PRIVATE  pwr_mode_t __PWR_FLAG__= RUN; 
+
+//para prints de debug
+PRIVATE  uint8_t buffer[100];
+
+
+//  intervalo en sleep mode en SRAM, 
+//  se recarga desde memoria flash en momentos especificos
+PRIVATE  uint8_t  __sleep_interval__ ;
+
+
+
+
+
+PRIVATE uint8_t get_sleep_interval(){
+    return __sleep_interval__;
+}
 
 PRIVATE status_t set_time(uint8_t hours, uint8_t minutes, uint8_t seconds){  
     status_t ret = STATUS_ERROR;
@@ -52,16 +69,18 @@ PRIVATE status_t set_alarm(uint8_t hours, uint8_t minutes, uint8_t seconds){
 }
 
 
+
+void set_sleep_interval(uint8_t interval){
+    __sleep_interval__ = interval;
+}
+
+
+
 pwr_mode_t pwr_get_mode(){
     return __PWR_FLAG__;
 }
 
 
-PRIVATE uint8_t interval_from_flash(){
-    // Funcion dummy por el momento
-    // Por default dejamos el intervalo en 5
-    return 1;
-}
 
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc){
@@ -75,6 +94,10 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc){
 
 void pwr_init(){
     set_time(0,0,0);
+    // obtengo intervalo desde flash
+    mem_s_get_interval(&__sleep_interval__);
+
+
 }
 
 
@@ -84,8 +107,7 @@ void pwr_sleep(){
     //configuro alarma si flag no es SLEEP,
     if(__PWR_FLAG__ == RUN){
          // leo intervalor from flash (dummy por el momento)
-    uint8_t interval = interval_from_flash();
-    uint8_t* buffer[100];
+    uint8_t interval = get_sleep_interval();
     //leo tiempo    
     uint8_t h,m,s ;
     get_time(&h,&m,&s);  
@@ -93,7 +115,6 @@ void pwr_sleep(){
     set_alarm(INTERVAL(h,m,s,interval));
     sprintf(buffer,"%d:%d:%d=>%d:%d:%d\n",h,m,s,INTERVAL(h,m,s,interval));
     modulo_debug_print(buffer);
-    
     }
     HAL_SuspendTick();
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);

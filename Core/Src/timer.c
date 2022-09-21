@@ -1,6 +1,5 @@
 #include "timer.h"
 #include "power_save.h"
-
 TIM_HandleTypeDef htim1;
 
 
@@ -12,11 +11,9 @@ TIM_HandleTypeDef htim1;
 void TIM1_UP_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_BRK_IRQn 0 */
-
   /* USER CODE END TIM1_BRK_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_BRK_IRQn 1 */
-
   /* USER CODE END TIM1_BRK_IRQn 1 */
 }
 
@@ -32,15 +29,8 @@ void TIM1_UP_IRQHandler(void)
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-            
-        
-  
-    
-
-       HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,1); // led encendido en modo run
-      // modulo_debug_print("timer\n");
-
-       //NO LLAMAR A REFRESH WDT DESDE UNA INTERRUPCION. CRASHEA 
+  // led encendido en modo run           
+    HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); 
 }
 
 
@@ -106,16 +96,11 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
  void MX_TIM1_Init(void)
 {
 
-  /* USER CODE BEGIN TIM1_Init 0 */
-
-  /* USER CODE END TIM1_Init 0 */
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM1_Init 1 */
-
-  /* USER CODE END TIM1_Init 1 */
+  
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 10000;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -138,9 +123,6 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM1_Init 2 */
-
-  /* USER CODE END TIM1_Init 2 */
 
 }
 

@@ -4,10 +4,6 @@
 
  RTC_HandleTypeDef hrtc;
 
-
-
-
-
 /**
   * @brief This function handles RTC alarm interrupt through EXTI line 17.
   */

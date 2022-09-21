@@ -136,12 +136,10 @@ status_t mem_s_get_counter(uint8_t* counter){
 // Interval
 status_t mem_s_get_interval(uint8_t* interval){
     status_t ret = STATUS_OK;
-    mem_resumen();
+    mem_resume();
     ret = mem_read_page(interval,1,MMAP_INTERVAL,0);
     // Si ocurre error de lectura, enviar valor por default
-    if(ret == STATUS_ERROR){
-        (*interval) = MMAP_DEFAULT_INTERVAL;
-    } 
+   
     mem_sleep();
     return ret;
 }

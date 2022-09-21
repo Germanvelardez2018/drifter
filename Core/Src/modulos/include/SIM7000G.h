@@ -61,6 +61,10 @@ status_t sim7000g_resume();
 status_t sim7000g_sleep();
 
 
+status_t sim7000g_get_operator();
+
+
+status_t simg7000g_set_gps(uint8_t value);
 
 
 status_t sim7000g_get_NMEA( uint8_t* buffer, uint8_t len);
@@ -68,6 +72,12 @@ status_t sim7000g_get_NMEA( uint8_t* buffer, uint8_t len);
 
 
 status_t sim7000g_test();
+
+status_t sim7000g_get_signal();
+
+
+status_t sim7000g_open_apn();
+
 
 
 
