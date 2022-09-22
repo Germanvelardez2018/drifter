@@ -35,23 +35,11 @@ extern "C" {
 
 
 
-
-
 status_t sim7000g_check();
 
 
 status_t sim7000g_init();
 
-
-status_t sim7000g_set_mqtt_config();
-
-
-
-status_t sim7000g_mqtt_publish();
-
-status_t sim7000g_set_mqtt_subscribe();
-
-status_t sim7000g_set_mqtt_dessubscribe();
 
 
 
@@ -69,7 +57,11 @@ status_t simg7000g_set_gps(uint8_t value);
 
 status_t sim7000g_get_NMEA( uint8_t* buffer, uint8_t len);
 
+status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password, uint8_t* qos);
 
+
+
+status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_payload);
 
 status_t sim7000g_test();
 

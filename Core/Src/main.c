@@ -35,6 +35,7 @@
 #include  "MPU6050.h"
 #include "SIM7000G.h"
 #include "AT45DB041.h"
+#include "MQTT.h"
 
 #include "mmap.h"
 #include "mem_services.h" // esto es lo que va no AT45
@@ -42,7 +43,7 @@
 
 
 #define COUNTER                (0)
-#define MAX_COUNTER           (10)
+#define MAX_COUNTER           (3)
 #define INTERVAL              (1)
 
 
@@ -64,9 +65,7 @@
 /* USER CODE BEGIN PM */
  #define MSG_INIT            "test drifter modular \n"
     
-  #define BUFFER_FLAG          0
-  #define FULL_ERASE           0
-  #define CHECK_TEMP           1
+
 
 /* USER CODE END PM */
 /* Private variables ---------------------------------------------------------*/
@@ -123,13 +122,17 @@ static void inline on_download(void){
     read_data(buffer,counter);
     modulo_debug_print(buffer);
     modulo_debug_print("<=");
+    HAL_IWDG_Refresh(&hiwdg);
+
+    // envio por mqtt
+    sim7000g_mqtt_publish(MQTT_TOPIC,"simo conectado",strlen("simo conectado"));
+
     HAL_Delay(10);
   }
    counter = 0;
    mem_s_set_counter(&counter);
    device = FSM_ON_FIELD;   
-  //Me conecto a servidor
-  //Leo las muestras y las envio al servidor
+
 }
 
 
@@ -175,15 +178,16 @@ int main(void)
 
 
 
-  //uint8_t c= COUNTER;
+  uint8_t c= COUNTER;
   uint8_t max = MAX_COUNTER;
   uint8_t interval = INTERVAL;
-  //mem_s_set_counter(&c);
   mem_s_set_max_amount_data(&max);
   mem_s_set_interval(&interval);
 
   mem_s_get_max_amount_data(&max_counter);
   mem_s_get_counter(&counter);
+  if(counter >= MAX_COUNTER)  mem_s_set_counter(&c);
+
   mem_s_get_interval(&interval);
 
 
@@ -195,8 +199,13 @@ int main(void)
 
 sim7000g_check();
 sim7000g_get_signal();
+sim7000g_open_apn();
 sim7000g_get_operator();
 simg7000g_set_gps(1);
+
+sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
+
+sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
 
 sim7000g_sleep();
 

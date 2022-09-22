@@ -48,10 +48,6 @@ PRIVATE float SCALA_DIV = 0;
 
 
 
-PRIVATE void delay(uint32_t time){
-        HAL_Delay(time);
-}
-
 
 PRIVATE status_t i2c_write_mem( uint8_t address_reg,uint8_t* buffer,uint32_t len){
     status_t ret = (HAL_I2C_Mem_Write(MPU6050_INSTANCE,MPU6050_ADDRESS,address_reg,1,buffer,len,MPU6050_TIMEOUT) == HAL_OK)?STATUS_OK:STATUS_ERROR;

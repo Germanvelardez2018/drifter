@@ -10,19 +10,6 @@
 
 
 
-
-#define CREDENTIALS_MQTT_TOPIC                 "X1111"
-#define CREDENTIALS_MQTT_URL                   "simointi.cloud.shiftr.io"
-#define CREDENTIALS_MQTT_PASS                  "fdZY5b69OhOVsAns"
-#define CREDENTIALS_MQTT_ID                    "simointi"
-#define CREDENTIALS_MQTT_QOS                    "0"
-
-
-
-
-
-
-
 #define CMD_OPEN_APN_TUENTI                          "AT+CNACT=1,\"internet.movil\"\r\n"
 #define CMD_OPEN_APN_PERSONAL                        "AT+CNACT=1,\"datos.personal.com\"\r\n"
 
@@ -36,20 +23,6 @@
 #define CMD_LOW_PWR_ON                              "AT+CPSMS=1\r\n"
 #define CMD_LOW_PWR_OFF                             "AT+CPSMS=0\r\n"
       
-
-
-
-//! Configuracion MQTT
- #define CMD_MQTT               "AT+SMCONF="
- #define CMD_MQTT_URL           " \"URL\""
- #define CMD_MQTT_USER          "\"USERNAME\""
- #define CMD_MQTT_PASSWORD      "\"PASSWORD\""
- #define CMD_MQTT_QOS           "\"QOS\""
- #define CMD_MQTT_COMMIT        "AT+SMCONN\r\n"
- #define CMD_MQTT_PUBLISH       "AT+SMPUB=\"%s\",\"%d\",1,1 \r\n" 
-#define CMD_MQTT_SUBSCRIBE      "AT+SMSUB=\"%s\",%d \r\n"   // topic , QoS
-
-#define CMD_MQTT_TOPIC_CONFIG   "SIMO_CONFIG"
 
 
 
@@ -106,9 +79,8 @@ extern UART_HandleTypeDef huart1;
 
 #define SIM_BUFFER_SIZE                               (254)
 static uint8_t buffer[SIM_BUFFER_SIZE]={0};
-static uint8_t buff_counter =0;
 
-#define SIM7000G_TIMEOUT                             (1000)
+#define SIM7000G_TIMEOUT                             (500)
 #define SIM7000G_UART                                (&huart1)
 #define SIM7000G_BUFFER                              (&buffer[0])
 #define IS_EQUAL                                     (0)
@@ -135,26 +107,9 @@ static uint8_t buff_counter =0;
 
 
 
-/**
- * @brief Buffer de recepccion
- * 
- * @return ** uint8_t* 
- */
-PRIVATE  uint8_t* _get_buffer(){
-    return SIM7000G_BUFFER;
-}
 
 
 
-
-
-
-
-
-
-PRIVATE void delay(uint32_t time){
-    HAL_Delay(time);
-}
 
 
 
@@ -249,12 +204,14 @@ status_t sim7000g_check(){
     status_t ret = STATUS_ERROR;
    
     ret = send_command(CMD_AT,CMD_OK);
+    modulo_debug_print("Check SIMG7000G");
+
     while ( ret == STATUS_ERROR){
         ret = send_command(CMD_VERSION,CMD_OK);
-        modulo_debug_print("...waiting\n");
-        delay(5000);
-
+        modulo_debug_print(".");
+        delay(1000);
     }
+    modulo_debug_print("\n");
     
     ret = send_command(CMD_ECHO_OFF,CMD_OK);
      ret = send_command(CMD_AT,CMD_OK);
@@ -268,37 +225,13 @@ status_t sim7000g_init(){
     uart_init();
     // Necesario para alimentar la placa y encender el sim7000g   
     status_t ret = STATUS_OK;
-    modulo_debug_print("SIM7000G ON\n");
-
+    modulo_debug_print("SIM7000G init\n");
     PWRKEY_set(LEVEL_HIGH);
     BAT_ENA_set(LEVEL_HIGH);
-
-   
     return ret;
 }
 
 
-status_t sim7000g_set_mqtt_config(){
-    status_t ret = STATUS_ERROR;
-    return ret;
-}
-
-
-
-status_t sim7000g_mqtt_publish(){
-    status_t ret = STATUS_ERROR;
-    return ret;
-}
-
-status_t sim7000g_set_mqtt_subscribe(){
-    status_t ret = STATUS_ERROR;
-    return ret;
-}
-
-status_t sim7000g_set_mqtt_dessubscribe(){
-    status_t ret = STATUS_ERROR;
-    return ret;
-}
 
 
 
@@ -321,15 +254,11 @@ status_t sim7000g_sleep(){
 status_t simg7000g_set_gps(uint8_t value){
     
     status_t ret = STATUS_ERROR;
-
     if(value == 0){
-        //off gps
      ret = send_command(CMD_GPS_OFF,CMD_OK);
     }
     else{
-        //on gps
          ret = send_command(CMD_GPS_ON,CMD_OK);
-
     }
     return ret;
 }
@@ -367,4 +296,49 @@ status_t sim7000g_get_signal(){
 
 status_t sim7000g_open_apn(){
     return send_command(CMD_OPEN_APN_PERSONAL,CMD_OK);
+}
+
+
+
+status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password, uint8_t* qos){
+    status_t ret = STATUS_ERROR;
+    if ((url == NULL) || ( user == NULL) || (password == NULL) || (qos == NULL)) return ret;
+    uint8_t* buffer[255]={0};
+    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_URL,url);    
+    delay(500);
+    ret = send_command(buffer,CMD_OK);
+    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
+    delay(500);
+    ret = send_command(buffer,CMD_OK);
+    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
+    delay(500);
+    ret = send_command(buffer,CMD_OK);
+    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
+    delay(500);
+    ret = send_command(buffer,CMD_OK);
+    delay(500);
+     // Nos subcribimos a topic de configuracion  
+    ret = send_command(CMD_MQTT_COMMIT,CMD_OK);
+    delay(2000);
+    sprintf(buffer,CMD_MQTT_SUBSCRIBE,CMD_MQTT_TOPIC_CONFIG,0); 
+    ret = send_command(buffer,CMD_OK);
+
+    return ret;
+}
+
+
+
+
+status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_payload){
+    status_t ret = STATUS_ERROR;
+    uint8_t  buffer[255]={0};
+    if( (topic != NULL) || (payload != NULL)){
+        sprintf(buffer,CMD_MQTT_PUBLISH,topic,len_payload);    
+        ret = send_command(buffer,CMD_OK);
+        delay(1000);
+        ret = send_command(payload,CMD_OK);
+
+    }
+    
+    return ret;
 }

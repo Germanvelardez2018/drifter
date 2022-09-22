@@ -115,10 +115,6 @@ PRIVATE void hardware_init(){
 }
 
 
-PRIVATE void delay(uint32_t time){
-        HAL_Delay(time);
-}
-
 
 PRIVATE status_t spi_init(){
         MX_SPI1_Init();

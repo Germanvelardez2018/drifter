@@ -5,12 +5,6 @@
 
 
 
-PRIVATE void delay(uint32_t timeout){
-    HAL_Delay(timeout);
-}
-
-
-
 PRIVATE status_t inline mem_resume(){
     at45db_resumen();
 }

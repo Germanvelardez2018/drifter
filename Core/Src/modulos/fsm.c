@@ -7,10 +7,6 @@ PRIVATE fsm_state_t __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED; // Antes de inicia
 
 
 
-PRIVATE delay(uint32_t time){
-    HAL_Delay(time);
-}
-
 PRIVATE fsm_state_t fsm_get_state_from_flash(){
     // Funcion dummy por el momento
     fsm_state_t state = FSM_ON_FIELD;
