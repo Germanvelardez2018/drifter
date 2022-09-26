@@ -40,10 +40,13 @@ extern "C" {
 #define MQTT_URL                                     "simointi.cloud.shiftr.io"
 #define MQTT_PASS                                    "fdZY5b69OhOVsAns"
 #define MQTT_ID                                      "simointi"
-#define MQTT_QOS                                     "0"
+#define MQTT_QOS                                     1
 
 
 /*-----------------------------------------------------------------------------*/
+
+
+
 
 
 

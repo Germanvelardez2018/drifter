@@ -43,7 +43,7 @@
 
 
 #define COUNTER                (0)
-#define MAX_COUNTER           (3)
+#define MAX_COUNTER           (2)
 #define INTERVAL              (1)
 
 
@@ -74,6 +74,14 @@
 DMA_HandleTypeDef hdma_spi1_tx;
 DMA_HandleTypeDef hdma_spi1_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
+extern  UART_HandleTypeDef huart1;
+
+
+
+
+// en adc.c
+extern  ADC_HandleTypeDef hadc1;
+
 // en wdt.c
 extern IWDG_HandleTypeDef hiwdg;
 // en timer.c
@@ -83,6 +91,8 @@ PRIVATE  uint8_t           buffer[255];
 PRIVATE  uint8_t           counter = 0;
 PRIVATE  uint8_t           max_counter = 0;
 
+uint8_t flag = 1;
+uint8_t bucle_end = 0;
 
 
 
@@ -113,7 +123,6 @@ static void inline on_download(void){
   mem_s_get_counter(&counter);
   sprintf(buffer,"extraer :%d datos\n",counter);
   modulo_debug_print(buffer);
-  
   while(counter > 0){
     counter = counter -1;
     sprintf(buffer,"counter :%d \n",counter);
@@ -125,12 +134,14 @@ static void inline on_download(void){
     HAL_IWDG_Refresh(&hiwdg);
 
     // envio por mqtt
-    sim7000g_mqtt_publish(MQTT_TOPIC,"simo conectado",strlen("simo conectado"));
+    sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
 
     HAL_Delay(10);
   }
    counter = 0;
    mem_s_set_counter(&counter);
+  
+   sim7000g_check_broker();
    device = FSM_ON_FIELD;   
 
 }
@@ -144,6 +155,7 @@ static void app_init(){
   HAL_Init();
   SystemClock_Config();
   mem_s_init();
+  MX_ADC1_Init();
   MX_DMA_Init();
   MX_RTC_Init();
   MX_TIM1_Init();
@@ -204,10 +216,47 @@ sim7000g_get_operator();
 simg7000g_set_gps(1);
 
 sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
+sim7000g_resume();
+//sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
 
-sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
+
+
+//
+memset(buffer,0,255);
+sim7000g_mqtt_subscription("SIMO_CONFIG");
+HAL_Delay(100);
+ //sim7000g_mqtt_publish("SIMO_CONFIG","alive",strlen("alive"));
+
+// formato de lo que recibis 
+// +SMSUB: "SIMO_CONFIG","mensaje recibido"
+HAL_UART_Receive_IT(&huart1,buffer,40);
+while(flag );
+
+
+int num = strlen(buffer);
+
+  if( num != 0){
+    modulo_debug_print("\nbuffer sim:");
+    modulo_debug_print(buffer);
+    modulo_debug_print(" \n|end |");
+    memset(buffer,0,255);
+
+  }
+
+
+
+     modulo_debug_print("sali del while");
+
+
+while(1){
+
+
+}
+
+
 
 sim7000g_sleep();
+
 
 MX_IWDG_Init();
 
@@ -248,6 +297,18 @@ MX_IWDG_Init();
 }
 
 
+
+ HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+    
+     modulo_debug_print("irq uart 1");
+          modulo_debug_print("irq uart 1");
+
+
+ //  HAL_UART_Receive(&huart1,(buffer ),254,500);   
+  flag = 0;
+     modulo_debug_print("irq uart 1");
+
+}
 
 
 /**

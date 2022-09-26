@@ -71,6 +71,10 @@ void USART2_IRQHandler(void){
 }
 
 
+void USART1_IRQHandler(void){
+     HAL_UART_IRQHandler(&huart1);
+}
+
 
 
 
@@ -78,7 +82,6 @@ void USART2_IRQHandler(void){
  HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
      UNUSED(huart);
 }
-
 
 
 
@@ -116,6 +119,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE BEGIN USART1_MspInit 1 */
+  
+    HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);  
 
   /* USER CODE END USART1_MspInit 1 */
   }
@@ -142,8 +148,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-      HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
-      HAL_NVIC_EnableIRQ(USART2_IRQn);  
+    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART2_IRQn);  
     
 
     /* USART2 DMA Init */
@@ -230,13 +236,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
  void MX_USART1_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART1_Init 0 */
-
-  /* USER CODE END USART1_Init 0 */
-
-  /* USER CODE BEGIN USART1_Init 1 */
-
-  /* USER CODE END USART1_Init 1 */
+  
   huart1.Instance = USART1;
   huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
@@ -249,10 +249,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN USART1_Init 2 */
-
-  /* USER CODE END USART1_Init 2 */
-
+  
 }
 
 /**
@@ -263,13 +260,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
  void MX_USART2_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
+  
   huart2.Instance = USART2;
   huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
@@ -282,9 +273,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
+  
 
 }
 

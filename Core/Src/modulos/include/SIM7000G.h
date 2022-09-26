@@ -63,12 +63,25 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
 
 status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_payload);
 
+status_t sim7000g_mqtt_subscription(uint8_t* topic);
+
+status_t simg7000g_mqtt_unsubscription(uint8_t* topic);
+
+status_t sim7000g_check_broker();
+
+
 status_t sim7000g_test();
 
 status_t sim7000g_get_signal();
 
 
 status_t sim7000g_open_apn();
+
+
+
+status_t sim7000g_read_input(uint8_t len, uint32_t timeout);
+
+uint8_t* sim7000g_get_buffer();
 
 
 

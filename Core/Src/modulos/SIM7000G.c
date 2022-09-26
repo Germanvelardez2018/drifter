@@ -8,6 +8,21 @@
 
 
 
+ //  0   ENVIAR UNA SOLA VEZ, SIN CONFIRMACION. SE ENVIA EL MENSAJE UNA VEZ, NO SE ESPERA CONFIRMACION.
+ //  1   ENVIAR, CON POSIBLE REENVIO DEPENDIENTE DE CONFIRMACION. SE RECIBE MENSAJE AL MENOS UNA VEZ
+ //  2   ENVIAR Y RECIBIR CONFIRMACION, SOLO UNA VEZ. SE RECIBE EL MENSAJE EXACTAMENTE UNA VEZ
+
+
+ typedef enum {
+    MQTT_QOS_ONCE_SEND = 0,
+    MQTT_QOS_AT_LEAST_ONCE_RECEIVED = 1,
+    MQTT_QOS_ONCE_RECEIVED = 2
+ } mqtt_qos;
+
+
+
+#define BROCKER_TOPIC_COMMAND                       "SIMO_CMD"
+
 
 
 #define CMD_OPEN_APN_TUENTI                          "AT+CNACT=1,\"internet.movil\"\r\n"
@@ -69,7 +84,7 @@
  #define CMD_MQTT_COMMIT                             "AT+SMCONN\r\n"
  #define CMD_MQTT_PUBLISH                            "AT+SMPUB=\"%s\",\"%d\",1,1 \r\n" 
 #define CMD_MQTT_SUBSCRIBE                           "AT+SMSUB=\"%s\",%d \r\n"   // topic , QoS
-
+#define CMD_MQTT_UMSUBSCRIBE                         "AT+SMUMSUB=\"%s\"\r\n"   // topic , QoS
 #define CMD_MQTT_TOPIC_CONFIG                        "SIMO_CONFIG"
 
 
@@ -78,7 +93,7 @@ extern UART_HandleTypeDef huart1;
 
 
 #define SIM_BUFFER_SIZE                               (254)
-static uint8_t buffer[SIM_BUFFER_SIZE]={0};
+PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 #define SIM7000G_TIMEOUT                             (500)
 #define SIM7000G_UART                                (&huart1)
@@ -98,9 +113,6 @@ static uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 #define SIM7000G_PWRKEY_Pin GPIO_PIN_12
 #define SIM7000G_PWRKEY_GPIO_Port GPIOA
-
-
-
 
 
 
@@ -197,6 +209,21 @@ PRIVATE status_t send_command(uint8_t* string_cmd,uint8_t* response_expected){
 
 
 
+
+
+status_t sim7000g_read_input(uint8_t len, uint32_t timeout){
+
+    memset(SIM7000G_BUFFER,0,SIM_BUFFER_SIZE);
+    HAL_StatusTypeDef res = HAL_UART_Receive(SIM7000G_UART,buffer,len,timeout);
+    status_t ret = ( res == HAL_OK)?STATUS_OK:STATUS_ERROR;
+
+    return ret;
+
+}
+
+uint8_t* sim7000g_get_buffer(){
+    return SIM7000G_BUFFER;
+}
 
 
 
@@ -313,16 +340,14 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
     delay(500);
     ret = send_command(buffer,CMD_OK);
-    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
+    sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
     delay(500);
     ret = send_command(buffer,CMD_OK);
     delay(500);
      // Nos subcribimos a topic de configuracion  
     ret = send_command(CMD_MQTT_COMMIT,CMD_OK);
     delay(2000);
-    sprintf(buffer,CMD_MQTT_SUBSCRIBE,CMD_MQTT_TOPIC_CONFIG,0); 
-    ret = send_command(buffer,CMD_OK);
-
+  
     return ret;
 }
 
@@ -335,10 +360,46 @@ status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_pay
     if( (topic != NULL) || (payload != NULL)){
         sprintf(buffer,CMD_MQTT_PUBLISH,topic,len_payload);    
         ret = send_command(buffer,CMD_OK);
-        delay(1000);
+        delay(500);
         ret = send_command(payload,CMD_OK);
-
     }
-    
     return ret;
 }
+
+
+
+
+
+/**
+ *  QoS
+ *  0   ENVIAR UNA SOLA VEZ, SIN CONFIRMACION. SE ENVIA EL MENSAJE UNA VEZ, NO SE ESPERA CONFIRMACION.
+ *  1   ENVIAR, CON POSIBLE REENVIO DEPENDIENTE DE CONFIRMACION. SE RECIBE MENSAJE AL MENOS UNA VEZ
+ *  2   ENVIAR Y RECIBIR CONFIRMACION, SOLO UNA VEZ. SE RECIBE EL MENSAJE EXACTAMENTE UNA VEZ
+ * 
+ * **/
+
+
+status_t sim7000g_mqtt_subscription(uint8_t* topic){
+    status_t ret = STATUS_ERROR;
+    uint8_t  buffer[255]={0};
+    if( topic != NULL){
+        sprintf(buffer,CMD_MQTT_SUBSCRIBE,topic,MQTT_QOS_AT_LEAST_ONCE_RECEIVED);    
+        ret = send_command(buffer,CMD_OK);
+    }
+    return ret;
+}
+
+
+
+status_t simg7000g_mqtt_unsubscription(uint8_t* topic){
+    status_t ret = STATUS_ERROR;
+    uint8_t  buffer[255]={0};
+    if(topic != NULL){
+        sprintf(buffer,CMD_MQTT_UMSUBSCRIBE,topic);    
+        ret = send_command(buffer,CMD_OK);
+    }
+    return ret;
+}
+
+
+
