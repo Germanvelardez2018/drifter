@@ -39,6 +39,11 @@ status_t mem_s_init();
 
 
 
+status_t mem_s_get_fsm_state(uint8_t* fsm_state);
+status_t mem_s_set_fsm_state(uint8_t* fsm_state);
+
+
+
 status_t mem_s_get_counter(uint8_t* counter);
 status_t mem_s_set_counter(uint8_t* counter);
 

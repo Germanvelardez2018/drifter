@@ -1,6 +1,6 @@
 #include "fsm.h"
 #include "power_save.h"
-
+#include "mem_services.h"
 
 PRIVATE fsm_state_t __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED; // Antes de inicializa
 
@@ -9,15 +9,64 @@ PRIVATE fsm_state_t __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED; // Antes de inicia
 
 PRIVATE fsm_state_t fsm_get_state_from_flash(){
     // Funcion dummy por el momento
-    fsm_state_t state = FSM_ON_FIELD;
+    status_t ret = STATUS_ERROR;
+    uint8_t buf_state = 0;
+    ret = mem_s_get_fsm_state(&buf_state);
+    fsm_state_t state = FSM_ERROR;  
+    
+    switch (buf_state)
+    {
+    case 0xff:
+        state = FSM_UNDEFINED;
+        break;
+    case 1:
+        state = FSM_ON_FIELD;
+        break;
+
+    case 2:
+        state = FSM_MEMORY_DOWNLOAD;
+        break;
+    
+    default:
+
+        break;
+    }
+    
     return state;
 }
 
 
 PRIVATE status_t fsm_set_state_into_flash(fsm_state_t new_state){
-    status_t ret= STATUS_OK;
-    // Logica para cargar estado en flash
-    return ret;
+    // Funcion dummy por el momento
+    status_t ret = STATUS_ERROR;
+    uint8_t buf_state = 0;
+    ret = mem_s_get_fsm_state(&buf_state);
+    fsm_state_t state = FSM_ERROR;  
+    
+    switch (new_state)
+    {
+    case FSM_UNDEFINED:
+            buf_state = 0xff;
+    break;
+    case  FSM_ON_FIELD:
+            ret = STATUS_OK;
+            buf_state = 1;
+    break;
+    case FSM_MEMORY_DOWNLOAD:
+            buf_state = 2;
+            ret = STATUS_OK;
+
+    break;
+    
+    default:
+    break;
+    }
+
+      ret = mem_s_set_fsm_state(&buf_state);
+
+
+
+
 }
 
 

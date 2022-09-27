@@ -16,10 +16,6 @@ void I2C_init(void){
     __DRIVER_INITED__ = DRIVER_STARTED;
   } 
 }
-
-
-
-
   
 
 void I2C_deinit(void){

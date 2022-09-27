@@ -105,6 +105,28 @@ status_t mem_s_init(){
 
 
 
+
+
+status_t mem_s_get_fsm_state(uint8_t* fsm_state){
+    status_t ret= STATUS_ERROR;
+    mem_resume();
+    ret = mem_read_page(fsm_state,1,MMAP_FSM_STATE,0);
+    mem_sleep();
+    return ret;
+}
+
+
+status_t mem_s_set_fsm_state(uint8_t* fsm_state){
+    status_t ret= STATUS_ERROR;
+    mem_resume();
+    ret = mem_write_page(fsm_state,1,MMAP_FSM_STATE,0);
+    mem_sleep();
+    return ret;
+}
+
+
+
+
 status_t mem_s_set_counter(uint8_t* counter){
     status_t ret = STATUS_ERROR;
     at45db_resumen();

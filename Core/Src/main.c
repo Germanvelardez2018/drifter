@@ -132,17 +132,16 @@ static void inline on_download(void){
     modulo_debug_print(buffer);
     modulo_debug_print("<=");
     HAL_IWDG_Refresh(&hiwdg);
-
     // envio por mqtt
     sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
-
     HAL_Delay(10);
   }
    counter = 0;
    mem_s_set_counter(&counter);
-  
    sim7000g_check_broker();
-   device = FSM_ON_FIELD;   
+   device = FSM_ON_FIELD;  
+   fsm_set_state(device); 
+
 
 }
 
@@ -185,7 +184,6 @@ int main(void)
   app_init();
 // Sirve para cargar valores por defecto a memoria flash
 
-
 #ifdef DEFAULT_VALUES
 
 
@@ -201,8 +199,6 @@ int main(void)
   if(counter >= MAX_COUNTER)  mem_s_set_counter(&c);
 
   mem_s_get_interval(&interval);
-
-
   sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \n",counter,max_counter,interval);
   modulo_debug_print(buffer);
 
@@ -217,29 +213,26 @@ simg7000g_set_gps(1);
 
 sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
 sim7000g_resume();
-//sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
 
 
-
+uint8_t buf[255];
 //
-memset(buffer,0,255);
-sim7000g_mqtt_subscription("SIMO_CONFIG");
+memset(buf,0,255);
 HAL_Delay(100);
- //sim7000g_mqtt_publish("SIMO_CONFIG","alive",strlen("alive"));
-
+sim7000g_mqtt_publish("SIMO_CONFIG2","UN MENSAJE ",strlen("UN MENSAJE "));
+HAL_Delay(2000);
 // formato de lo que recibis 
 // +SMSUB: "SIMO_CONFIG","mensaje recibido"
-HAL_UART_Receive_IT(&huart1,buffer,40);
+HAL_UART_Receive_IT(&huart1,buf,3);
 while(flag );
 
-
-int num = strlen(buffer);
+int num = strlen(buf);
 
   if( num != 0){
-    modulo_debug_print("\nbuffer sim:");
-    modulo_debug_print(buffer);
-    modulo_debug_print(" \n|end |");
-    memset(buffer,0,255);
+    modulo_debug_print("\nbuf |");
+    modulo_debug_print(buf);
+    modulo_debug_print("  |");
+    memset(buf,0,255);
 
   }
 

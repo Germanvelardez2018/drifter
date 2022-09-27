@@ -34,7 +34,7 @@
 // Flag de estado de bateria: 3 Normal, 2 medio, 1 baja
 #define MMAP_F_BATTERY_STATE                                (MMAP_OFFSET_CONFIG + 4)
 
-
+#define MMAP_FSM_STATE                                      (MMAP_OFFSET_CONFIG + 5)
 
 // Almacena los 6 bytes del ofsset  del acelerometro. Eje X, eje y, eje z 
 #define MMAP_OFFSET_ACELEROMETER                            (MMAP_OFFSET_CONFIG + 10)

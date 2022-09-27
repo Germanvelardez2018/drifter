@@ -343,10 +343,15 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
     delay(500);
     ret = send_command(buffer,CMD_OK);
+    
+    
+    
     delay(500);
-     // Nos subcribimos a topic de configuracion  
     ret = send_command(CMD_MQTT_COMMIT,CMD_OK);
-    delay(2000);
+    delay(1000);
+     // Nos subcribimos a topic de configuracion  
+sprintf(buffer,CMD_MQTT_SUBSCRIBE,"SIMO_CONFIG",MQTT_QOS_AT_LEAST_ONCE_RECEIVED);    
+ret = send_command(buffer,CMD_OK);
   
     return ret;
 }
