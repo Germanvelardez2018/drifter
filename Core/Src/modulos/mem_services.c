@@ -108,7 +108,7 @@ status_t mem_s_init(){
 
 
 status_t mem_s_get_fsm_state(uint8_t* fsm_state){
-    status_t ret= STATUS_ERROR;
+    status_t ret= STATUS_OK;
     mem_resume();
     ret = mem_read_page(fsm_state,1,MMAP_FSM_STATE,0);
     mem_sleep();
@@ -117,7 +117,7 @@ status_t mem_s_get_fsm_state(uint8_t* fsm_state){
 
 
 status_t mem_s_set_fsm_state(uint8_t* fsm_state){
-    status_t ret= STATUS_ERROR;
+    status_t ret= STATUS_OK;
     mem_resume();
     ret = mem_write_page(fsm_state,1,MMAP_FSM_STATE,0);
     mem_sleep();

@@ -27,7 +27,7 @@ extern "C" {
 /* Definiciones --------------------------------------------------------------*/
 
 typedef enum{
-   FSM_ERROR            = -1
+   FSM_ERROR            = 5
  , FSM_UNDEFINED        = 0
  , FSM_ON_FIELD         = 1     //! Transmicion desde campo
  , FSM_MEMORY_DOWNLOAD  = 2     //! Transmicion desde memoria

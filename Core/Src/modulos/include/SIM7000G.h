@@ -33,9 +33,9 @@ extern "C" {
 
 
 
+uint8_t simg7000g_get_flag();
 
 
-status_t sim7000g_check();
 
 
 status_t sim7000g_init();
@@ -65,10 +65,11 @@ status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_pay
 
 status_t sim7000g_mqtt_subscription(uint8_t* topic);
 
-status_t simg7000g_mqtt_unsubscription(uint8_t* topic);
+status_t sim7000g_mqtt_unsubscription(uint8_t* topic);
 
-status_t sim7000g_check_broker();
 
+
+status_t sim7000g_mqtt_check();
 
 status_t sim7000g_test();
 

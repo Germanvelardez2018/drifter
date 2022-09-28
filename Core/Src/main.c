@@ -88,6 +88,8 @@ extern IWDG_HandleTypeDef hiwdg;
 extern  TIM_HandleTypeDef  htim1;
 PRIVATE  fsm_state_t       device;
 PRIVATE  uint8_t           buffer[255];
+
+PRIVATE uint8_t buf[255];
 PRIVATE  uint8_t           counter = 0;
 PRIVATE  uint8_t           max_counter = 0;
 
@@ -138,7 +140,6 @@ static void inline on_download(void){
   }
    counter = 0;
    mem_s_set_counter(&counter);
-   sim7000g_check_broker();
    device = FSM_ON_FIELD;  
    fsm_set_state(device); 
 
@@ -166,9 +167,8 @@ static void app_init(){
   pwr_init();
   fsm_init();
   // Sensor
-  mpu6050_init();
+   //mpu6050_init();
   // Memoria
-  HAL_Delay(500);
 }
 
 
@@ -185,8 +185,6 @@ int main(void)
 // Sirve para cargar valores por defecto a memoria flash
 
 #ifdef DEFAULT_VALUES
-
-
 
   uint8_t c= COUNTER;
   uint8_t max = MAX_COUNTER;
@@ -210,43 +208,26 @@ sim7000g_get_signal();
 sim7000g_open_apn();
 sim7000g_get_operator();
 simg7000g_set_gps(1);
-
 sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
 sim7000g_resume();
 
-
-uint8_t buf[255];
-//
-memset(buf,0,255);
-HAL_Delay(100);
-sim7000g_mqtt_publish("SIMO_CONFIG2","UN MENSAJE ",strlen("UN MENSAJE "));
-HAL_Delay(2000);
+sim7000g_mqtt_subscription("SIMO_CONFIG");
 // formato de lo que recibis 
-// +SMSUB: "SIMO_CONFIG","mensaje recibido"
-HAL_UART_Receive_IT(&huart1,buf,3);
-while(flag );
-
-int num = strlen(buf);
-
-  if( num != 0){
-    modulo_debug_print("\nbuf |");
-    modulo_debug_print(buf);
-    modulo_debug_print("  |");
-    memset(buf,0,255);
-
-  }
+sim7000g_mqtt_publish("SIMO_CONFIG2","RETORNO ",strlen("RETORNO "));
 
 
 
-     modulo_debug_print("sali del while");
+sim7000g_mqtt_check();
 
+while(1 ){
 
-while(1){
-
+HAL_Delay(500);
 
 }
 
+modulo_debug_print("sali del while");
 
+while(1);
 
 sim7000g_sleep();
 
@@ -293,10 +274,8 @@ MX_IWDG_Init();
 
  HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
     
-     modulo_debug_print("irq uart 1");
-          modulo_debug_print("irq uart 1");
-
-
+  modulo_debug_print("irq uart 1");
+  buf[10] = 0;
  //  HAL_UART_Receive(&huart1,(buffer ),254,500);   
   flag = 0;
      modulo_debug_print("irq uart 1");

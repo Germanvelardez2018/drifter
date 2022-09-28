@@ -12,26 +12,34 @@ PRIVATE fsm_state_t fsm_get_state_from_flash(){
     status_t ret = STATUS_ERROR;
     uint8_t buf_state = 0;
     ret = mem_s_get_fsm_state(&buf_state);
+            
+
     fsm_state_t state = FSM_ERROR;  
+      
     
-    switch (buf_state)
+    if(ret == STATUS_ERROR){
+          modulo_debug_print("ret con error\n");
+          return state;
+
+
+    } 
+    switch(buf_state)
     {
-    case 0xff:
-        state = FSM_UNDEFINED;
-        break;
     case 1:
         state = FSM_ON_FIELD;
         break;
-
     case 2:
         state = FSM_MEMORY_DOWNLOAD;
         break;
+    case 255:
+        state = FSM_UNDEFINED;
+        break;
     
     default:
-
+        state = FSM_ERROR;
         break;
     }
-    
+    modulo_debug_print("final  de fsm mem\n");
     return state;
 }
 
@@ -40,9 +48,7 @@ PRIVATE status_t fsm_set_state_into_flash(fsm_state_t new_state){
     // Funcion dummy por el momento
     status_t ret = STATUS_ERROR;
     uint8_t buf_state = 0;
-    ret = mem_s_get_fsm_state(&buf_state);
-    fsm_state_t state = FSM_ERROR;  
-    
+    ret = mem_s_get_fsm_state(&buf_state);    
     switch (new_state)
     {
     case FSM_UNDEFINED:
@@ -62,10 +68,8 @@ PRIVATE status_t fsm_set_state_into_flash(fsm_state_t new_state){
     break;
     }
 
-      ret = mem_s_set_fsm_state(&buf_state);
-
-
-
+    ret = mem_s_set_fsm_state(&buf_state);
+    return ret;
 
 }
 
@@ -74,11 +78,20 @@ status_t fsm_init(){
     status_t ret = STATUS_OK;
     __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED;
     // Leo estado desde flash
-    status_t state_from_flash = fsm_get_state_from_flash();
+            modulo_debug_print("fsm antes de get flash\n");
+
+    //fsm_state_t state_from_flash = fsm_get_state_from_flash();
+         fsm_state_t state_from_flash = FSM_ON_FIELD;
+
+            modulo_debug_print("fsm despues de get flash\n");
+
     // Si es estado valido, actualizo sram
     if(state_from_flash != FSM_ERROR){
         __DEVICE_STATE_IN_SRAM__ = state_from_flash;
+        ret = STATUS_ERROR;
     }
+        modulo_debug_print("fsm init\n");
+
     return ret;
 }
 

@@ -1,7 +1,8 @@
 #include "gpio.h"
-
+#include "uart.h"
 
 PRIVATE driver_status_t __DRIVER_INITED__ = DRIVER_NO_STARTED;
+
 
 
 void GPIO_init(void){
@@ -26,7 +27,6 @@ if(__DRIVER_INITED__ == DRIVER_STARTED){
    }
 }
 }
-
 
 
 

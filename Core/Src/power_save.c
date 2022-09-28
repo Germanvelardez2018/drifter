@@ -95,6 +95,8 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc){
 void pwr_init(){
     set_time(0,0,0);
     // obtengo intervalo desde flash
+    modulo_debug_print("pwr init\n");
+
     mem_s_get_interval(&__sleep_interval__);
 
 

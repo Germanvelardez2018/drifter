@@ -333,7 +333,7 @@ uint8_t at45db_write_page(uint8_t* data, uint8_t len, uint32_t pag,uint8_t pos){
 
 
 uint8_t at45db_read_page(uint8_t* data, uint8_t len, uint32_t pag,uint8_t pos){
-       uint8_t ret=0;
+       uint8_t ret=1;
         uint32_t address =  (pag << 8) | (uint32_t)pos ;       //
         uint8_t cmd[5] ={0};
         uint8_t _len = 0;

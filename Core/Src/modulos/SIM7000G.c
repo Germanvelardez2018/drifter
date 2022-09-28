@@ -67,7 +67,7 @@
 
 #define CMD_OPEN_APN_TUENTI                          "AT+CNACT=1,\"internet.movil\"\r\n"
 #define CMD_OPEN_APN_PERSONAL                        "AT+CNACT=1,\"datos.personal.com\"\r\n"
-#define CMD_GET_APN                                  "AT+CNACT?"       
+#define CMD_GET_APN                                  "AT+CNACT?\r\n"       
 
 
 // ! Modo sleep y resume
@@ -83,9 +83,11 @@
  #define CMD_MQTT_QOS                                "\"QOS\""
  #define CMD_MQTT_COMMIT                             "AT+SMCONN\r\n"
  #define CMD_MQTT_PUBLISH                            "AT+SMPUB=\"%s\",\"%d\",1,1 \r\n" 
-#define CMD_MQTT_SUBSCRIBE                           "AT+SMSUB=\"%s\",%d \r\n"   // topic , QoS
+#define CMD_MQTT_SUBSCRIBE                           "AT+SMSUB=\"%s\",%d\r\n"   // topic , QoS
 #define CMD_MQTT_UMSUBSCRIBE                         "AT+SMUMSUB=\"%s\"\r\n"   // topic , QoS
 #define CMD_MQTT_TOPIC_CONFIG                        "SIMO_CONFIG"
+#define CMD_MQTT_CHECK_STATUS                        "AT+SMSTATE? \r\n"
+#define CMD_MQTT_KEEK_ALIVE                          "AT+SMCONF=\"KEEPTIME\",60\r\n"
 
 
 
@@ -120,9 +122,11 @@ PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 
 
+PRIVATE uint8_t _WAIT_CMD_ = 0;
 
 
-
+extern  UART_HandleTypeDef huart1;
+extern  UART_HandleTypeDef huart2;
 
 
 
@@ -248,6 +252,31 @@ status_t sim7000g_check(){
 
 
 
+
+PRIVATE uint8_t cmd_buffer[50]={0};
+PRIVATE uint8_t buf[100]={0};
+
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+  if(GPIO_Pin == GPIO_PIN_15){
+
+    if(_WAIT_CMD_ == 1){
+        HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); 
+        HAL_UART_Receive(&huart1,cmd_buffer,50,200);
+        
+        HAL_UART_Transmit(&huart2,cmd_buffer,50,1000);
+
+    // leer buf
+
+    }
+ 
+  }
+
+}
+
+
+
 status_t sim7000g_init(){
     uart_init();
     // Necesario para alimentar la placa y encender el sim7000g   
@@ -332,8 +361,10 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     if ((url == NULL) || ( user == NULL) || (password == NULL) || (qos == NULL)) return ret;
     uint8_t* buffer[255]={0};
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_URL,url);    
-    delay(500);
     ret = send_command(buffer,CMD_OK);
+    delay(500);
+    ret = send_command(CMD_MQTT_KEEK_ALIVE,CMD_OK);
+    delay(500);
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
     delay(500);
     ret = send_command(buffer,CMD_OK);
@@ -343,16 +374,14 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
     delay(500);
     ret = send_command(buffer,CMD_OK);
-    
-    
-    
     delay(500);
     ret = send_command(CMD_MQTT_COMMIT,CMD_OK);
     delay(1000);
-     // Nos subcribimos a topic de configuracion  
-sprintf(buffer,CMD_MQTT_SUBSCRIBE,"SIMO_CONFIG",MQTT_QOS_AT_LEAST_ONCE_RECEIVED);    
-ret = send_command(buffer,CMD_OK);
-  
+   
+    // configurar la interrupcion del PIN RI SIM7000G
+    ret = send_command("AT+CFGRI=1\r\n",CMD_OK);
+    
+
     return ret;
 }
 
@@ -386,25 +415,35 @@ status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_pay
 
 status_t sim7000g_mqtt_subscription(uint8_t* topic){
     status_t ret = STATUS_ERROR;
-    uint8_t  buffer[255]={0};
-    if( topic != NULL){
-        sprintf(buffer,CMD_MQTT_SUBSCRIBE,topic,MQTT_QOS_AT_LEAST_ONCE_RECEIVED);    
+    uint8_t  buffer[100]={0};
+  
+        sprintf(buffer,CMD_MQTT_SUBSCRIBE,topic,1);    
         ret = send_command(buffer,CMD_OK);
-    }
+        _WAIT_CMD_ = 1;
     return ret;
 }
 
 
 
-status_t simg7000g_mqtt_unsubscription(uint8_t* topic){
+status_t sim7000g_mqtt_unsubscription(uint8_t* topic){
     status_t ret = STATUS_ERROR;
-    uint8_t  buffer[255]={0};
-    if(topic != NULL){
+    uint8_t  buffer[100]={0};
+   
         sprintf(buffer,CMD_MQTT_UMSUBSCRIBE,topic);    
         ret = send_command(buffer,CMD_OK);
-    }
+        _WAIT_CMD_ = 0; 
     return ret;
 }
 
 
 
+
+
+status_t sim7000g_mqtt_check(){
+
+    status_t ret = STATUS_ERROR;
+    ret = send_command(CMD_MQTT_CHECK_STATUS,CMD_OK);
+    
+    return ret;
+
+}

@@ -31,13 +31,19 @@ extern "C" {
 
 
 /**
- * @brief Configura el hardware del SPI1 . DMA normal mode e interrupciones (agregado manualmente, no MXCube)
+ * @brief Configura el hardware del SPI1 . DMA y normal mode (interrupciones  agregado manualmente, no MXCube)
  * 
  * @return ** void 
  */
 void SPI_init(void);
 
 
+
+/**
+ * @brief Desconfigura el hardware del SPI1 .
+ * 
+ * @return ** void 
+ */
 void SPI_deinit(void);
 
 
