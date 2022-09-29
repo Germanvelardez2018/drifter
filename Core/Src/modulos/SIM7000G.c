@@ -4,7 +4,7 @@
 #include "gpio.h"
 #include <string.h>
 #include "debug.h"
-
+#include "mem_services.h"
 
 
 
@@ -22,7 +22,6 @@
 
 
 #define BROCKER_TOPIC_COMMAND                       "SIMO_CMD"
-
 
 
 #define CMD_OPEN_APN_TUENTI                          "AT+CNACT=1,\"internet.movil\"\r\n"
@@ -127,6 +126,43 @@ PRIVATE uint8_t _WAIT_CMD_ = 0;
 
 extern  UART_HandleTypeDef huart1;
 extern  UART_HandleTypeDef huart2;
+
+
+
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+
+// formato interval, max 
+
+PRIVATE   void get_values(char* buffer,int* interval, int* max)
+{
+    int ret = 0;
+    printf(buffer);
+    int index = 0;
+    int len = 0;
+    char num[10]={0};
+
+    char *token = strtok(buffer,",");
+    int n;
+     if(token != NULL){
+        while(token != NULL){
+          n = atoi(token);
+          if(n != 0){
+          printf("\nel numero extraido es:%d\n",n);
+          if(index == 0){
+          *interval =n; 
+          }else{
+          *max = n;
+          }
+            index ++;
+        }     
+            token = strtok(NULL, ",");
+ }
+ }
+}
 
 
 
@@ -255,7 +291,7 @@ status_t sim7000g_check(){
 #define COMMAND_SIZE            38
 PRIVATE uint8_t cmd_buffer[40]={0};
 PRIVATE uint8_t len = 0;
-
+PRIVATE uint8_t interval = 0 , max = 0;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
   if(GPIO_Pin == GPIO_PIN_15){
@@ -263,11 +299,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
     if(_WAIT_CMD_ == 1){
         HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); 
         HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,200);
-        len = strlen(cmd_buffer);
-        
-        HAL_UART_Transmit(&huart2,cmd_buffer,250);
+        len = strlen(cmd_buffer); 
+        HAL_UART_Transmit(&huart2,cmd_buffer,len,250);
+        get_values(cmd_buffer,&interval,&max);
+        memset(cmd_buffer,0,40);
+        sprintf(cmd_buffer,"\nget: %d %d\n",interval,max);
+        HAL_UART_Transmit(&huart2,cmd_buffer,40,250);
+        mem_s_set_interval(&interval);
+        mem_s_set_max_amount_data(&max);
 
-    // leer buf
+        // leer buf
+
 
     }
  
