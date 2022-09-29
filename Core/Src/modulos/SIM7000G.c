@@ -307,10 +307,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
         HAL_UART_Transmit(&huart2,cmd_buffer,40,250);
         mem_s_set_interval(&interval);
         mem_s_set_max_amount_data(&max);
-
-        // leer buf
-
-
     }
  
   }
