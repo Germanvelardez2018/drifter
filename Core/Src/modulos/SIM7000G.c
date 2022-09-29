@@ -252,10 +252,9 @@ status_t sim7000g_check(){
 
 
 
-
-PRIVATE uint8_t cmd_buffer[50]={0};
-PRIVATE uint8_t buf[100]={0};
-
+#define COMMAND_SIZE            38
+PRIVATE uint8_t cmd_buffer[40]={0};
+PRIVATE uint8_t len = 0;
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
@@ -263,9 +262,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
     if(_WAIT_CMD_ == 1){
         HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); 
-        HAL_UART_Receive(&huart1,cmd_buffer,50,200);
+        HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,200);
+        len = strlen(cmd_buffer);
         
-        HAL_UART_Transmit(&huart2,cmd_buffer,50,1000);
+        HAL_UART_Transmit(&huart2,cmd_buffer,250);
 
     // leer buf
 
