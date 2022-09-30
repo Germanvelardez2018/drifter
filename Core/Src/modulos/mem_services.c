@@ -21,7 +21,7 @@ PRIVATE void inline mem_init(){
 
 PRIVATE status_t mem_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
    status_t ret = STATUS_ERROR;
-   ret = at45db_write_page(data,  len, pag, pos);
+    at45db_write_page(data,  len, pag, pos);
    return ret;
 }
 
@@ -98,7 +98,7 @@ status_t mem_s_init(){
     status_t ret = STATUS_OK;
     // Iniciar memoria
     mem_init();
-   
+   modulo_debug_print("memoria iniciada \r\n");
     return ret;
 }
 
@@ -180,9 +180,8 @@ status_t mem_s_get_max_amount_data(uint8_t* max_amount_data){
 
 
 status_t mem_s_set_max_amount_data(uint8_t* max_amount_data){
-     status_t ret = STATUS_OK;
-        
-     mem_resume();
+     status_t ret = STATUS_OK; 
+    mem_resume();
 
       ret = mem_write_page(max_amount_data,1,MMAP_MAX_AMOUNT_DATA,0);    
       mem_sleep();

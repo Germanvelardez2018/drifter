@@ -33,6 +33,16 @@ extern "C" {
 
 
 
+
+
+
+
+
+ uint8_t* sim7000g_get_interval();
+ uint8_t* sim7000g_get_max();
+
+
+
 uint8_t simg7000g_get_flag();
 
 

@@ -43,12 +43,12 @@
 
 
 #define COUNTER                (0)
-#define MAX_COUNTER           (2)
-#define INTERVAL              (1)
+#define MAX_COUNTER           (10)
+#define INTERVAL              (10)
 
 
 //si esta definido default value, recargamos flash con valores default
-#define DEFAULT_VALUES
+//#define DEFAULT_VALUES
 
 
 
@@ -94,7 +94,6 @@ PRIVATE  uint8_t           counter = 0;
 PRIVATE  uint8_t           max_counter = 0;
 
 uint8_t flag = 1;
-uint8_t bucle_end = 0;
 
 
 
@@ -125,6 +124,8 @@ static void inline on_download(void){
   mem_s_get_counter(&counter);
   sprintf(buffer,"extraer :%d datos\n",counter);
   modulo_debug_print(buffer);
+  sim7000g_mqtt_subscription("CMD");
+
   while(counter > 0){
     counter = counter -1;
     sprintf(buffer,"counter :%d \n",counter);
@@ -138,10 +139,18 @@ static void inline on_download(void){
     sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
     HAL_Delay(10);
   }
+
+  sim7000g_mqtt_unsubscription("CMD");
+
    counter = 0;
    mem_s_set_counter(&counter);
    device = FSM_ON_FIELD;  
    fsm_set_state(device); 
+   
+
+    sim7000g_get_interval();
+    sim7000g_get_max();
+
 
 
 }
@@ -184,23 +193,19 @@ int main(void)
   app_init();
 // Sirve para cargar valores por defecto a memoria flash
 
-#ifdef DEFAULT_VALUES
 
-  uint8_t c= COUNTER;
-  uint8_t max = MAX_COUNTER;
-  uint8_t interval = INTERVAL;
-  mem_s_set_max_amount_data(&max);
-  mem_s_set_interval(&interval);
 
-  mem_s_get_max_amount_data(&max_counter);
-  mem_s_get_counter(&counter);
-  if(counter >= MAX_COUNTER)  mem_s_set_counter(&c);
+  uint8_t c= 0;
+  uint8_t max = 0;
+  uint8_t interval = 0;
 
+
+  mem_s_get_counter(&max);
+  mem_s_get_max_amount_data(&max);
   mem_s_get_interval(&interval);
-  sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \n",counter,max_counter,interval);
+  sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \n",counter,max,interval);
   modulo_debug_print(buffer);
 
-#endif
 
 
 sim7000g_check();
@@ -212,33 +217,17 @@ sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
 sim7000g_resume();
 
 sim7000g_mqtt_subscription("CMD");
+sim7000g_mqtt_check();
+
 // formato de lo que recibis 
 sim7000g_mqtt_publish("SIMO_CONFIG2","RETORNO ",strlen("RETORNO "));
 
 
 
-sim7000g_mqtt_check();
-
-while(1 ){
-
-HAL_Delay(500);
-
-}
-
-modulo_debug_print("sali del while");
-
-while(1);
-
 sim7000g_sleep();
 
 
 MX_IWDG_Init();
-
-
-
-
-
-
 
   device = fsm_get_state();
   pwr_mode_t  modo ;
@@ -271,16 +260,6 @@ MX_IWDG_Init();
 }
 
 
-
- HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-    
-  modulo_debug_print("irq uart 1");
-  buf[10] = 0;
- //  HAL_UART_Receive(&huart1,(buffer ),254,500);   
-  flag = 0;
-     modulo_debug_print("irq uart 1");
-
-}
 
 
 /**

@@ -37,7 +37,9 @@ extern "C" {
 
 
 #define MQTT_TOPIC                                   "X1111"
-#define MQTT_URL                                     "simointi.cloud.shiftr.io"
+#define MQTT_URL2                                     "simointi.cloud.shiftr.io"
+#define MQTT_URL                                  "lseserver.ddns.net"
+
 #define MQTT_PASS                                    "fdZY5b69OhOVsAns"
 #define MQTT_ID                                      "simointi"
 #define MQTT_QOS                                      1

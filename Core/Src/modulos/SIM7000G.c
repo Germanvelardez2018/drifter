@@ -122,7 +122,7 @@ PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 
 PRIVATE uint8_t _WAIT_CMD_ = 0;
-
+PRIVATE uint8_t interval = 0 , m = 0;
 
 extern  UART_HandleTypeDef huart1;
 extern  UART_HandleTypeDef huart2;
@@ -137,21 +137,18 @@ extern  UART_HandleTypeDef huart2;
 
 // formato interval, max 
 
-PRIVATE   void get_values(char* buffer,int* interval, int* max)
+PRIVATE   void get_values(char* buffer,int8_t* interval, uint8_t* max)
 {
-    int ret = 0;
-    printf(buffer);
-    int index = 0;
-    int len = 0;
+    uint8_t ret = 0;
+    uint8_t index = 0;
+    uint8_t len = 0;
     char num[10]={0};
-
     char *token = strtok(buffer,",");
-    int n;
+    uint8_t n;
      if(token != NULL){
         while(token != NULL){
           n = atoi(token);
           if(n != 0){
-          printf("\nel numero extraido es:%d\n",n);
           if(index == 0){
           *interval =n; 
           }else{
@@ -166,7 +163,13 @@ PRIVATE   void get_values(char* buffer,int* interval, int* max)
 
 
 
+ uint8_t* sim7000g_get_interval(){
+    return (&interval);
+}
 
+ uint8_t* sim7000g_get_max(){
+    return (&m);
+}
 
 
 PRIVATE void PWRKEY_set(level_t level){
@@ -288,30 +291,30 @@ status_t sim7000g_check(){
 
 
 
-#define COMMAND_SIZE            38
+#define COMMAND_SIZE            25
 PRIVATE uint8_t cmd_buffer[40]={0};
 PRIVATE uint8_t len = 0;
-PRIVATE uint8_t interval = 0 , max = 0;
+
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-  if(GPIO_Pin == GPIO_PIN_15){
 
+  if(GPIO_Pin == GPIO_PIN_15){
     if(_WAIT_CMD_ == 1){
-        HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin); 
         HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,200);
+      //   len = strlen(cmd_buffer); 
+      //  HAL_UART_Transmit(&huart2,cmd_buffer,len,250);
+        get_values(cmd_buffer,&interval,&m);
+   //   memset(cmd_buffer,0,40);
+        sprintf(cmd_buffer,"cmd: %d %d\r\n",interval,m);
         len = strlen(cmd_buffer); 
-        HAL_UART_Transmit(&huart2,cmd_buffer,len,250);
-        get_values(cmd_buffer,&interval,&max);
-        memset(cmd_buffer,0,40);
-        sprintf(cmd_buffer,"\nget: %d %d\n",interval,max);
-        HAL_UART_Transmit(&huart2,cmd_buffer,40,250);
-        mem_s_set_interval(&interval);
-        mem_s_set_max_amount_data(&max);
+        HAL_UART_Transmit(&huart2,cmd_buffer,len,100);
+  
     }
  
   }
 
 }
+
 
 
 
@@ -401,16 +404,16 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_URL,url);    
     ret = send_command(buffer,CMD_OK);
     delay(500);
-    ret = send_command(CMD_MQTT_KEEK_ALIVE,CMD_OK);
-    delay(500);
-    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
-    delay(500);
-    ret = send_command(buffer,CMD_OK);
-    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
-    delay(500);
-    ret = send_command(buffer,CMD_OK);
-    sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
-    delay(500);
+ //   ret = send_command(CMD_MQTT_KEEK_ALIVE,CMD_OK);
+  //  delay(500);
+  //  sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
+  //  delay(500);
+  //  ret = send_command(buffer,CMD_OK);
+   // sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
+   // delay(500);
+   // ret = send_command(buffer,CMD_OK);
+  //  sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
+  //  delay(500);
     ret = send_command(buffer,CMD_OK);
     delay(500);
     ret = send_command(CMD_MQTT_COMMIT,CMD_OK);
@@ -454,7 +457,6 @@ status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_pay
 status_t sim7000g_mqtt_subscription(uint8_t* topic){
     status_t ret = STATUS_ERROR;
     uint8_t  buffer[100]={0};
-  
         sprintf(buffer,CMD_MQTT_SUBSCRIBE,topic,1);    
         ret = send_command(buffer,CMD_OK);
         _WAIT_CMD_ = 1;
@@ -466,7 +468,6 @@ status_t sim7000g_mqtt_subscription(uint8_t* topic){
 status_t sim7000g_mqtt_unsubscription(uint8_t* topic){
     status_t ret = STATUS_ERROR;
     uint8_t  buffer[100]={0};
-   
         sprintf(buffer,CMD_MQTT_UMSUBSCRIBE,topic);    
         ret = send_command(buffer,CMD_OK);
         _WAIT_CMD_ = 0; 
