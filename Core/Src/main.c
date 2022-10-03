@@ -36,6 +36,7 @@
 #include "SIM7000G.h"
 #include "AT45DB041.h"
 #include "MQTT.h"
+#include "battery.h"
 
 #include "mmap.h"
 #include "mem_services.h" // esto es lo que va no AT45
@@ -119,6 +120,7 @@ static void inline on_field(){
 }
 
 
+
 static void inline on_download(void){
   modulo_debug_print("FSM: DOWNLOAD\n");  
   mem_s_get_counter(&counter);
@@ -140,8 +142,10 @@ static void inline on_download(void){
     HAL_Delay(10);
   }
 
+  memset(buffer,0,255);
+  battery_check_status(buffer,255);
+  sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
   sim7000g_mqtt_unsubscription("CMD");
-
    counter = 0;
    mem_s_set_counter(&counter);
    device = FSM_ON_FIELD;  
@@ -160,7 +164,8 @@ static void app_init(){
   HAL_Init();
   SystemClock_Config();
   mem_s_init();
-  MX_ADC1_Init();
+//  MX_ADC1_Init();  // Esta en battery_init 
+  battery_init();
   MX_DMA_Init();
   MX_RTC_Init();
   MX_TIM1_Init();
@@ -188,49 +193,20 @@ int main(void)
   // Configuracion inicial de los perifericos
   app_init();
 // Sirve para cargar valores por defecto a memoria flash
-
 // prueba adc
-
-
-modulo_debug_print("Prueba ADC\r\n");
-
-
-  uint32_t adc_value = 0;
-  HAL_ADC_Start(&hadc1);
-  HAL_Delay(50);
-  adc_value = HAL_ADC_GetValue(&hadc1);
-  uint8_t buffer_adc[100]={0};
-  sprintf(buffer_adc,"valor adc:%d\r\n",adc_value);
-  
-  while(1){
-    HAL_ADC_Start(&hadc1);
-    HAL_Delay(50);
-    adc_value = HAL_ADC_GetValue(&hadc1);
-    sprintf(buffer_adc,"valor adc:%d\r\n",adc_value);
-    modulo_debug_print(buffer_adc);
-    sprintf(buffer_adc,"valor adc float :%.2f\r\n",((adc_value*3.3)/4096));
-    modulo_debug_print(buffer_adc);
-    HAL_Delay(2500);
-  }
-
-while(1);
-
-
-
   uint8_t c= 0;
   uint8_t max = 5;
   uint8_t interval = 1;
 
-  mem_s_set_counter(&c);
-  mem_s_set_interval(&interval);
-  mem_s_set_max_amount_data(&max);
+ // mem_s_set_counter(&c);
+ // mem_s_set_interval(&interval);
+ // mem_s_set_max_amount_data(&max);
 
   mem_s_get_counter(&max);
   mem_s_get_max_amount_data(&max);
   mem_s_get_interval(&interval);
   sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \r\n",counter,max,interval);
   modulo_debug_print(buffer);
-
   sim7000g_check();
   sim7000g_get_signal();
   sim7000g_open_apn();

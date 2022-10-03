@@ -78,6 +78,7 @@ Core/Src/modulos/MPU6050.c \
 Core/Src/modulos/sim7000g.c \
 Core/Src/modulos/fsm.c \
 Core/Src/modulos/mem_services.c \
+Core/Src/modulos/battery.c \
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f103xb.s

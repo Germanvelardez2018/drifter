@@ -51,6 +51,6 @@
 
 #define MMAP_DEFAULT_INTERVAL                               (1)
 #define MMAP_DEFAULT_MAX_AMOUNT_DATA                        (5)
-#define MMAP_DEFAULT_BATTERY                                ((battery_state_t )NIVEL_MEDIO)
+#define MMAP_DEFAULT_BATTERY                                NORMAL_LEVEL
 #define MMAP_DEFAULT_OFFSET_ACCELEROMETER                   ((int16_t)0)
 #define MMAP_DEFAULT_COUNTER                                (0)

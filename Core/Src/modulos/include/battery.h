@@ -1,7 +1,7 @@
 /**
- * @file adc.h
+ * @file BATTERY.h
  * @author German Velardez(gvelardez@inti.gob.ar)
- * @brief  Archivo de configuracion del periferico ADC
+ * @brief  Archivo de configuracion del periferico BATTERY
  * @version 0.1
  * @date 2022-08-30
  * 
@@ -13,8 +13,8 @@
 
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __ADC1_H
-#define __ADC1_H
+#ifndef __BATTERY_H
+#define __BATTERY_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,13 +27,15 @@ extern "C" {
 /*-----------------------------------------------------------------------------*/
 
 
+ void battery_init(void);
+
 
 /**
- * @brief Configuracion de hardware ADC1. Modo simple sin DMA e interrupciones.
  * 
- * @return ** void 
- */
-void MX_ADC1_Init(void);
+ * **/
+status_t battery_check_status(uint8_t* buffer,uint8_t max_len);
+
+
 
 
 
@@ -44,8 +46,5 @@ void MX_ADC1_Init(void);
 }
 #endif
 
-#endif /* __ADC1_H */
-
-
-
+#endif /* __BATTERY_H */
 
