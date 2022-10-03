@@ -203,25 +203,17 @@ modulo_debug_print("Prueba ADC\r\n");
   sprintf(buffer_adc,"valor adc:%d\r\n",adc_value);
   
   while(1){
-
     HAL_ADC_Start(&hadc1);
     HAL_Delay(50);
     adc_value = HAL_ADC_GetValue(&hadc1);
-
     sprintf(buffer_adc,"valor adc:%d\r\n",adc_value);
     modulo_debug_print(buffer_adc);
     sprintf(buffer_adc,"valor adc float :%.2f\r\n",((adc_value*3.3)/4096));
     modulo_debug_print(buffer_adc);
     HAL_Delay(2500);
-
-
-
   }
 
 while(1);
-
-
-
 
 
 

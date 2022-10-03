@@ -303,11 +303,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
         sprintf(cmd_buffer,"cmd: %d %d\r\n",interval,m);
         len = strlen(cmd_buffer); 
         HAL_UART_Transmit(&huart2,cmd_buffer,len,100);
-  
     }
- 
   }
-
 }
 
 

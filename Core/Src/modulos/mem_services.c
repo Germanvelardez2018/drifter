@@ -21,7 +21,7 @@ PRIVATE void inline mem_init(){
 
 PRIVATE status_t mem_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
    status_t ret = STATUS_ERROR;
-    at45db_write_page(data,  len, pag, pos);
+   at45db_write_page(data,  len, pag, pos);
    return ret;
 }
 
@@ -98,7 +98,7 @@ status_t mem_s_init(){
     status_t ret = STATUS_OK;
     // Iniciar memoria
     mem_init();
-   modulo_debug_print("memoria iniciada \r\n");
+    modulo_debug_print("memoria iniciada \r\n");
     return ret;
 }
 
@@ -142,7 +142,6 @@ status_t mem_s_get_counter(uint8_t* counter){
     at45db_resumen();
     ret = mem_get_counter(counter);
     at45db_sleep();
-
     return ret;
 }
 
@@ -155,7 +154,6 @@ status_t mem_s_get_interval(uint8_t* interval){
     mem_resume();
     ret = mem_read_page(interval,1,MMAP_INTERVAL,0);
     // Si ocurre error de lectura, enviar valor por default
-   
     mem_sleep();
     return ret;
 }
