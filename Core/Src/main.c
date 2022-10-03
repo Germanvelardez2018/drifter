@@ -146,12 +146,8 @@ static void inline on_download(void){
    mem_s_set_counter(&counter);
    device = FSM_ON_FIELD;  
    fsm_set_state(device); 
-   
-
-    sim7000g_get_interval();
-    sim7000g_get_max();
-
-
+   sim7000g_get_interval();
+   sim7000g_get_max();
 
 }
 
@@ -193,41 +189,72 @@ int main(void)
   app_init();
 // Sirve para cargar valores por defecto a memoria flash
 
+// prueba adc
+
+
+modulo_debug_print("Prueba ADC\r\n");
+
+
+  uint32_t adc_value = 0;
+  HAL_ADC_Start(&hadc1);
+  HAL_Delay(50);
+  adc_value = HAL_ADC_GetValue(&hadc1);
+  uint8_t buffer_adc[100]={0};
+  sprintf(buffer_adc,"valor adc:%d\r\n",adc_value);
+  
+  while(1){
+
+    HAL_ADC_Start(&hadc1);
+    HAL_Delay(50);
+    adc_value = HAL_ADC_GetValue(&hadc1);
+
+    sprintf(buffer_adc,"valor adc:%d\r\n",adc_value);
+    modulo_debug_print(buffer_adc);
+    sprintf(buffer_adc,"valor adc float :%.2f\r\n",((adc_value*3.3)/4096));
+    modulo_debug_print(buffer_adc);
+    HAL_Delay(2500);
+
+
+
+  }
+
+while(1);
+
+
+
+
 
 
   uint8_t c= 0;
-  uint8_t max = 0;
-  uint8_t interval = 0;
+  uint8_t max = 5;
+  uint8_t interval = 1;
 
+  mem_s_set_counter(&c);
+  mem_s_set_interval(&interval);
+  mem_s_set_max_amount_data(&max);
 
   mem_s_get_counter(&max);
   mem_s_get_max_amount_data(&max);
   mem_s_get_interval(&interval);
-  sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \n",counter,max,interval);
+  sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \r\n",counter,max,interval);
   modulo_debug_print(buffer);
 
-
-
-sim7000g_check();
-sim7000g_get_signal();
-sim7000g_open_apn();
-sim7000g_get_operator();
-simg7000g_set_gps(1);
-sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
-sim7000g_resume();
-
-sim7000g_mqtt_subscription("CMD");
-sim7000g_mqtt_check();
+  sim7000g_check();
+  sim7000g_get_signal();
+  sim7000g_open_apn();
+  sim7000g_get_operator();
+  simg7000g_set_gps(1);
+  sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
+  sim7000g_resume();
+  sim7000g_mqtt_subscription("CMD");
+  sim7000g_mqtt_check();
 
 // formato de lo que recibis 
-sim7000g_mqtt_publish("SIMO_CONFIG2","RETORNO ",strlen("RETORNO "));
+  sim7000g_mqtt_publish("SIMO_CONFIG2","RETORNO \r\n",strlen("RETORNO \r\n "));
+  sim7000g_sleep();
 
 
-
-sim7000g_sleep();
-
-
-MX_IWDG_Init();
+  MX_IWDG_Init();
 
   device = fsm_get_state();
   pwr_mode_t  modo ;
@@ -246,7 +273,7 @@ MX_IWDG_Init();
             sim7000g_sleep();
           break;
        case FSM_MEMORY_DOWNLOAD:
-          on_download();
+           on_download();
           break;
         default:
         //nothing

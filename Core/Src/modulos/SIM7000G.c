@@ -118,9 +118,6 @@ PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 
 
-
-
-
 PRIVATE uint8_t _WAIT_CMD_ = 0;
 PRIVATE uint8_t interval = 0 , m = 0;
 
@@ -301,8 +298,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
   if(GPIO_Pin == GPIO_PIN_15){
     if(_WAIT_CMD_ == 1){
         HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,200);
-      //   len = strlen(cmd_buffer); 
-      //  HAL_UART_Transmit(&huart2,cmd_buffer,len,250);
         get_values(cmd_buffer,&interval,&m);
    //   memset(cmd_buffer,0,40);
         sprintf(cmd_buffer,"cmd: %d %d\r\n",interval,m);
