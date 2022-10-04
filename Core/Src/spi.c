@@ -1,7 +1,16 @@
 #include "spi.h"
-
+#include "dma.h"
 
 //  Nota:Configurar  manualmente PB8 para CS
+
+
+
+
+
+ extern DMA_HandleTypeDef hdma_spi1_tx;
+
+ extern DMA_HandleTypeDef hdma_spi1_rx;
+
 
 
 
@@ -12,13 +21,12 @@
 
 SPI_HandleTypeDef hspi1;
 
-extern DMA_HandleTypeDef hdma_spi1_tx;
-
-extern DMA_HandleTypeDef hdma_spi1_rx;
-
 
 
 PRIVATE driver_status_t __DRIVER_INITED__ = DRIVER_NO_STARTED;
+
+
+
 
 
 void SPI_init(void){
@@ -44,6 +52,7 @@ if(__DRIVER_INITED__ == DRIVER_STARTED){
    }
 }
 }
+
 
 
 

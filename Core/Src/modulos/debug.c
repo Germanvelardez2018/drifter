@@ -14,5 +14,4 @@ void  modulo_debug_init(void){
 
 void modulo_debug_print(char* string){
     HAL_UART_Transmit(&huart2,string,strlen(string),500);
-  //   HAL_UART_Transmit_DMA(&huart2,string,strlen(string));
 }

@@ -3,7 +3,7 @@
 
  UART_HandleTypeDef huart1;
  UART_HandleTypeDef huart2;
-extern DMA_HandleTypeDef hdma_usart2_tx;
+ DMA_HandleTypeDef hdma_usart2_tx;
 
 
 

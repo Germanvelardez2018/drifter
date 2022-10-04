@@ -205,9 +205,6 @@ PRIVATE status_t uart_read(uint8_t* buffer,uint8_t len){
 
 
 
-
-
-
 PRIVATE status_t check_response(char* response){
     status_t ret = STATUS_ERROR;
      if(response == NULL ) return 0;
@@ -225,7 +222,6 @@ PRIVATE status_t check_response(char* response){
 PRIVATE status_t send_command(uint8_t* string_cmd,uint8_t* response_expected){
     status_t ret = STATUS_ERROR;
     //Envio comando
-
     modulo_debug_print("cmd enviado:");
     modulo_debug_print(string_cmd);
     ret  = uart_write(string_cmd,strlen(string_cmd));     
@@ -236,7 +232,6 @@ PRIVATE status_t send_command(uint8_t* string_cmd,uint8_t* response_expected){
     modulo_debug_print("respuesta leida:");
     modulo_debug_print(SIM7000G_BUFFER);
     modulo_debug_print("\n");
-
 
     // checkeo buffer rx con respuesta esperada
     ret  = check_response(response_expected) ;
@@ -387,14 +382,14 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_URL,url);    
     ret = send_command(buffer,CMD_OK);
     delay(500);
-//    ret = send_command(CMD_MQTT_KEEK_ALIVE,CMD_OK);
-    delay(500);
-    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
-    delay(500);
-//    ret = send_command(buffer,CMD_OK);
-    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
-    delay(500);
-//    ret = send_command(buffer,CMD_OK);
+  // ret = send_command(CMD_MQTT_KEEK_ALIVE,CMD_OK);
+  //  delay(500);
+  //  sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
+  //  delay(500);
+  //  ret = send_command(buffer,CMD_OK);
+  //  sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
+   // delay(500);
+  //  ret = send_command(buffer,CMD_OK);
     sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
     delay(500);
     ret = send_command(buffer,CMD_OK);
@@ -404,12 +399,8 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
    
     // configurar la interrupcion del PIN RI SIM7000G
     ret = send_command("AT+CFGRI=1\r\n",CMD_OK);
-    
-
     return ret;
 }
-
-
 
 
 status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_payload){
@@ -423,9 +414,6 @@ status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_pay
     }
     return ret;
 }
-
-
-
 
 
 /**
@@ -447,7 +435,6 @@ status_t sim7000g_mqtt_subscription(uint8_t* topic){
 }
 
 
-
 status_t sim7000g_mqtt_unsubscription(uint8_t* topic){
     status_t ret = STATUS_ERROR;
     uint8_t  buffer[100]={0};
@@ -456,9 +443,6 @@ status_t sim7000g_mqtt_unsubscription(uint8_t* topic){
         _WAIT_CMD_ = 0; 
     return ret;
 }
-
-
-
 
 
 status_t sim7000g_mqtt_check(){

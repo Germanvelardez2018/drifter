@@ -24,11 +24,7 @@
 #include "timer.h"
 #include "watchdog.h"
 #include "adc.h"
-
-
 #include "power_save.h"
-
-
 // Modulos
 #include "fsm.h"
 #include "debug.h"
@@ -71,17 +67,10 @@
 /* USER CODE END PM */
 /* Private variables ---------------------------------------------------------*/
 
-// Peticiones dma
-DMA_HandleTypeDef hdma_spi1_tx;
-DMA_HandleTypeDef hdma_spi1_rx;
-DMA_HandleTypeDef hdma_usart2_tx;
 extern  UART_HandleTypeDef huart1;
 
 
 
-
-// en adc.c
-extern  ADC_HandleTypeDef hadc1;
 
 // en wdt.c
 extern IWDG_HandleTypeDef hiwdg;
@@ -97,12 +86,14 @@ PRIVATE  uint8_t           max_counter = 0;
 uint8_t flag = 1;
 
 
+extern DMA_HandleTypeDef hdma_usart2_tx;
+
+
 
 static void inline on_field(){
   modulo_debug_print("FSM: ON FIELD\n");
   // Secuencia:
   memset(buffer,0,255);
-
   //Obtengo datos de sensores
   mem_s_get_counter(&counter);
   //Guardo datos de sensores
@@ -127,7 +118,6 @@ static void inline on_download(void){
   sprintf(buffer,"extraer :%d datos\n",counter);
   modulo_debug_print(buffer);
   sim7000g_mqtt_subscription("CMD");
-
   while(counter > 0){
     counter = counter -1;
     sprintf(buffer,"counter :%d \n",counter);
@@ -146,16 +136,13 @@ static void inline on_download(void){
   battery_check_status(buffer,255);
   sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
   sim7000g_mqtt_unsubscription("CMD");
-   counter = 0;
-   mem_s_set_counter(&counter);
-   device = FSM_ON_FIELD;  
-   fsm_set_state(device); 
-   sim7000g_get_interval();
-   sim7000g_get_max();
-
+  counter = 0;
+  mem_s_set_counter(&counter);
+  device = FSM_ON_FIELD;  
+  fsm_set_state(device); 
+  sim7000g_get_interval();
+  sim7000g_get_max();
 }
-
-
 
 
 
@@ -164,12 +151,11 @@ static void app_init(){
   HAL_Init();
   SystemClock_Config();
   mem_s_init();
-//  MX_ADC1_Init();  // Esta en battery_init 
   battery_init();
   MX_DMA_Init();
   MX_RTC_Init();
   MX_TIM1_Init();
-  // Necesario para evitar que el micro se reinicio por WDT
+  //  Necesario para evitar que el micro se reinicio por WDT
   HAL_TIM_Base_Start_IT(&htim1);
   // Inicio modulos
   modulo_debug_init();
@@ -177,7 +163,7 @@ static void app_init(){
   pwr_init();
   fsm_init();
   // Sensor
-   //mpu6050_init();
+  mpu6050_init();
   // Memoria
 }
 
@@ -190,20 +176,8 @@ static void app_init(){
   */
 int main(void)
 {
-  // Configuracion inicial de los perifericos
+
   app_init();
-  uint8_t test_adc[100]={"hola mundo "};
-
-// Test bateria
-while(1){
-
-  battery_check_status(test_adc,100);
-  delay(2500);
-  modulo_debug_print(test_adc);
-}
-
-while(1);
-
 
 
 
@@ -211,12 +185,12 @@ while(1);
 // Sirve para cargar valores por defecto a memoria flash
 // prueba adc
   uint8_t c= 0;
-  uint8_t max = 5;
+  uint8_t max = 2;
   uint8_t interval = 1;
 
- // mem_s_set_counter(&c);
- // mem_s_set_interval(&interval);
- // mem_s_set_max_amount_data(&max);
+  mem_s_set_counter(&c);
+  mem_s_set_interval(&interval);
+  mem_s_set_max_amount_data(&max);
 
   mem_s_get_counter(&max);
   mem_s_get_max_amount_data(&max);
@@ -234,7 +208,7 @@ while(1);
   sim7000g_mqtt_check();
 
 // formato de lo que recibis 
-  sim7000g_mqtt_publish("SIMO_CONFIG2","RETORNO \r\n",strlen("RETORNO \r\n "));
+  sim7000g_mqtt_publish("SIMO_CONFIG2","RETORNO \r\n",strlen("RETORNO \r\n"));
   sim7000g_sleep();
 
 

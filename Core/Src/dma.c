@@ -4,6 +4,10 @@
 
 
 
+ DMA_HandleTypeDef hdma_spi1_tx;
+
+ DMA_HandleTypeDef hdma_spi1_rx;
+
 
 
 
