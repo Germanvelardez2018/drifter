@@ -43,7 +43,7 @@ extern "C" {
 
 
 
-uint8_t simg7000g_get_flag();
+uint8_t sim7000g_get_flag();
 
 
 
@@ -62,7 +62,7 @@ status_t sim7000g_sleep();
 status_t sim7000g_get_operator();
 
 
-status_t simg7000g_set_gps(uint8_t value);
+status_t sim7000g_set_gps(uint8_t value);
 
 
 status_t sim7000g_get_NMEA( uint8_t* buffer, uint8_t len);

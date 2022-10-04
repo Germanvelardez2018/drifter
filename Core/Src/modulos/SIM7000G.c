@@ -307,8 +307,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 }
 
 
-
-
 status_t sim7000g_init(){
     uart_init();
     // Necesario para alimentar la placa y encender el sim7000g   
@@ -318,9 +316,6 @@ status_t sim7000g_init(){
     BAT_ENA_set(LEVEL_HIGH);
     return ret;
 }
-
-
-
 
 
 status_t sim7000g_resume(){
@@ -337,10 +332,7 @@ status_t sim7000g_sleep(){
 }
 
 
-
-
-status_t simg7000g_set_gps(uint8_t value){
-    
+status_t sim7000g_set_gps(uint8_t value){
     status_t ret = STATUS_ERROR;
     if(value == 0){
      ret = send_command(CMD_GPS_OFF,CMD_OK);
@@ -351,6 +343,7 @@ status_t simg7000g_set_gps(uint8_t value){
     return ret;
 }
 
+
 status_t sim7000g_get_NMEA( uint8_t* buff, uint8_t len){
     status_t ret = STATUS_ERROR;
     send_command(CMD_GETGPSINFO,CMD_OK);
@@ -358,7 +351,6 @@ status_t sim7000g_get_NMEA( uint8_t* buff, uint8_t len){
     strcpy(buff,SIM7000G_BUFFER);
     return ret;
 }
-
 
 
 status_t sim7000g_test(){
@@ -470,10 +462,8 @@ status_t sim7000g_mqtt_unsubscription(uint8_t* topic){
 
 
 status_t sim7000g_mqtt_check(){
-
     status_t ret = STATUS_ERROR;
     ret = send_command(CMD_MQTT_CHECK_STATUS,CMD_OK);
-    
     return ret;
 
 }

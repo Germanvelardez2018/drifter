@@ -31,12 +31,12 @@
 
 // Modulos
 #include "fsm.h"
-#include  "debug.h"
-#include  "MPU6050.h"
+#include "debug.h"
+#include "MPU6050.h"
 #include "SIM7000G.h"
 #include "AT45DB041.h"
 #include "MQTT.h"
-#include "battery.h"
+#include "battery.h" // 
 
 #include "mmap.h"
 #include "mem_services.h" // esto es lo que va no AT45
@@ -192,6 +192,28 @@ int main(void)
 {
   // Configuracion inicial de los perifericos
   app_init();
+
+
+
+
+
+uint8_t test_adc[100]={0};
+
+// Test bateria
+while(1){
+
+  battery_check_status(test_adc,100);
+  delay(2500);
+  modulo_debug_print(".");
+  //modulo_debug_print(test_adc);
+}
+
+while(1);
+
+
+
+
+
 // Sirve para cargar valores por defecto a memoria flash
 // prueba adc
   uint8_t c= 0;
@@ -211,7 +233,7 @@ int main(void)
   sim7000g_get_signal();
   sim7000g_open_apn();
   sim7000g_get_operator();
-  simg7000g_set_gps(1);
+  sim7000g_set_gps(1);
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
   sim7000g_mqtt_subscription("CMD");
