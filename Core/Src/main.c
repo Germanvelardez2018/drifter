@@ -192,20 +192,14 @@ int main(void)
 {
   // Configuracion inicial de los perifericos
   app_init();
-
-
-
-
-
-uint8_t test_adc[100]={0};
+  uint8_t test_adc[100]={"hola mundo "};
 
 // Test bateria
 while(1){
 
   battery_check_status(test_adc,100);
   delay(2500);
-  modulo_debug_print(".");
-  //modulo_debug_print(test_adc);
+  modulo_debug_print(test_adc);
 }
 
 while(1);
