@@ -189,8 +189,6 @@ int main(void)
 
 app_init();
 
-//mem_full_clear();
-
 //test de memoria flash
 while(0){
 #define PAGE    100
