@@ -225,15 +225,15 @@ status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
     mpu6050_resume();
     int16_t temp =0;
     ret = mpu6050_get_temperature(  &temp);
-    if( ret == STATUS_ERROR)    modulo_debug_print("error en leer temp\n");
+    if( ret == STATUS_ERROR)    modulo_debug_print("error en leer temp\r\n");
     float ft = (float)  ((temp/340.0)+ 36.53);
     int16_t x,y,z ;
     ret = mpu6050_get_acceleration(  &x,&y,&z);
-    if( ret == STATUS_ERROR)    modulo_debug_print("error en leer acelerometro\n");
+    if( ret == STATUS_ERROR)    modulo_debug_print("error en leer acelerometro\r\n");
     float fx = (float) (x/(SCALA_DIV/2.0)); //      
     float fy = (float) (y/(SCALA_DIV/2.0)); // 
     float fz = (float) (z/(SCALA_DIV/2.0)); // 
-    sprintf(buffer,"\n t:%.2f , x:%.2f , y:%.2f , z:%.2f \n",ft,fx,fy,fz);
+    sprintf(buffer,"\r\n t:%.2f , x:%.2f , y:%.2f , z:%.2f \n",ft,fx,fy,fz);
     modulo_debug_print(buffer);
     mpu6050_sleep();
     return ret;

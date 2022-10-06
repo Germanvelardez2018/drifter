@@ -58,8 +58,6 @@ status_t mem_s_get_max_amount_data(uint8_t* max_amount_data);
 status_t mem_s_set_max_amount_data(uint8_t* max_amount_data);
 
 
-status_t mem_s_get_battery_state(battery_state_t* battery_state);
-status_t mem_s_set_battery_state(battery_state_t* battery_state);
 
 
 status_t mem_s_get_max_accelerometer_offset(int16_t* x,int16_t* y, int16_t* z );
@@ -89,6 +87,11 @@ status_t write_data(uint8_t* buffer, uint32_t page);
 
 status_t read_data(uint8_t* buffer, uint32_t page);
 
+
+
+
+
+void mem_full_clear();
 
 
 #ifdef __cplusplus

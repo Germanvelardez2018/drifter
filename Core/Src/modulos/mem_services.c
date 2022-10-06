@@ -4,7 +4,6 @@
 #include "mmap.h"
 
 
-
 PRIVATE status_t inline mem_resume(){
     at45db_resumen();
 }
@@ -14,8 +13,10 @@ PRIVATE status_t inline mem_sleep(){
     at45db_sleep();
 }
 
+
 PRIVATE void inline mem_init(){
     at45db_init();
+    
 }
 
 
@@ -47,10 +48,6 @@ PRIVATE status_t mem_write_buffer(uint8_t* data, uint8_t len,uint8_t pos){
 }
 
 
-
-
-
-
 status_t   write_data(uint8_t* buffer, uint32_t page){
     status_t ret = STATUS_ERROR;
     uint8_t len =  strlen(buffer)+1;
@@ -63,10 +60,6 @@ status_t   write_data(uint8_t* buffer, uint32_t page){
 }
 
 
-
-
-
-
 status_t   read_data(uint8_t* buffer, uint32_t page){
     status_t ret = STATUS_ERROR;
     uint8_t len=0;
@@ -77,34 +70,31 @@ status_t   read_data(uint8_t* buffer, uint32_t page){
     return ret;
 }
 
+
 PRIVATE status_t mem_get_counter(uint8_t* counter){
    status_t ret = STATUS_OK;
-   ret = mem_read_buffer(counter, 1,10);
+   #define ANYOFFSET            2
+    ret = mem_read_buffer(counter, 1,ANYOFFSET);
    return ret;
 }
 
 
 PRIVATE status_t  mem_set_counter(uint8_t* counter){
     status_t ret = STATUS_OK;
-    ret = mem_write_buffer(counter, 1,10);
+    ret = mem_write_buffer(counter, 1,ANYOFFSET);
     return ret;
 }
 
-
 //------------------------------------------------------
-
 
 status_t mem_s_init(){
     status_t ret = STATUS_OK;
     // Iniciar memoria
     mem_init();
     modulo_debug_print("memoria iniciada \r\n");
+    mem_resume();
     return ret;
 }
-
-
-
-
 
 
 status_t mem_s_get_fsm_state(uint8_t* fsm_state){
@@ -125,8 +115,6 @@ status_t mem_s_set_fsm_state(uint8_t* fsm_state){
 }
 
 
-
-
 status_t mem_s_set_counter(uint8_t* counter){
     status_t ret = STATUS_ERROR;
     at45db_resumen();
@@ -136,7 +124,6 @@ status_t mem_s_set_counter(uint8_t* counter){
 }
 
 
-
 status_t mem_s_get_counter(uint8_t* counter){
     status_t ret = STATUS_ERROR;
     at45db_resumen();
@@ -144,8 +131,6 @@ status_t mem_s_get_counter(uint8_t* counter){
     at45db_sleep();
     return ret;
 }
-
-
 
 
 // Interval
@@ -179,36 +164,12 @@ status_t mem_s_get_max_amount_data(uint8_t* max_amount_data){
 
 status_t mem_s_set_max_amount_data(uint8_t* max_amount_data){
      status_t ret = STATUS_OK; 
-    mem_resume();
-
-      ret = mem_write_page(max_amount_data,1,MMAP_MAX_AMOUNT_DATA,0);    
-      mem_sleep();
+     mem_resume();
+     ret = mem_write_page(max_amount_data,1,MMAP_MAX_AMOUNT_DATA,0);    
+     mem_sleep();
     return ret;
 }
 
-
-
-// ?? Tiene sentido mantener estado de bateria en memoria?, 
-//   Cuando triempo lleva la medicion de baterias?
-
-status_t mem_s_get_battery_state(battery_state_t* battery_state){
-    status_t ret = STATUS_OK;
-    ret = mem_read_page(battery_state,1,MMAP_F_BATTERY_STATE,0);
-    // Si ocurre error de lectura, enviar valor por default
-    if(ret == STATUS_ERROR){
-        (*battery_state) = MMAP_DEFAULT_BATTERY;
-    } 
-    return ret;
-}
-
-
-
-status_t mem_s_set_battery_state(battery_state_t* battery_state){
-    status_t ret = STATUS_OK;
-    ret = mem_write_page(battery_state,1,MMAP_F_BATTERY_STATE,0);
-    return ret;
-    
-}
 
 
 status_t mem_s_get_max_accelerometer_offset(int16_t* x,int16_t* y, int16_t* z ){
@@ -253,5 +214,10 @@ status_t mem_s_set_max_accelerometer_offset(int16_t* x, int16_t* y,int16_t* z){
 
 
 
+
+
+void mem_full_clear(){
+    at45db_full_erase_memory();
+}
 
 

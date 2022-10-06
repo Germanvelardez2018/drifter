@@ -137,14 +137,14 @@ PRIVATE  status_t  gpio_write(level_t value){
 
 
 PRIVATE  status_t  spi_write(uint8_t* buffer, size_t len ){
-            HAL_SPI_Transmit(AT45DB_SPI,buffer,len,1000);
+            HAL_SPI_Transmit(AT45DB_SPI,buffer,len,500);
           //  HAL_SPI_Transmit_DMA(AT45DB_SPI,buffer,len);
             return STATUS_OK;
 }
 
 PRIVATE  status_t  spi_read(uint8_t* buffer, size_t len){
 
-        HAL_SPI_Receive(AT45DB_SPI,buffer,len,1000);  
+        HAL_SPI_Receive(AT45DB_SPI,buffer,len,500);  
         //HAL_SPI_Receive_DMA(AT45DB_SPI,buffer,len);
         return STATUS_OK;
 }
