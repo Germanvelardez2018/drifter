@@ -81,7 +81,7 @@
  #define CMD_MQTT_PASSWORD                           "\"PASSWORD\""
  #define CMD_MQTT_QOS                                "\"QOS\""
  #define CMD_MQTT_COMMIT                             "AT+SMCONN\r\n"
- #define CMD_MQTT_PUBLISH                            "AT+SMPUB=\"%s\",\"%d\",1,1 \r\n" 
+ #define CMD_MQTT_PUBLISH                            "AT+SMPUB=\"%s\",\"%d\",2,1 \r\n" 
 #define CMD_MQTT_SUBSCRIBE                           "AT+SMSUB=\"%s\",%d\r\n"   // topic , QoS
 #define CMD_MQTT_UMSUBSCRIBE                         "AT+SMUMSUB=\"%s\"\r\n"   // topic , QoS
 #define CMD_MQTT_TOPIC_CONFIG                        "SIMO_CONFIG"

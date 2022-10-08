@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "timer.h"
@@ -33,15 +32,14 @@
 #include "AT45DB041.h"
 #include "MQTT.h"
 #include "battery.h" // 
-
 #include "mmap.h"
 #include "mem_services.h" // esto es lo que va no AT45
 /* USER CODE END Includes */
 
 
 #define COUNTER                (0)
-#define MAX_COUNTER           (5)
-#define INTERVAL              (1)
+#define MAX_COUNTER            (3)
+#define INTERVAL               (1)
 
 
 //si esta definido default value, recargamos flash con valores default
@@ -82,7 +80,6 @@ PRIVATE  uint8_t           buffer[255];
 PRIVATE  uint8_t  buf[255];
 PRIVATE  uint8_t  counter = 0;
 PRIVATE  uint8_t  max_counter = 0;
-
 uint8_t flag = 1;
 
 
@@ -91,15 +88,18 @@ extern DMA_HandleTypeDef hdma_usart2_tx;
 
 
 static void inline on_field(){
+
+  // leo el contador
+  mem_s_get_counter(&counter);
   modulo_debug_print("FSM: ON FIELD\r\n");
   // Secuencia:
   memset(buffer,0,255);
   //Obtengo datos de sensores
- // mem_s_get_counter(&counter);
+
   //Guardo datos de sensores
  // mpu6050_get_measure(buffer,255);
-  
-  sim7000g_get_NMEA(buffer,255);
+  sprintf(buffer,"Contador:%d.\r\n",counter);
+  //sim7000g_get_NMEA(buffer,255);
   modulo_debug_print(buffer);
   write_data(buffer,counter);
   //Automento contador de muestras almacenadas
@@ -107,8 +107,8 @@ static void inline on_field(){
       device = FSM_MEMORY_DOWNLOAD;   
   }else{
     counter = counter +1 ;
-
- //   mem_s_set_counter(&counter);
+    // seteo el contador
+    mem_s_set_counter(&counter);
   }
 }
 
@@ -116,36 +116,42 @@ static void inline on_field(){
 
 static void inline on_download(void){
   modulo_debug_print("FSM: DOWNLOAD\r\n");  
-  //mem_s_get_counter(&counter);
-  counter = MAX_COUNTER;
+  mem_s_get_counter(&counter);
+ // counter = MAX_COUNTER;
   sprintf(buffer,"extraer :%d datos\n",counter);
   modulo_debug_print(buffer);
 
   flag = 1;
   while(counter >=  0 && flag){
-    sprintf(buffer,"counter :%d \n",counter);
-    modulo_debug_print("read en memory:");
-    modulo_debug_print(buffer);
     memset(buffer,0,255);
     read_data(buffer,counter);
-    modulo_debug_print(buffer);
-    HAL_IWDG_Refresh(&hiwdg);
     // envio por mqtt
     sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
-    HAL_Delay(250);
-    if(counter ==0 ){
-       flag = 0;
-    } else{
-       counter = counter -1;
-    }
+    modulo_debug_print("mensaje publicado:");
+    modulo_debug_print(buffer);
+    HAL_IWDG_Refresh(&hiwdg);
+    HAL_Delay(2000);
+    if(counter ==0 ){ 
+       flag = 0;} 
+    else{
+       counter = counter -1;}
   }
   memset(buffer,0,255);
   battery_check_status(buffer,255);
   sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
-  //sim7000g_mqtt_subscription("CMD");
-  //sim7000g_mqtt_unsubscription("CMD");
+  sim7000g_mqtt_subscription("CMD");
+  modulo_debug_print("Esperando comandos nuevos\r\n");
+    HAL_IWDG_Refresh(&hiwdg);
+
+  delay(4000);
+  HAL_IWDG_Refresh(&hiwdg);
+  delay(4000);
+  HAL_IWDG_Refresh(&hiwdg);
+  modulo_debug_print("deshabilito comandos\r\n");
+
+  sim7000g_mqtt_unsubscription("CMD");
   counter = 0;
- // mem_s_set_counter(&counter);
+  mem_s_set_counter(&counter);
   device = FSM_ON_FIELD;  
   //fsm_set_state(device); 
   //sim7000g_get_interval();
@@ -184,32 +190,7 @@ static void app_init(){
   */
 int main(void)
 {
-
-
-
-app_init();
-
-//test de memoria flash
-while(0){
-#define PAGE    100
-char test[100]="Primera version del sistema \r\n";
-char data_readed[100];
-modulo_debug_print("comienzo de la prueba \r\n");
-
-write_data(test,PAGE);
-
-read_data(data_readed,PAGE);
-
-
-memset(test,0,100);
-sprintf(test,"buffer leido:%s\r\n",data_readed);
-
-modulo_debug_print(test);
-modulo_debug_print("fin de la prueba\r\n");
-
-while(1);
-
-}
+  app_init();
 
 
 // Sirve para cargar valores por defecto a memoria flash
@@ -218,6 +199,7 @@ while(1);
   uint8_t max = MAX_COUNTER;
   uint8_t interval = INTERVAL;
 
+  //reset el contador
   //mem_s_set_counter(&c);
   mem_s_set_interval(&interval);
   mem_s_set_max_amount_data(&max);
@@ -225,12 +207,11 @@ while(1);
   c= 0;
   max = 0;
   interval = 0;
-  mem_s_get_counter(&max);
+  mem_s_get_counter(&counter);
   mem_s_get_max_amount_data(&max);
   mem_s_get_interval(&interval);
   sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \r\n",counter,max,interval);
   modulo_debug_print(buffer);
-
 
   sim7000g_check();
   sim7000g_get_signal();
