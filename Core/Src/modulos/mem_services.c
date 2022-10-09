@@ -21,21 +21,21 @@ PRIVATE void inline mem_init(){
 
 
 PRIVATE status_t mem_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
-   status_t ret = STATUS_ERROR;
+   status_t ret = STATUS_OK;
    at45db_write_page(data,  len, pag, pos);
    return ret;
 }
 
 
 PRIVATE status_t mem_read_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
-   status_t ret = STATUS_ERROR;
+   status_t ret = STATUS_OK;
    ret =  at45db_read_page(data,len,pag,pos);
     return ret;
 }
 
 
 PRIVATE status_t mem_read_buffer(uint8_t* data, uint8_t len,uint8_t pos){
-   status_t ret = STATUS_ERROR;
+   status_t ret = STATUS_OK;
    ret =  at45db_read_buffer2(data,len,pos);
     return ret;
 }
@@ -96,23 +96,26 @@ status_t mem_s_init(){
     return ret;
 }
 
-
+// 10 es una posicion randow dentro de la pagina (el ultimo param de mem_read_page)
 status_t mem_s_get_fsm_state(uint8_t* fsm_state){
     status_t ret= STATUS_OK;
     mem_resume();
-    ret = mem_read_page(fsm_state,1,MMAP_FSM_STATE,0);
+    ret = mem_read_page(fsm_state,1,MMAP_FSM_STATE,10);
     mem_sleep();
     return ret;
 }
 
+// 10 es una posicion randow dentro de la pagina (el ultimo param de mem_write_page)
 
 status_t mem_s_set_fsm_state(uint8_t* fsm_state){
     status_t ret= STATUS_OK;
     mem_resume();
-    ret = mem_write_page(fsm_state,1,MMAP_FSM_STATE,0);
+    ret = mem_write_page(fsm_state,1,MMAP_FSM_STATE,10);
     mem_sleep();
     return ret;
 }
+
+
 
 
 status_t mem_s_set_counter(uint8_t* counter){
@@ -164,9 +167,9 @@ status_t mem_s_get_max_amount_data(uint8_t* max_amount_data){
 
 status_t mem_s_set_max_amount_data(uint8_t* max_amount_data){
      status_t ret = STATUS_OK; 
-     mem_resume();
-     ret = mem_write_page(max_amount_data,1,MMAP_MAX_AMOUNT_DATA,0);    
-     mem_sleep();
+       mem_resume();
+    ret = mem_write_page(max_amount_data,1,MMAP_MAX_AMOUNT_DATA,0);    
+       mem_sleep();
     return ret;
 }
 

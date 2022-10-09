@@ -12,17 +12,7 @@ PRIVATE fsm_state_t fsm_get_state_from_flash(){
     status_t ret = STATUS_ERROR;
     uint8_t buf_state = 0;
     ret = mem_s_get_fsm_state(&buf_state);
-            
-
     fsm_state_t state = FSM_ERROR;  
-      
-    
-    if(ret == STATUS_ERROR){
-          modulo_debug_print("ret con error\n");
-          return state;
-
-
-    } 
     switch(buf_state)
     {
     case 1:
@@ -48,7 +38,7 @@ PRIVATE status_t fsm_set_state_into_flash(fsm_state_t new_state){
     // Funcion dummy por el momento
     status_t ret = STATUS_ERROR;
     uint8_t buf_state = 0;
-    ret = mem_s_get_fsm_state(&buf_state);    
+   // ret = mem_s_get_fsm_state(&buf_state);    
     switch (new_state)
     {
     case FSM_UNDEFINED:
@@ -61,7 +51,6 @@ PRIVATE status_t fsm_set_state_into_flash(fsm_state_t new_state){
     case FSM_MEMORY_DOWNLOAD:
             buf_state = 2;
             ret = STATUS_OK;
-
     break;
     
     default:
@@ -73,24 +62,19 @@ PRIVATE status_t fsm_set_state_into_flash(fsm_state_t new_state){
 
 }
 
-
 status_t fsm_init(){
     status_t ret = STATUS_OK;
     __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED;
     // Leo estado desde flash
-            modulo_debug_print("fsm antes de get flash\n");
-
-    //fsm_state_t state_from_flash = fsm_get_state_from_flash();
-         fsm_state_t state_from_flash = FSM_ON_FIELD;
-
-            modulo_debug_print("fsm despues de get flash\n");
-
-    // Si es estado valido, actualizo sram
-    if(state_from_flash != FSM_ERROR){
-        __DEVICE_STATE_IN_SRAM__ = state_from_flash;
-        ret = STATUS_ERROR;
-    }
-        modulo_debug_print("fsm init\n");
+    modulo_debug_print("fsm antes de get flash\n");
+    fsm_state_t state_from_flash = fsm_get_state_from_flash();
+   
+   
+   
+    __DEVICE_STATE_IN_SRAM__ = state_from_flash;
+  
+  
+  
 
     return ret;
 }
@@ -109,7 +93,7 @@ status_t fsm_set_state( fsm_state_t new_state){
     // Cargo el nuevo estado en memoria
     ret = fsm_set_state_into_flash(new_state);
     // Si no tenemos error actualizo estado en sram
-    if(ret == STATUS_OK)__DEVICE_STATE_IN_SRAM__ = new_state;
+    __DEVICE_STATE_IN_SRAM__ = new_state;
     return ret;
 }
 

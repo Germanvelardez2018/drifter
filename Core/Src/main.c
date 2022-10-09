@@ -38,7 +38,7 @@
 
 
 #define COUNTER                (0)
-#define MAX_COUNTER            (3)
+#define MAX_COUNTER            (10)
 #define INTERVAL               (1)
 
 
@@ -88,23 +88,22 @@ extern DMA_HandleTypeDef hdma_usart2_tx;
 
 
 static void inline on_field(){
-
   // leo el contador
   mem_s_get_counter(&counter);
   modulo_debug_print("FSM: ON FIELD\r\n");
   // Secuencia:
   memset(buffer,0,255);
   //Obtengo datos de sensores
-
   //Guardo datos de sensores
  // mpu6050_get_measure(buffer,255);
   sprintf(buffer,"Contador:%d.\r\n",counter);
   //sim7000g_get_NMEA(buffer,255);
   modulo_debug_print(buffer);
   write_data(buffer,counter);
-  //Automento contador de muestras almacenadas
+  //Aumento contador de muestras almacenadas
   if( counter >= MAX_COUNTER){
       device = FSM_MEMORY_DOWNLOAD;   
+      fsm_set_state(device); 
   }else{
     counter = counter +1 ;
     // seteo el contador
@@ -120,7 +119,6 @@ static void inline on_download(void){
  // counter = MAX_COUNTER;
   sprintf(buffer,"extraer :%d datos\n",counter);
   modulo_debug_print(buffer);
-
   flag = 1;
   while(counter >=  0 && flag){
     memset(buffer,0,255);
@@ -136,9 +134,6 @@ static void inline on_download(void){
     else{
        counter = counter -1;}
   }
-  memset(buffer,0,255);
-  battery_check_status(buffer,255);
-  sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
   sim7000g_mqtt_subscription("CMD");
   modulo_debug_print("Esperando comandos nuevos\r\n");
     HAL_IWDG_Refresh(&hiwdg);
@@ -153,7 +148,7 @@ static void inline on_download(void){
   counter = 0;
   mem_s_set_counter(&counter);
   device = FSM_ON_FIELD;  
-  //fsm_set_state(device); 
+  fsm_set_state(device); 
   //sim7000g_get_interval();
   //sim7000g_get_max();
 }
@@ -193,20 +188,35 @@ int main(void)
   app_init();
 
 
+
 // Sirve para cargar valores por defecto a memoria flash
 // prueba adc
-  uint8_t c= 0;
-  uint8_t max = MAX_COUNTER;
-  uint8_t interval = INTERVAL;
+
+  uint8_t max = 3;
+  uint8_t interval = 5;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   //reset el contador
   //mem_s_set_counter(&c);
-  mem_s_set_interval(&interval);
-  mem_s_set_max_amount_data(&max);
+  //mem_s_set_interval(&interval);
+  //mem_s_set_max_amount_data(&max);
 
-  c= 0;
-  max = 0;
-  interval = 0;
+
   mem_s_get_counter(&counter);
   mem_s_get_max_amount_data(&max);
   mem_s_get_interval(&interval);
@@ -231,9 +241,10 @@ int main(void)
 
 
 
+
   sim7000g_sleep();
   MX_IWDG_Init();
-  device = FSM_ON_FIELD; // fsm_get_state();
+  device =  fsm_get_state();
   pwr_mode_t  modo = RUN ;
   while (1)
   {   

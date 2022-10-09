@@ -26,9 +26,9 @@
 // De 0 A 47   // Registros especiales, No Data
 
 //Intervalo en minutos para mediciones
-#define MMAP_INTERVAL                                       (MMAP_OFFSET_CONFIG + 1)
+#define MMAP_INTERVAL                                       (MMAP_OFFSET_CONFIG + 7)
 // Numero de datos almacenados antes de enviar a servidor
-#define MMAP_MAX_AMOUNT_DATA                                (MMAP_OFFSET_CONFIG + 2)
+#define MMAP_MAX_AMOUNT_DATA                                (MMAP_OFFSET_CONFIG + 8)
 // Flag de estado de conexion
 #define MMAP_F_CONNECTION                                   (MMAP_OFFSET_CONFIG + 3)
 // Flag de estado de bateria: 3 Normal, 2 medio, 1 baja

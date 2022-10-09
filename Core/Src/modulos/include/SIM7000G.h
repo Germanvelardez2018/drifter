@@ -34,7 +34,7 @@ extern "C" {
 
 
 
-
+void check_buffer_cmd();
 
 
 

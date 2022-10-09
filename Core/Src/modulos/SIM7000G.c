@@ -120,7 +120,7 @@ PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 PRIVATE uint8_t _WAIT_CMD_ = 0;
 PRIVATE uint8_t interval = 0 , m = 0;
-
+PRIVATE uint8_t flag_cmd = 0;
 extern  UART_HandleTypeDef huart1;
 extern  UART_HandleTypeDef huart2;
 
@@ -144,7 +144,7 @@ PRIVATE   void get_values(char* buffer,int8_t* interval, uint8_t* max)
     uint8_t n;
      if(token != NULL){
         while(token != NULL){
-          n = atoi(token);
+          n =(uint8_t) atoi(token);
           if(n != 0){
           if(index == 0){
           *interval =n; 
@@ -160,13 +160,10 @@ PRIVATE   void get_values(char* buffer,int8_t* interval, uint8_t* max)
 
 
 
- uint8_t* sim7000g_get_interval(){
-    return (&interval);
-}
 
- uint8_t* sim7000g_get_max(){
-    return (&m);
-}
+
+
+
 
 
 PRIVATE void PWRKEY_set(level_t level){
@@ -288,15 +285,40 @@ PRIVATE uint8_t cmd_buffer[40]={0};
 PRIVATE uint8_t len = 0;
 
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
-  if(GPIO_Pin == GPIO_PIN_15){
-    if(_WAIT_CMD_ == 1){
-        HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,200);
+
+void check_buffer_cmd(){
+
+   
+    if(0)
+    {
+         modulo_debug_print("activar comandos \r\n");
         get_values(cmd_buffer,&interval,&m);
-        sprintf(cmd_buffer,"cmd: %d %d\r\n",interval,m);
+        sprintf(cmd_buffer,"interval:%d max:%d\r\n",interval,m);
         len = strlen(cmd_buffer); 
         HAL_UART_Transmit(&huart2,cmd_buffer,len,100);
+        mem_s_set_interval(&interval);
+        mem_s_set_max_amount_data(&m);
+        flag_cmd = 0;
+    }
+}
+
+
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+  if(GPIO_Pin == GPIO_PIN_15){
+    if(_WAIT_CMD_ == 1){
+      //HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,500);
+      //  get_values(cmd_buffer,&interval,&m);
+        flag_cmd = 1;    
+       // sprintf(cmd_buffer,"cmd: %d %d\r\n",interval,m);
+        len = strlen(cmd_buffer); 
+        interval = 8;
+        m = 3;
+        HAL_UART_Transmit(&huart2,"irq gpio",9,100);   
+        mem_s_set_interval(&interval);
+        mem_s_set_max_amount_data(&m);
     }
   }
 }
