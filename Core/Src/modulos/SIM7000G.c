@@ -160,13 +160,6 @@ PRIVATE   void get_values(char* buffer,int8_t* interval, uint8_t* max)
 
 
 
- uint8_t* sim7000g_get_interval(){
-    return (&interval);
-}
-
- uint8_t* sim7000g_get_max(){
-    return (&m);
-}
 
 
 PRIVATE void PWRKEY_set(level_t level){
@@ -274,10 +267,8 @@ status_t sim7000g_check(){
         delay(1000);
     }
     modulo_debug_print("\n");
-    
     ret = send_command(CMD_ECHO_OFF,CMD_OK);
-     ret = send_command(CMD_AT,CMD_OK);
-
+    ret = send_command(CMD_AT,CMD_OK);
     return ret;
 }
 
@@ -289,14 +280,19 @@ PRIVATE uint8_t len = 0;
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+ //HAL_ResumeTick();
+    //    HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
+ //HAL_SuspendTick();
 
   if(GPIO_Pin == GPIO_PIN_15){
     if(_WAIT_CMD_ == 1){
-        HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,200);
-        get_values(cmd_buffer,&interval,&m);
-        sprintf(cmd_buffer,"cmd: %d %d\r\n",interval,m);
-        len = strlen(cmd_buffer); 
-        HAL_UART_Transmit(&huart2,cmd_buffer,len,100);
+     //  
+      //  HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,200);
+    //    get_values(cmd_buffer,&interval,&m);
+    //    sprintf(cmd_buffer,"INTERVAL:%d  MAX:%d\r\n",interval,m);
+      //  len = strlen(cmd_buffer); 
+      //  HAL_UART_Transmit(&huart2,cmd_buffer,len,100);
+       //
     }
   }
 }
@@ -383,17 +379,17 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     ret = send_command(buffer,CMD_OK);
     delay(1000);
     ret = send_command(CMD_MQTT_KEEK_ALIVE,CMD_OK);
-    delay(500);
-  //sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
-  //delay(500);
-  //ret = send_command(buffer,CMD_OK);
-  //sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
-  //delay(500);
-  //ret= send_command(buffer,CMD_OK);
+    delay(1000);
+    //sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
+    //delay(1000);
+    //ret = send_command(buffer,CMD_OK);
+    //sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
+    //delay(1000);
+    //ret= send_command(buffer,CMD_OK);
     sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
-    delay(500);
+    delay(1000);
     ret = send_command(buffer,CMD_OK);
-    delay(500);
+    delay(1000);
     ret = send_command(CMD_MQTT_COMMIT,CMD_OK);
     delay(1000);
    

@@ -38,7 +38,7 @@
 
 
 #define COUNTER                (0)
-#define MAX_COUNTER            (3)
+#define MAX_COUNTER            (5)
 #define INTERVAL               (1)
 
 
@@ -134,26 +134,20 @@ static void inline on_download(void){
     if(counter ==0 ){ 
        flag = 0;} 
     else{
-       counter = counter -1;}
+       counter = counter -1;
+       mem_s_set_counter(&counter);}
   }
   memset(buffer,0,255);
-  battery_check_status(buffer,255);
-  sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
-  sim7000g_mqtt_subscription("CMD");
+  
   modulo_debug_print("Esperando comandos nuevos\r\n");
     HAL_IWDG_Refresh(&hiwdg);
 
-  delay(4000);
-  HAL_IWDG_Refresh(&hiwdg);
-  delay(4000);
-  HAL_IWDG_Refresh(&hiwdg);
-  modulo_debug_print("deshabilito comandos\r\n");
 
-  sim7000g_mqtt_unsubscription("CMD");
+ // sim7000g_mqtt_unsubscription("CMD");
   counter = 0;
   mem_s_set_counter(&counter);
   device = FSM_ON_FIELD;  
-  //fsm_set_state(device); 
+  fsm_set_state(device); 
   //sim7000g_get_interval();
   //sim7000g_get_max();
 }
@@ -181,6 +175,26 @@ static void app_init(){
   
 }
 
+
+
+
+
+
+static void mqtt_config(){
+
+  sim7000g_check();
+  sim7000g_get_signal();
+  sim7000g_open_apn();
+  sim7000g_get_operator();
+  sim7000g_set_gps(1);
+  sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
+  sim7000g_resume();
+  sim7000g_mqtt_subscription("CMD");
+  sim7000g_sleep();
+
+
+
+}
 
 
 
@@ -213,27 +227,14 @@ int main(void)
   sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \r\n",counter,max,interval);
   modulo_debug_print(buffer);
 
-  sim7000g_check();
-  sim7000g_get_signal();
-  sim7000g_open_apn();
-  sim7000g_get_operator();
-  sim7000g_set_gps(1);
-  sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
-  sim7000g_resume();
-  sim7000g_mqtt_subscription("CMD");
-  sim7000g_mqtt_check();
 
-// formato de lo que recibis 
-  sim7000g_mqtt_publish("SIMO_CONFIG2","CHECK CONNECTION \r\n",strlen("CHECK CONNECTION \r\n"));
+  mqtt_config();
 
 
 
 
-
-
-  sim7000g_sleep();
   MX_IWDG_Init();
-  device = FSM_ON_FIELD; // fsm_get_state();
+  device =  fsm_get_state();
   pwr_mode_t  modo = RUN ;
   while (1)
   {   
@@ -250,13 +251,12 @@ int main(void)
            on_download();
           break;
         default:
-        //nothing
+           //nothing
         break;
-      }
-  }
+      }}
     pwr_sleep();
   }
-  /* USER CODE END 3 */
+
 }
 
 
