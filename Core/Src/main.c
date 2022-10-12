@@ -117,6 +117,8 @@ static void inline on_field(){
 static void inline on_download(void){
   modulo_debug_print("FSM: DOWNLOAD\r\n");  
   mem_s_get_counter(&counter);
+
+  if(counter > MAX_COUNTER) counter = MAX_COUNTER;
  // counter = MAX_COUNTER;
   sprintf(buffer,"extraer :%d datos\n",counter);
   modulo_debug_print(buffer);
@@ -189,8 +191,8 @@ static void mqtt_config(){
   sim7000g_set_gps(1);
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
-  sim7000g_mqtt_subscription("CMD");
-  sim7000g_sleep();
+ // sim7000g_mqtt_subscription("CMD");
+  //sim7000g_sleep();
 
 
 
@@ -229,6 +231,19 @@ int main(void)
 
 
   mqtt_config();
+  #define PUB_MSG            "hola mundo"
+  sim7000g_mqtt_publish("check",PUB_MSG,strlen(PUB_MSG));
+  gpio_interruption_init();
+
+
+  while(1){
+    delay(10000);
+    modulo_debug_print("into the while \r\n");
+
+  }
+
+
+
 
 
 
