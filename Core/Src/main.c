@@ -79,13 +79,12 @@ PRIVATE  uint8_t           buffer[255];
 
 PRIVATE  uint8_t  buf[255];
 PRIVATE  uint8_t  counter = 0;
-PRIVATE  uint8_t  max_counter = 0;
 uint8_t flag = 1;
 
 
 extern DMA_HandleTypeDef hdma_usart2_tx;
 
-
+PRIVATE uint8_t max_counter = MAX_COUNTER;
 
 static void inline on_field(){
 
@@ -103,7 +102,7 @@ static void inline on_field(){
   modulo_debug_print(buffer);
   write_data(buffer,counter);
   //Automento contador de muestras almacenadas
-  if( counter >= MAX_COUNTER){
+  if( counter >= max_counter){
       device = FSM_MEMORY_DOWNLOAD;   
   }else{
     counter = counter +1 ;
@@ -141,17 +140,23 @@ static void inline on_download(void){
   }
   memset(buffer,0,255);
   
-  modulo_debug_print("Esperando comandos nuevos\r\n");
+  modulo_debug_print("parametros ingresados interval 2, max 7\r\n");
+   uint8_t interval = 2;
+   uint8_t max = 7;
+   mem_s_set_interval(&interval);
+   mem_s_set_max_amount_data(&max);
+
     HAL_IWDG_Refresh(&hiwdg);
 
 
  // sim7000g_mqtt_unsubscription("CMD");
   counter = 0;
   mem_s_set_counter(&counter);
+  mem_s_get_max_amount_data(&max_counter);
+
   device = FSM_ON_FIELD;  
   fsm_set_state(device); 
-  //sim7000g_get_interval();
-  //sim7000g_get_max();
+  
 }
 
 
@@ -191,8 +196,8 @@ static void mqtt_config(){
   sim7000g_set_gps(1);
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
- // sim7000g_mqtt_subscription("CMD");
-  //sim7000g_sleep();
+  sim7000g_mqtt_subscription("CMD");
+  sim7000g_sleep();
 
 
 
@@ -211,14 +216,16 @@ int main(void)
 
 // Sirve para cargar valores por defecto a memoria flash
 // prueba adc
-  uint8_t c= 0;
+  uint8_t c= 4;
   uint8_t max = MAX_COUNTER;
   uint8_t interval = INTERVAL;
 
   //reset el contador
-  //mem_s_set_counter(&c);
+  mem_s_set_counter(&c);
   mem_s_set_interval(&interval);
   mem_s_set_max_amount_data(&max);
+
+ modulo_debug_print("init program \r\n");
 
   c= 0;
   max = 0;
@@ -231,30 +238,22 @@ int main(void)
 
 
   mqtt_config();
-  #define PUB_MSG            "hola mundo"
+  #define PUB_MSG            "check"
   sim7000g_mqtt_publish("check",PUB_MSG,strlen(PUB_MSG));
-  gpio_interruption_init();
-
-
-  while(1){
-    delay(10000);
-    modulo_debug_print("into the while \r\n");
-
-  }
-
-
-
-
-
-
+  //gpio_interruption_init();
 
   MX_IWDG_Init();
+
+
+
+  modulo_debug_print("iniciamos proceso\r\n");
   device =  fsm_get_state();
   pwr_mode_t  modo = RUN ;
   while (1)
   {   
-  HAL_IWDG_Refresh(&hiwdg);
-  modo = pwr_get_mode();
+    modo = pwr_get_mode();
+    HAL_IWDG_Refresh(&hiwdg);
+
   if(modo == RUN){
       switch (device)
       {
@@ -273,6 +272,9 @@ int main(void)
   }
 
 }
+
+
+
 
 
 

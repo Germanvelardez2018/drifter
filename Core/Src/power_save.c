@@ -17,15 +17,9 @@ PRIVATE  uint8_t buffer[100];
 
 //  intervalo en sleep mode en SRAM, 
 //  se recarga desde memoria flash en momentos especificos
-PRIVATE  uint8_t  __sleep_interval__ ;
 
 
 
-
-
-PRIVATE uint8_t get_sleep_interval(){
-    return __sleep_interval__;
-}
 
 PRIVATE status_t set_time(uint8_t hours, uint8_t minutes, uint8_t seconds){  
     status_t ret = STATUS_ERROR;
@@ -70,10 +64,6 @@ PRIVATE status_t set_alarm(uint8_t hours, uint8_t minutes, uint8_t seconds){
 
 
 
-void set_sleep_interval(uint8_t interval){
-    __sleep_interval__ = interval;
-}
-
 
 
 pwr_mode_t pwr_get_mode(){
@@ -96,7 +86,7 @@ void pwr_init(){
     set_time(0,0,0);
 
 
-    mem_s_get_interval(&__sleep_interval__);
+   
 
 
 }
@@ -108,7 +98,10 @@ void pwr_sleep(){
     //configuro alarma si flag no es SLEEP,
     if(__PWR_FLAG__ == RUN){
          // leo intervalor from flash (dummy por el momento)
-    uint8_t interval = get_sleep_interval();
+    uint8_t interval =1;
+
+    mem_s_get_interval(&interval);
+
     //leo tiempo    
     uint8_t h,m,s ;
     get_time(&h,&m,&s);  

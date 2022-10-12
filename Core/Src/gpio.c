@@ -84,3 +84,13 @@ void gpio_interruption_init(){
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
+
+
+
+
+
+
+void gpio_interruption_deinit(){
+  HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
+
+}

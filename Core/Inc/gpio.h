@@ -40,6 +40,10 @@ void GPIO_deinit(void);
 
 void gpio_interruption_init();
 
+
+void gpio_interruption_deinit();
+
+
 #ifdef __cplusplus
 }
 #endif

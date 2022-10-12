@@ -280,21 +280,27 @@ PRIVATE uint8_t len = 0;
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
- //HAL_ResumeTick();
-        HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
- //HAL_SuspendTick();
+ HAL_ResumeTick();
 
   if(GPIO_Pin == GPIO_PIN_15){
-    if(_WAIT_CMD_ == 1){
+    if(1){
      //  
       //  HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,200);
-    //    get_values(cmd_buffer,&interval,&m);
-    //    sprintf(cmd_buffer,"INTERVAL:%d  MAX:%d\r\n",interval,m);
+      //  get_values(cmd_buffer,&interval,&m);
+      //  sprintf(cmd_buffer,"INTERVAL:%d  MAX:%d\r\n",interval,m);
       //  len = strlen(cmd_buffer); 
       //  HAL_UART_Transmit(&huart2,cmd_buffer,len,100);
-       //
+    //modulo_debug_print("parametros obtenidos\r\n");
+
+  
+    mem_s_set_interval(&interval);
+  mem_s_set_max_amount_data(&m);
+ // while(1);
+    
     }
   }
+   HAL_SuspendTick();
+
 }
 
 
