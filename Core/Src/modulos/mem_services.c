@@ -22,7 +22,7 @@ PRIVATE void inline mem_init(){
 
 PRIVATE status_t mem_write_page(uint8_t* data, uint8_t len, uint16_t pag,uint8_t pos){
    status_t ret = STATUS_ERROR;
-   at45db_write_page(data,  len, pag, pos);
+   ret = at45db_write_page(data,  len, pag, pos);
    return ret;
 }
 

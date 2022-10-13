@@ -119,7 +119,7 @@ PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 
 PRIVATE uint8_t _WAIT_CMD_ = 0;
-PRIVATE uint8_t interval = 0 , m = 0;
+PRIVATE uint8_t interval , m;
 
 extern  UART_HandleTypeDef huart1;
 extern  UART_HandleTypeDef huart2;
@@ -144,6 +144,8 @@ PRIVATE   void get_values(char* buffer,int8_t* interval, uint8_t* max)
     uint8_t n;
      if(token != NULL){
         while(token != NULL){
+      //   modulo_debug_print(":");
+      //   modulo_debug_print(token);
           n = atoi(token);
           if(n != 0){
           if(index == 0){
@@ -274,32 +276,61 @@ status_t sim7000g_check(){
 
 
 
-#define COMMAND_SIZE            25
+#define COMMAND_SIZE            15
 PRIVATE uint8_t cmd_buffer[40]={0};
-PRIVATE uint8_t len = 0;
+PRIVATE uint8_t rebound = 0;
+
+
+
+
+
+
+
+
+
+ HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+            HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
+         
+            
+            get_values(cmd_buffer,&interval,&m);
+            sprintf(cmd_buffer,"INTERVAL:%d  MAX:%d\r\n",interval,m);
+            modulo_debug_print(cmd_buffer);
+            //mem_s_set_interval(&interval);
+            //mem_s_get_max_amount_data(&m);
+
+        
+            while(1);
+            //  gpio_interruption_init();
+
+            
+          
+       
+}
+
+
+
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
- HAL_ResumeTick();
-
-  if(GPIO_Pin == GPIO_PIN_15){
-    if(1){
-     //  
-      //  HAL_UART_Receive(&huart1,cmd_buffer,COMMAND_SIZE,200);
-      //  get_values(cmd_buffer,&interval,&m);
-      //  sprintf(cmd_buffer,"INTERVAL:%d  MAX:%d\r\n",interval,m);
-      //  len = strlen(cmd_buffer); 
-      //  HAL_UART_Transmit(&huart2,cmd_buffer,len,100);
-    //modulo_debug_print("parametros obtenidos\r\n");
-
-  
-    mem_s_set_interval(&interval);
-  mem_s_set_max_amount_data(&m);
- // while(1);
     
-    }
-  }
-   HAL_SuspendTick();
+         HAL_ResumeTick();
+     //    HAL_UART_Receive_IT(&huart1,cmd_buffer,8);
+        HAL_UART_Receive(&huart1,cmd_buffer,10,150);
+        HAL_UART_Transmit(&huart2,cmd_buffer,10,150);
+
+        //   get_values(cmd_buffer,&interval,&m);
+        //   sprintf(cmd_buffer,"INTERVAL:%d  MAX:%d\r\n",interval,m);
+        //   modulo_debug_print(cmd_buffer);
+           while(1);
+
+     
+        
+
+       
+       // mem_s_set_interval(&interval);
+        //mem_s_get_max_amount_data(&m);
+
+      
 
 }
 

@@ -145,15 +145,11 @@ static void inline on_download(void){
    uint8_t max = 7;
    mem_s_set_interval(&interval);
    mem_s_set_max_amount_data(&max);
-
-    HAL_IWDG_Refresh(&hiwdg);
-
-
+  HAL_IWDG_Refresh(&hiwdg);
  // sim7000g_mqtt_unsubscription("CMD");
   counter = 0;
   mem_s_set_counter(&counter);
   mem_s_get_max_amount_data(&max_counter);
-
   device = FSM_ON_FIELD;  
   fsm_set_state(device); 
   
@@ -178,8 +174,7 @@ static void app_init(){
   pwr_init();
   fsm_init();
   // Sensor
-  mpu6050_init();
-  
+  mpu6050_init();  
 }
 
 
@@ -188,7 +183,6 @@ static void app_init(){
 
 
 static void mqtt_config(){
-
   sim7000g_check();
   sim7000g_get_signal();
   sim7000g_open_apn();
@@ -198,8 +192,6 @@ static void mqtt_config(){
   sim7000g_resume();
   sim7000g_mqtt_subscription("CMD");
   sim7000g_sleep();
-
-
 
 }
 
@@ -221,9 +213,9 @@ int main(void)
   uint8_t interval = INTERVAL;
 
   //reset el contador
-  mem_s_set_counter(&c);
-  mem_s_set_interval(&interval);
-  mem_s_set_max_amount_data(&max);
+  //em_s_set_counter(&c);
+  //mem_s_set_interval(&interval);
+  //mem_s_set_max_amount_data(&max);
 
  modulo_debug_print("init program \r\n");
 
@@ -240,14 +232,20 @@ int main(void)
   mqtt_config();
   #define PUB_MSG            "check"
   sim7000g_mqtt_publish("check",PUB_MSG,strlen(PUB_MSG));
-  //gpio_interruption_init();
+  gpio_interruption_init();
 
   MX_IWDG_Init();
 
 
+  while(1){
+    delay(2500);
+    HAL_IWDG_Refresh(&hiwdg);
+    modulo_debug_print("in while\r\n");
+  }
+
 
   modulo_debug_print("iniciamos proceso\r\n");
-  device =  fsm_get_state();
+  device =  FSM_ON_FIELD;//fsm_get_state();
   pwr_mode_t  modo = RUN ;
   while (1)
   {   

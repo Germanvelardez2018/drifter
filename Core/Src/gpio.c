@@ -32,6 +32,25 @@ if(__DRIVER_INITED__ == DRIVER_STARTED){
 
 
 /**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  
+  HAL_GPIO_EXTI_IRQHandler(SIM7000G_RI_Pin);
+  
+}
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
+
+
+
+
+
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
