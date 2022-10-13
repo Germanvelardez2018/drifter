@@ -79,7 +79,7 @@ status_t fsm_init(){
     __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED;
     // Leo estado desde flash
     //fsm_state_t state_from_flash = fsm_get_state_from_flash();
-         fsm_state_t state_from_flash = FSM_ON_FIELD;
+    fsm_state_t state_from_flash = FSM_ON_FIELD;
     // Si es estado valido, actualizo sram
     if(state_from_flash != FSM_ERROR){
         __DEVICE_STATE_IN_SRAM__ = state_from_flash;
