@@ -29,7 +29,7 @@ PRIVATE fsm_state_t fsm_get_state_from_flash(){
         state = FSM_ERROR;
         break;
     }
-    modulo_debug_print("final  de fsm mem\n");
+  
     return state;
 }
 
@@ -66,8 +66,7 @@ status_t fsm_init(){
     status_t ret = STATUS_OK;
     __DEVICE_STATE_IN_SRAM__ = FSM_UNDEFINED;
     // Leo estado desde flash
-    modulo_debug_print("fsm antes de get flash\n");
-    fsm_state_t state_from_flash = fsm_get_state_from_flash();
+    fsm_state_t state_from_flash =FSM_ON_FIELD;//fsm_get_state_from_flash();
     __DEVICE_STATE_IN_SRAM__ = state_from_flash;
   
   

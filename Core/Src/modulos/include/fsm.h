@@ -31,7 +31,7 @@ typedef enum{
  , FSM_UNDEFINED        = 0
  , FSM_ON_FIELD         = 1     //! Transmicion desde campo
  , FSM_MEMORY_DOWNLOAD  = 2     //! Transmicion desde memoria
-
+ , FSM_UPDATE_PARAMS    = 3
 } fsm_state_t;
 
 /*-----------------------------------------------------------------------------*/

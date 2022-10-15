@@ -34,6 +34,17 @@ extern "C" {
 
 
 
+
+
+
+uint8_t sim_get_update_params(void);
+
+
+void sim_set_update_params(uint8_t value);
+
+
+
+
 void check_buffer_cmd();
 
 

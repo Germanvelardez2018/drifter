@@ -84,6 +84,7 @@ PRIVATE  uint8_t           buffer[255];
 PRIVATE  uint8_t  buf[255];
 PRIVATE  uint8_t  counter = 0;
 uint8_t flag = 1;
+uint8_t flag_params = 0;
 
 
 extern DMA_HandleTypeDef hdma_usart2_tx;
@@ -154,8 +155,8 @@ static void inline on_download(void){
   HAL_IWDG_Refresh(&hiwdg);
  // sim7000g_mqtt_unsubscription("CMD");
   counter = 0;
-  mem_s_set_counter(&counter);
-  mem_s_get_max_amount_data(&max_counter);
+ // mem_s_set_counter(&counter);
+ // mem_s_get_max_amount_data(&max_counter);
   device = FSM_ON_FIELD;  
   fsm_set_state(device); 
 
@@ -184,7 +185,7 @@ static void app_init(){
   pwr_init();
   fsm_init();
   // Sensor
-  mpu6050_init();  
+ // mpu6050_init();  
 }
 
 
@@ -220,19 +221,17 @@ int main(void)
 // Sirve para cargar valores por defecto a memoria flash
 // prueba adc
 
-  uint8_t interval = 5;
-
-
-
-
-
-  //reset el contador
-  //mem_s_set_counter(&c);
-  //mem_s_set_interval(&interval);
-  //mem_s_set_max_amount_data(&max);
-
+  uint8_t interval = 1;
   uint8_t c= 4;
   uint8_t max = MAX_COUNTER;
+
+  //reset el contador
+  mem_s_set_counter(&c);
+  mem_s_set_interval(&interval);
+  mem_s_set_max_amount_data(&max);
+
+
+
 
   //reset el contador
   //em_s_set_counter(&c);
@@ -253,14 +252,6 @@ int main(void)
   sim7000g_mqtt_publish("check",PUB_MSG,strlen(PUB_MSG));
   gpio_interruption_init();
 
-
-
-
-
-
-
-
-  sim7000g_sleep();
   MX_IWDG_Init();
   device =  fsm_get_state();
   pwr_mode_t  modo = RUN ;
@@ -282,9 +273,17 @@ int main(void)
         default:
            //nothing
         break;
-      }}
+      }
+      }
+      flag_params = sim_get_update_params();
+      if(flag_params )      {
+        modulo_debug_print("done update params\r\n");
+        modo = RUN;
+        sim_set_update_params(0);
+      }    
+
     pwr_sleep();
-  }
+ }
 
 }
 

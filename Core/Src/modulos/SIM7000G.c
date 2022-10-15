@@ -119,7 +119,7 @@ PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 
 
-PRIVATE uint8_t _WAIT_CMD_ = 0;
+PRIVATE uint8_t _UPDATE_PARAMS_ = 0;
 PRIVATE uint8_t interval = 0 , m = 0;
 PRIVATE uint8_t flag_cmd = 0;
 
@@ -306,9 +306,14 @@ PRIVATE uint8_t rebound = 0;
 
 
 
+uint8_t sim_get_update_params(void){
 
+    return _UPDATE_PARAMS_;
+}
 
-
+void sim_set_update_params(uint8_t value){
+    _UPDATE_PARAMS_ = value;
+}
 
 
 
@@ -322,14 +327,14 @@ PRIVATE uint8_t rebound = 0;
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
     
          HAL_ResumeTick();
-     //    HAL_UART_Receive_IT(&huart1,cmd_buffer,8);
-        HAL_UART_Receive(&huart1,cmd_buffer,10,150);
-        HAL_UART_Transmit(&huart2,cmd_buffer,10,150);
+        sim_set_update_params(1);
+        HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
+
 
         //   get_values(cmd_buffer,&interval,&m);
         //   sprintf(cmd_buffer,"INTERVAL:%d  MAX:%d\r\n",interval,m);
         //   modulo_debug_print(cmd_buffer);
-           while(1);       
+     //      while(1);       
        // mem_s_set_interval(&interval);
         //mem_s_get_max_amount_data(&m);
 
@@ -436,7 +441,7 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     delay(2000);
     ret = send_command(CMD_MQTT_COMMIT,CMD_OK);
     delay(2000);
-       _WAIT_CMD_ = 1;
+       
     sprintf(buffer,CMD_MQTT_SUBSCRIBE,"CMD",1);    
     ret = send_command(buffer,CMD_OK);
     delay(2000);
@@ -473,7 +478,6 @@ status_t sim7000g_mqtt_subscription(uint8_t* topic){
     uint8_t  buffer[100]={0};
         sprintf(buffer,CMD_MQTT_SUBSCRIBE,topic,1);    
         ret = send_command(buffer,CMD_OK);
-        _WAIT_CMD_ = 1;
     return ret;
 }
 
@@ -483,7 +487,6 @@ status_t sim7000g_mqtt_unsubscription(uint8_t* topic){
     uint8_t  buffer[100]={0};
         sprintf(buffer,CMD_MQTT_UMSUBSCRIBE,topic);    
         ret = send_command(buffer,CMD_OK);
-        _WAIT_CMD_ = 0; 
     return ret;
 }
 
