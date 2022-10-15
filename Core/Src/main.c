@@ -38,8 +38,12 @@
 
 
 #define COUNTER                (0)
+
 #define MAX_COUNTER            (10)
-#define INTERVAL               (1)
+
+
+
+
 
 
 //si esta definido default value, recargamos flash con valores default
@@ -79,13 +83,12 @@ PRIVATE  uint8_t           buffer[255];
 
 PRIVATE  uint8_t  buf[255];
 PRIVATE  uint8_t  counter = 0;
-PRIVATE  uint8_t  max_counter = 0;
 uint8_t flag = 1;
 
 
 extern DMA_HandleTypeDef hdma_usart2_tx;
 
-
+PRIVATE uint8_t max_counter = MAX_COUNTER;
 
 static void inline on_field(){
   // leo el contador
@@ -101,7 +104,10 @@ static void inline on_field(){
   modulo_debug_print(buffer);
   write_data(buffer,counter);
   //Aumento contador de muestras almacenadas
-  if( counter >= MAX_COUNTER){
+
+
+
+  if( counter >= max_counter){
       device = FSM_MEMORY_DOWNLOAD;   
       fsm_set_state(device); 
   }else{
@@ -116,6 +122,8 @@ static void inline on_field(){
 static void inline on_download(void){
   modulo_debug_print("FSM: DOWNLOAD\r\n");  
   mem_s_get_counter(&counter);
+
+  if(counter > MAX_COUNTER) counter = MAX_COUNTER;
  // counter = MAX_COUNTER;
   sprintf(buffer,"extraer :%d datos\n",counter);
   modulo_debug_print(buffer);
@@ -132,26 +140,30 @@ static void inline on_download(void){
     if(counter ==0 ){ 
        flag = 0;} 
     else{
-       counter = counter -1;}
+       counter = counter -1;
+       mem_s_set_counter(&counter);}
   }
-  sim7000g_mqtt_subscription("CMD");
-  modulo_debug_print("Esperando comandos nuevos\r\n");
-    HAL_IWDG_Refresh(&hiwdg);
 
-  delay(4000);
+  memset(buffer,0,255);
+  
+  modulo_debug_print("parametros ingresados interval 2, max 7\r\n");
+   uint8_t interval = 2;
+   uint8_t max = 7;
+   mem_s_set_interval(&interval);
+   mem_s_set_max_amount_data(&max);
   HAL_IWDG_Refresh(&hiwdg);
-  delay(4000);
-  HAL_IWDG_Refresh(&hiwdg);
-  modulo_debug_print("deshabilito comandos\r\n");
-
-  sim7000g_mqtt_unsubscription("CMD");
+ // sim7000g_mqtt_unsubscription("CMD");
   counter = 0;
   mem_s_set_counter(&counter);
+  mem_s_get_max_amount_data(&max_counter);
   device = FSM_ON_FIELD;  
   fsm_set_state(device); 
-  //sim7000g_get_interval();
-  //sim7000g_get_max();
+
 }
+
+
+
+
 
 
 static void app_init(){
@@ -172,10 +184,26 @@ static void app_init(){
   pwr_init();
   fsm_init();
   // Sensor
-  mpu6050_init();
-  
+  mpu6050_init();  
 }
 
+
+
+
+
+
+static void mqtt_config(){
+  sim7000g_check();
+  sim7000g_get_signal();
+  sim7000g_open_apn();
+  sim7000g_get_operator();
+  sim7000g_set_gps(1);
+  sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
+  sim7000g_resume();
+  sim7000g_mqtt_subscription("CMD");
+  sim7000g_sleep();
+
+}
 
 
 
@@ -192,20 +220,7 @@ int main(void)
 // Sirve para cargar valores por defecto a memoria flash
 // prueba adc
 
-  uint8_t max = 3;
   uint8_t interval = 5;
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -216,6 +231,15 @@ int main(void)
   //mem_s_set_interval(&interval);
   //mem_s_set_max_amount_data(&max);
 
+  uint8_t c= 4;
+  uint8_t max = MAX_COUNTER;
+
+  //reset el contador
+  //em_s_set_counter(&c);
+  //mem_s_set_interval(&interval);
+  //mem_s_set_max_amount_data(&max);
+
+ modulo_debug_print("init program \r\n");
 
   mem_s_get_counter(&counter);
   mem_s_get_max_amount_data(&max);
@@ -223,18 +247,12 @@ int main(void)
   sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \r\n",counter,max,interval);
   modulo_debug_print(buffer);
 
-  sim7000g_check();
-  sim7000g_get_signal();
-  sim7000g_open_apn();
-  sim7000g_get_operator();
-  sim7000g_set_gps(1);
-  sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
-  sim7000g_resume();
-  sim7000g_mqtt_subscription("CMD");
-  sim7000g_mqtt_check();
 
-// formato de lo que recibis 
-  sim7000g_mqtt_publish("SIMO_CONFIG2","CHECK CONNECTION \r\n",strlen("CHECK CONNECTION \r\n"));
+  mqtt_config();
+  #define PUB_MSG            "check"
+  sim7000g_mqtt_publish("check",PUB_MSG,strlen(PUB_MSG));
+  gpio_interruption_init();
+
 
 
 
@@ -248,8 +266,9 @@ int main(void)
   pwr_mode_t  modo = RUN ;
   while (1)
   {   
-  HAL_IWDG_Refresh(&hiwdg);
-  modo = pwr_get_mode();
+    modo = pwr_get_mode();
+    HAL_IWDG_Refresh(&hiwdg);
+
   if(modo == RUN){
       switch (device)
       {
@@ -261,14 +280,16 @@ int main(void)
            on_download();
           break;
         default:
-        //nothing
+           //nothing
         break;
-      }
-  }
+      }}
     pwr_sleep();
   }
-  /* USER CODE END 3 */
+
 }
+
+
+
 
 
 

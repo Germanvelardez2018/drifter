@@ -32,6 +32,25 @@ if(__DRIVER_INITED__ == DRIVER_STARTED){
 
 
 /**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  
+  HAL_GPIO_EXTI_IRQHandler(SIM7000G_RI_Pin);
+  
+}
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
+
+
+
+
+
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -68,12 +87,29 @@ if(__DRIVER_INITED__ == DRIVER_STARTED){
 
   /*Configure GPIO pin : PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;//GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;//GPIO_NOPULL;
+  GPIO_InitStruct.Mode =GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  
+
+}
+
+
+void gpio_interruption_init(){
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+}
+
+
+
+
+
+
+void gpio_interruption_deinit(){
+  HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
 
 }

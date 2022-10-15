@@ -68,14 +68,10 @@ status_t fsm_init(){
     // Leo estado desde flash
     modulo_debug_print("fsm antes de get flash\n");
     fsm_state_t state_from_flash = fsm_get_state_from_flash();
-   
-   
-   
     __DEVICE_STATE_IN_SRAM__ = state_from_flash;
   
   
   
-
     return ret;
 }
 

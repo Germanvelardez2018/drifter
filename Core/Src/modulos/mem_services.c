@@ -91,7 +91,6 @@ status_t mem_s_init(){
     status_t ret = STATUS_OK;
     // Iniciar memoria
     mem_init();
-    modulo_debug_print("memoria iniciada \r\n");
     mem_resume();
     return ret;
 }

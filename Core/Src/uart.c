@@ -79,9 +79,6 @@ void USART1_IRQHandler(void){
 
 
 
- HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
-     UNUSED(huart);
-}
 
 
 
