@@ -127,6 +127,9 @@ extern  UART_HandleTypeDef huart1;
 extern  UART_HandleTypeDef huart2;
 
 
+#define COMMAND_SIZE            32
+PRIVATE uint8_t cmd_buffer[COMMAND_SIZE]={0};
+
 
 
 #include <stdio.h>
@@ -160,6 +163,11 @@ PRIVATE   void get_values(char* buffer,int8_t* interval, uint8_t* max)
  }
 }
 
+
+void sim_get_values(char* buffer,int8_t* interval, uint8_t* max){
+     get_values(buffer, interval,  max);
+
+}
 
 
 
@@ -241,11 +249,9 @@ PRIVATE status_t send_command(uint8_t* string_cmd,uint8_t* response_expected){
 
 
 status_t sim7000g_read_input(uint8_t len, uint32_t timeout){
-
     memset(SIM7000G_BUFFER,0,SIM_BUFFER_SIZE);
     HAL_StatusTypeDef res = HAL_UART_Receive(SIM7000G_UART,buffer,len,timeout);
     status_t ret = ( res == HAL_OK)?STATUS_OK:STATUS_ERROR;
-
     return ret;
 
 }
@@ -275,9 +281,6 @@ status_t sim7000g_check(){
 
 
 
-#define COMMAND_SIZE            15
-PRIVATE uint8_t cmd_buffer[40]={0};
-PRIVATE uint8_t rebound = 0;
 
 
 
@@ -287,24 +290,18 @@ PRIVATE uint8_t rebound = 0;
 
  HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
             HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
-         
-            
-            get_values(cmd_buffer,&interval,&m);
-            sprintf(cmd_buffer,"INTERVAL:%d  MAX:%d\r\n",interval,m);
-            modulo_debug_print(cmd_buffer);
-            //mem_s_set_interval(&interval);
-            //mem_s_get_max_amount_data(&m);
-
         
-            while(1);
-            //  gpio_interruption_init();
+    }
+
+
+
+uint8_t* sim_get_buffer_cmd(){
+    return cmd_buffer;
 }
 
-
-
-
-
-
+void sim_copy_buffer_cmd(uint8_t* buffer){
+    strncpy(buffer,cmd_buffer,strlen(cmd_buffer));
+}
 
 uint8_t sim_get_update_params(void){
 
@@ -326,17 +323,10 @@ void sim_set_update_params(uint8_t value){
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
     
-         HAL_ResumeTick();
+        HAL_ResumeTick();
+        HAL_UART_Receive_IT(&huart1,cmd_buffer,COMMAND_SIZE);
         sim_set_update_params(1);
-        HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
-
-
-        //   get_values(cmd_buffer,&interval,&m);
-        //   sprintf(cmd_buffer,"INTERVAL:%d  MAX:%d\r\n",interval,m);
-        //   modulo_debug_print(cmd_buffer);
-     //      while(1);       
-       // mem_s_set_interval(&interval);
-        //mem_s_get_max_amount_data(&m);
+        cmd_buffer[COMMAND_SIZE]=0;
 
       
 
@@ -442,7 +432,7 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     ret = send_command(CMD_MQTT_COMMIT,CMD_OK);
     delay(2000);
        
-    sprintf(buffer,CMD_MQTT_SUBSCRIBE,"CMD",1);    
+    sprintf(buffer,CMD_MQTT_SUBSCRIBE,"CMD",0);    
     ret = send_command(buffer,CMD_OK);
     delay(2000);
     // configurar la interrupcion del PIN RI SIM7000G
@@ -476,7 +466,7 @@ status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_pay
 status_t sim7000g_mqtt_subscription(uint8_t* topic){
     status_t ret = STATUS_ERROR;
     uint8_t  buffer[100]={0};
-        sprintf(buffer,CMD_MQTT_SUBSCRIBE,topic,1);    
+        sprintf(buffer,CMD_MQTT_SUBSCRIBE,topic,2);    
         ret = send_command(buffer,CMD_OK);
     return ret;
 }

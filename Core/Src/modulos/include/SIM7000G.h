@@ -31,11 +31,11 @@ extern "C" {
 
 // Nota POWERKEY MODIFICADO PB13 A PA12...CAMBIARLO EN SOFTWARE
 
+void sim_copy_buffer_cmd(uint8_t* buffer);
 
+void sim_get_values(char* buffer,int8_t* interval, uint8_t* max);
 
-
-
-
+uint8_t* sim_get_buffer_cmd();
 
 uint8_t sim_get_update_params(void);
 

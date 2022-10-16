@@ -147,11 +147,10 @@ static void inline on_download(void){
 
   memset(buffer,0,255);
   
-  modulo_debug_print("parametros ingresados interval 2, max 7\r\n");
-   uint8_t interval = 2;
-   uint8_t max = 7;
-   mem_s_set_interval(&interval);
-   mem_s_set_max_amount_data(&max);
+ 
+ 
+ 
+ 
   HAL_IWDG_Refresh(&hiwdg);
  // sim7000g_mqtt_unsubscription("CMD");
   counter = 0;
@@ -226,9 +225,9 @@ int main(void)
   uint8_t max = MAX_COUNTER;
 
   //reset el contador
-  mem_s_set_counter(&c);
-  mem_s_set_interval(&interval);
-  mem_s_set_max_amount_data(&max);
+ // mem_s_set_counter(&c);
+  //mem_s_set_interval(&interval);
+ // mem_s_set_max_amount_data(&max);
 
 
 
@@ -277,9 +276,60 @@ int main(void)
       }
       flag_params = sim_get_update_params();
       if(flag_params )      {
-        modulo_debug_print("done update params\r\n");
+        modulo_debug_print("\r\n actualizo parametros\r\n");
         modo = RUN;
         sim_set_update_params(0);
+        #define PARAMS_OK       1
+        if(PARAMS_OK)
+         {
+         
+
+
+         
+         
+          modulo_debug_print("cmd:");
+          uint8_t cmd[40]={0};
+          sim_copy_buffer_cmd(cmd);
+
+         modulo_debug_print(cmd);
+         sim_get_values(cmd,&interval,&max);
+         
+         
+        
+        
+        
+          
+
+        if( interval != 0 &&  max != 0){
+           uint8_t i = 0 , m = 0;
+
+            mem_s_get_interval(&i);
+            mem_s_get_max_amount_data(&m);
+
+            // Con este if se evitan problema de repeticion me mensaje por servidor mqtt problematico
+            if(i != interval || max != m){
+              sprintf(buf," INTERVAL:%d  MAX:%d\r\n",interval,max);
+              modulo_debug_print(buf);
+               mem_s_set_interval(&interval);
+               mem_s_set_max_amount_data(&max);
+               modulo_debug_print("parametros configurados. Reset \r\n");
+               while(1);
+                
+            }
+           
+           
+           
+           
+
+        }
+        //  while(1);
+      
+      
+
+
+        
+         }
+        //  while(1);
       }    
 
     pwr_sleep();
@@ -289,6 +339,7 @@ int main(void)
 
 
 
+// +SMSUB: "CMD"," ,1,1, " FORMATEO esta cadena
 
 
 
