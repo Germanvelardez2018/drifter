@@ -1,5 +1,3 @@
-
-
 #include "sim7000g.h"
 #include "uart.h"
 #include "gpio.h"
@@ -8,6 +6,10 @@
 #include "mem_services.h"
 
 
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
  //  0   ENVIAR UNA SOLA VEZ, SIN CONFIRMACION. SE ENVIA EL MENSAJE UNA VEZ, NO SE ESPERA CONFIRMACION.
  //  1   ENVIAR, CON POSIBLE REENVIO DEPENDIENTE DE CONFIRMACION. SE RECIBE MENSAJE AL MENOS UNA VEZ
@@ -22,17 +24,13 @@
 
 
 
+ 
+extern  UART_HandleTypeDef huart1;
+extern  UART_HandleTypeDef huart2;
+
+
+
 #define BROCKER_TOPIC_COMMAND                       "SIMO_CMD"
-
-
-#define CMD_OPEN_APN_TUENTI                          "AT+CNACT=1,\"internet.movil\"\r\n"
-#define CMD_OPEN_APN_PERSONAL                        "AT+CNACT=1,\"datos.personal.com\"\r\n"
-
-#define CMD_GET_APN                                  "AT+CNACT?"       
-
-
-
-
 
 // ! Modo sleep y resume
 #define CMD_LOW_PWR_ON                              "AT+CPSMS=1\r\n"
@@ -83,7 +81,7 @@
  #define CMD_MQTT_QOS                                "\"QOS\""
  #define CMD_MQTT_COMMIT                             "AT+SMCONN\r\n"
  #define CMD_MQTT_PUBLISH                            "AT+SMPUB=\"%s\",\"%d\",2,1 \r\n" 
-#define CMD_MQTT_SUBSCRIBE                           "AT+SMSUB=\"%s\",%d\r\n"   // topic , QoS
+#define CMD_MQTT_SUBSCRIBE                           "AT+SMSUB=\"%s\",%d \r\n"   // topic , QoS
 #define CMD_MQTT_UMSUBSCRIBE                         "AT+SMUMSUB=\"%s\"\r\n"   // topic , QoS
 #define CMD_MQTT_TOPIC_CONFIG                        "SIMO_CONFIG"
 #define CMD_MQTT_CHECK_STATUS                        "AT+SMSTATE? \r\n"
@@ -91,11 +89,6 @@
 
 
 
-extern UART_HandleTypeDef huart1;
-
-
-#define SIM_BUFFER_SIZE                               (254)
-PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 #define SIM7000G_TIMEOUT                             (500)
 #define SIM7000G_UART                                (&huart1)
@@ -107,34 +100,35 @@ PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
 
 #define SIM7000G_BAT_ENA_Pin GPIO_PIN_4
 #define SIM7000G_BAT_ENA_GPIO_Port GPIOA
-
-
-
-
-
-
 #define SIM7000G_PWRKEY_Pin GPIO_PIN_12
 #define SIM7000G_PWRKEY_GPIO_Port GPIOA
 
 
+
+#define SIM_BUFFER_SIZE                               (254)
+#define COMMAND_SIZE                                    32
+#define BUFFER_ID_SIZE                                (100)
+
+
+PRIVATE uint8_t buffer[SIM_BUFFER_SIZE]={0};
+
+//! Buffer donde se almacena string con comando recibido
+PRIVATE uint8_t cmd_buffer[COMMAND_SIZE]={0};
 
 
 PRIVATE uint8_t _UPDATE_PARAMS_ = 0;
 PRIVATE uint8_t interval = 0 , m = 0;
 PRIVATE uint8_t flag_cmd = 0;
 
-extern  UART_HandleTypeDef huart1;
-extern  UART_HandleTypeDef huart2;
-
-
-#define COMMAND_SIZE            32
-PRIVATE uint8_t cmd_buffer[COMMAND_SIZE]={0};
+PRIVATE uint8_t buffer_id[BUFFER_ID_SIZE]="Sin datos del dispositivo \r\n";
 
 
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+
+
+
+
+
 
 
 // formato interval, max 
@@ -144,7 +138,6 @@ PRIVATE   void get_values(char* buffer,int8_t* interval, uint8_t* max)
     uint8_t ret = 0;
     uint8_t index = 0;
     uint8_t len = 0;
-    char num[10]={0};
     char *token = strtok(buffer,",");
     uint8_t n;
      if(token != NULL){
@@ -161,6 +154,20 @@ PRIVATE   void get_values(char* buffer,int8_t* interval, uint8_t* max)
             token = strtok(NULL, ",");
  }
  }
+}
+
+
+
+
+
+uint8_t* sim_get_id(void){
+    uint8_t counter,interval, max_counter ;
+    mem_s_get_counter(&counter);
+    mem_s_get_max_amount_data(&max_counter);
+    mem_s_get_interval(&interval);
+    sprintf(buffer,"Params: counter:%d, max_counter:%d, interval:%d \r\n",counter,max_counter,interval);
+    modulo_debug_print(buffer);
+    return buffer_id;
 }
 
 
@@ -322,14 +329,11 @@ void sim_set_update_params(uint8_t value){
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-    
         HAL_ResumeTick();
+        memset(cmd_buffer,COMMAND_SIZE,0);
         HAL_UART_Receive_IT(&huart1,cmd_buffer,COMMAND_SIZE);
         sim_set_update_params(1);
         cmd_buffer[COMMAND_SIZE]=0;
-
-      
-
 }
 
 

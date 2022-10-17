@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "string.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "timer.h"
@@ -215,11 +216,11 @@ int main(void)
   //mem_s_set_interval(&interval);
  // mem_s_set_max_amount_data(&max)
   modulo_debug_print("init program \r\n");
-  mem_s_get_counter(&counter);
-  mem_s_get_max_amount_data(&max);
-  mem_s_get_interval(&interval);
-  sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \r\n",counter,max,interval);
-  modulo_debug_print(buffer);
+// mem_s_get_counter(&counter);
+//  mem_s_get_max_amount_data(&max);
+ // mem_s_get_interval(&interval);
+ // sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \r\n",counter,max,interval);
+  modulo_debug_print(sim_get_id());
 
 
   mqtt_config();
@@ -256,10 +257,11 @@ int main(void)
         sim_set_update_params(0);
         uint8_t cmd[40]={0};
         sim_copy_buffer_cmd(cmd);
+        modulo_debug_print("cmd:");
         modulo_debug_print(cmd);
         sim_get_values(cmd,&interval,&max);
          
-
+        // ! get_value devuelve 0,0 si hay error en parseo
         if( interval != 0 &&  max != 0){
            uint8_t i = 0 , m = 0;
             mem_s_get_interval(&i);

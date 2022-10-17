@@ -47,7 +47,7 @@ void sim_set_update_params(uint8_t value);
 
 void check_buffer_cmd();
 
-
+uint8_t* sim_get_id(void );
 
  uint8_t* sim7000g_get_interval();
  uint8_t* sim7000g_get_max();
