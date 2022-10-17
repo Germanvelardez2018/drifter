@@ -86,28 +86,26 @@ PRIVATE  uint8_t  counter = 0;
 uint8_t flag = 1;
 uint8_t flag_params = 0;
 
-
 extern DMA_HandleTypeDef hdma_usart2_tx;
+PRIVATE uint8_t max_counter ;
 
-PRIVATE uint8_t max_counter = MAX_COUNTER;
+
 
 static void inline on_field(){
   // leo el contador
   mem_s_get_counter(&counter);
+  mem_s_get_max_amount_data(&max_counter);
   modulo_debug_print("FSM: ON FIELD\r\n");
   // Secuencia:
   memset(buffer,0,255);
   //Obtengo datos de sensores
   //Guardo datos de sensores
  // mpu6050_get_measure(buffer,255);
-  sprintf(buffer,"Contador:%d.\r\n",counter);
-  //sim7000g_get_NMEA(buffer,255);
+ //sprintf(buffer,"Contador:%d.\r\n",counter);
+  sim7000g_get_NMEA(buffer,255);
   modulo_debug_print(buffer);
   write_data(buffer,counter);
   //Aumento contador de muestras almacenadas
-
-
-
   if( counter >= max_counter){
       device = FSM_MEMORY_DOWNLOAD;   
       fsm_set_state(device); 
@@ -123,7 +121,6 @@ static void inline on_field(){
 static void inline on_download(void){
   modulo_debug_print("FSM: DOWNLOAD\r\n");  
   mem_s_get_counter(&counter);
-
   if(counter > MAX_COUNTER) counter = MAX_COUNTER;
  // counter = MAX_COUNTER;
   sprintf(buffer,"extraer :%d datos\n",counter);
@@ -132,7 +129,6 @@ static void inline on_download(void){
   while(counter >=  0 && flag){
     memset(buffer,0,255);
     read_data(buffer,counter);
-    // envio por mqtt
     sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
     modulo_debug_print("mensaje publicado:");
     modulo_debug_print(buffer);
@@ -146,16 +142,9 @@ static void inline on_download(void){
   }
 
   memset(buffer,0,255);
-  
- 
- 
- 
- 
   HAL_IWDG_Refresh(&hiwdg);
- // sim7000g_mqtt_unsubscription("CMD");
   counter = 0;
- // mem_s_set_counter(&counter);
- // mem_s_get_max_amount_data(&max_counter);
+  mem_s_set_counter(&counter);
   device = FSM_ON_FIELD;  
   fsm_set_state(device); 
 
@@ -221,7 +210,6 @@ int main(void)
 // prueba adc
 
   uint8_t interval = 1;
-  uint8_t c= 4;
   uint8_t max = MAX_COUNTER;
 
   //reset el contador
@@ -252,7 +240,7 @@ int main(void)
   gpio_interruption_init();
 
   MX_IWDG_Init();
-  device =  fsm_get_state();
+  device =FSM_ON_FIELD;// fsm_get_state();
   pwr_mode_t  modo = RUN ;
   while (1)
   {   
@@ -276,60 +264,31 @@ int main(void)
       }
       flag_params = sim_get_update_params();
       if(flag_params )      {
-        modulo_debug_print("\r\n actualizo parametros\r\n");
         modo = RUN;
         sim_set_update_params(0);
-        #define PARAMS_OK       1
-        if(PARAMS_OK)
-         {
+        uint8_t cmd[40]={0};
+        sim_copy_buffer_cmd(cmd);
+        modulo_debug_print(cmd);
+        sim_get_values(cmd,&interval,&max);
          
-
-
-         
-         
-          modulo_debug_print("cmd:");
-          uint8_t cmd[40]={0};
-          sim_copy_buffer_cmd(cmd);
-
-         modulo_debug_print(cmd);
-         sim_get_values(cmd,&interval,&max);
-         
-         
-        
-        
-        
-          
 
         if( interval != 0 &&  max != 0){
            uint8_t i = 0 , m = 0;
-
             mem_s_get_interval(&i);
             mem_s_get_max_amount_data(&m);
-
             // Con este if se evitan problema de repeticion me mensaje por servidor mqtt problematico
             if(i != interval || max != m){
               sprintf(buf," INTERVAL:%d  MAX:%d\r\n",interval,max);
               modulo_debug_print(buf);
-               mem_s_set_interval(&interval);
-               mem_s_set_max_amount_data(&max);
-               modulo_debug_print("parametros configurados. Reset \r\n");
-               while(1);
+              mem_s_set_interval(&interval);
+              mem_s_set_max_amount_data(&max);
+              modulo_debug_print("parametros configurados. Reset \r\n");
+              memset(cmd,40,0);
+              while(1);
                 
             }
-           
-           
-           
-           
-
-        }
-        //  while(1);
-      
-      
-
-
         
-         }
-        //  while(1);
+        }
       }    
 
     pwr_sleep();

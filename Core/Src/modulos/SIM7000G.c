@@ -432,7 +432,7 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     ret = send_command(CMD_MQTT_COMMIT,CMD_OK);
     delay(2000);
        
-    sprintf(buffer,CMD_MQTT_SUBSCRIBE,"CMD",0);    
+    sprintf(buffer,CMD_MQTT_SUBSCRIBE,"CMD",2);    
     ret = send_command(buffer,CMD_OK);
     delay(2000);
     // configurar la interrupcion del PIN RI SIM7000G
