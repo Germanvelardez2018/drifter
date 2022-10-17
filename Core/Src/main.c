@@ -98,8 +98,6 @@ static void inline on_field(){
   modulo_debug_print("FSM: ON FIELD\r\n");
   // Secuencia:
   memset(buffer,0,255);
-  //Obtengo datos de sensores
-  //Guardo datos de sensores
  // mpu6050_get_measure(buffer,255);
  //sprintf(buffer,"Contador:%d.\r\n",counter);
   sim7000g_get_NMEA(buffer,255);
@@ -215,18 +213,8 @@ int main(void)
   //reset el contador
  // mem_s_set_counter(&c);
   //mem_s_set_interval(&interval);
- // mem_s_set_max_amount_data(&max);
-
-
-
-
-  //reset el contador
-  //em_s_set_counter(&c);
-  //mem_s_set_interval(&interval);
-  //mem_s_set_max_amount_data(&max);
-
- modulo_debug_print("init program \r\n");
-
+ // mem_s_set_max_amount_data(&max)
+  modulo_debug_print("init program \r\n");
   mem_s_get_counter(&counter);
   mem_s_get_max_amount_data(&max);
   mem_s_get_interval(&interval);
