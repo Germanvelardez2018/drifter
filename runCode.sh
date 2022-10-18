@@ -1,7 +1,7 @@
 # Script to flash device with files from build folder
 # Author: German Velardez     (germanvelardez16@gmail.com)
 #
-
+#
 echo -e "making somethings ... \n\t\t"
 make
 

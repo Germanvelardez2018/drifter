@@ -211,15 +211,9 @@ int main(void)
   uint8_t interval = 1;
   uint8_t max = MAX_COUNTER;
 
-  //reset el contador
- // mem_s_set_counter(&c);
-  //mem_s_set_interval(&interval);
- // mem_s_set_max_amount_data(&max)
+
+
   modulo_debug_print("init program \r\n");
-// mem_s_get_counter(&counter);
-//  mem_s_get_max_amount_data(&max);
- // mem_s_get_interval(&interval);
- // sprintf(buffer,"default values: counter:%d, max_counter:%d, interval:%d \r\n",counter,max,interval);
   modulo_debug_print(sim_get_id());
 
 
