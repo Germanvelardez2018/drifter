@@ -4,7 +4,7 @@
 #include <string.h>
 #include "debug.h"
 #include "mem_services.h"
-
+#include "fsm.h"
 
 
 #include <stdio.h>
@@ -158,14 +158,23 @@ PRIVATE   void get_values(char* buffer,int8_t* interval, uint8_t* max)
 
 
 
+PRIVATE status_t uart_init(){
+    status_t ret = STATUS_OK;
+    UART_SIMCOM_init();
+    return ret;
+}
+
+
 
 
 uint8_t* sim_get_id(void){
     uint8_t counter,interval, max_counter ;
+    fsm_state_t state = FSM_ON_FIELD;
     mem_s_get_counter(&counter);
     mem_s_get_max_amount_data(&max_counter);
     mem_s_get_interval(&interval);
-    sprintf(buffer,"Params: counter:%d, max_counter:%d, interval:%d \r\n",counter,max_counter,interval);
+    state = fsm_get_state();
+    sprintf(buffer,"Params: counter:%d, max_counter:%d, interval:%d, last state:%s \r\n",counter,max_counter,interval,((state == FSM_ON_FIELD)?"ON FIELD": "DOWNLOAD"));
     modulo_debug_print(buffer);
     return buffer_id;
 }
@@ -189,11 +198,9 @@ PRIVATE void BAT_ENA_set(level_t level){
 
 
 
-PRIVATE status_t uart_init(){
-    status_t ret = STATUS_OK;
-    UART_SIMCOM_init();
-    return ret;
-}
+
+
+
 
 
 
@@ -244,8 +251,8 @@ PRIVATE status_t send_command(uint8_t* string_cmd,uint8_t* response_expected){
 
     // checkeo buffer rx con respuesta esperada
     ret  = check_response(response_expected) ;
-    modulo_debug_print("respuesta esperada:");
-    modulo_debug_print(response_expected);
+   // modulo_debug_print("respuesta esperada:");
+   // modulo_debug_print(response_expected);
     modulo_debug_print("\n");
 
     return ret;

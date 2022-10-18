@@ -80,7 +80,9 @@ extern IWDG_HandleTypeDef hiwdg;
 // en timer.c
 extern  TIM_HandleTypeDef  htim1;
 PRIVATE  fsm_state_t       device;
-PRIVATE  uint8_t           buffer[255];
+
+#define DATAFRAME_SIZE              255
+PRIVATE  uint8_t           data_frame_buffer[DATAFRAME_SIZE];
 
 PRIVATE  uint8_t  buf[255];
 PRIVATE  uint8_t  counter = 0;
@@ -92,26 +94,54 @@ PRIVATE uint8_t max_counter ;
 
 
 
+
+PRIVATE void get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter){
+
+    modulo_debug_print("FSM: ON FIELD\r\n");
+     // Secuencia:
+     memset(buffer,0,len);
+    // mpu6050_get_measure(buffer,255);
+    //sprintf(buffer,"Contador:%d.\r\n",counter);
+     sim7000g_get_NMEA(buffer,len);
+     modulo_debug_print(buffer);
+     write_data(buffer,counter);
+
+
+}
+
+
+PRIVATE  void  get_data_frame_from_memory(){
+
+}
+
+
+
+PRIVATE void send_data_frame_to_server(){
+
+}
+
+
+
+
+
 static void inline on_field(){
   // leo el contador
   mem_s_get_counter(&counter);
-  mem_s_get_max_amount_data(&max_counter);
-  modulo_debug_print("FSM: ON FIELD\r\n");
-  // Secuencia:
-  memset(buffer,0,255);
- // mpu6050_get_measure(buffer,255);
- //sprintf(buffer,"Contador:%d.\r\n",counter);
-  sim7000g_get_NMEA(buffer,255);
-  modulo_debug_print(buffer);
-  write_data(buffer,counter);
+
+
+  get_data_frame_to_save(data_frame_buffer,DATAFRAME_SIZE,counter);
   //Aumento contador de muestras almacenadas
+
+
+
   if( counter >= max_counter){
       device = FSM_MEMORY_DOWNLOAD;   
-      fsm_set_state(device); 
-  }else{
-    counter = counter +1 ;
-    // seteo el contador
-    mem_s_set_counter(&counter);
+      fsm_set_state(FSM_MEMORY_DOWNLOAD); 
+      modulo_debug_print("ON FIELD => DOWNLOAD \r\n");}
+  else{
+     counter = counter +1 ;
+     // seteo el contador
+     mem_s_set_counter(&counter);
   }
 }
 
@@ -119,35 +149,33 @@ static void inline on_field(){
 
 static void inline on_download(void){
   modulo_debug_print("FSM: DOWNLOAD\r\n");  
-  mem_s_get_counter(&counter);
-  if(counter > MAX_COUNTER) counter = MAX_COUNTER;
+  counter = (max_counter< counter)? max_counter: counter;
  // counter = MAX_COUNTER;
-  sprintf(buffer,"extraer :%d datos\n",counter);
-  modulo_debug_print(buffer);
-  flag = 1;
-  while(counter >=  0 && flag){
-    memset(buffer,0,255);
-    read_data(buffer,counter);
-    sim7000g_mqtt_publish(MQTT_TOPIC,buffer,strlen(buffer));
-    modulo_debug_print("mensaje publicado:");
-    modulo_debug_print(buffer);
+  sprintf(data_frame_buffer,"extraer :%d datos\n",counter);
+  modulo_debug_print(data_frame_buffer);
+  while(counter !=  0){
+    memset(data_frame_buffer,0,255);
+    read_data(data_frame_buffer,counter);
+    sim7000g_mqtt_publish(MQTT_TOPIC,data_frame_buffer,strlen(data_frame_buffer));
+    modulo_debug_print("send=>");
+    modulo_debug_print(data_frame_buffer);
     HAL_IWDG_Refresh(&hiwdg);
-    HAL_Delay(2000);
-    if(counter ==0 ){ 
-       flag = 0;} 
-    else{
-       counter = counter -1;
-       mem_s_set_counter(&counter);}
+    HAL_Delay(1000); 
+    counter = counter -1;
+    mem_s_set_counter(&counter);
   }
-
-  memset(buffer,0,255);
   HAL_IWDG_Refresh(&hiwdg);
   counter = 0;
   mem_s_set_counter(&counter);
-  device = FSM_ON_FIELD;  
-  fsm_set_state(device); 
+  device = FSM_ON_FIELD;
+  fsm_set_state(FSM_ON_FIELD); 
+  modulo_debug_print("DOWNLOAD => ON FIELD \r\n");
+
+  
 
 }
+
+
 
 
 
@@ -173,6 +201,15 @@ static void app_init(){
   fsm_init();
   // Sensor
  // mpu6050_init();  
+
+
+
+ // Cargar parametros desde memoria flash
+
+   mem_s_get_max_amount_data(&max_counter);
+   mem_s_get_counter(&counter);
+
+
 }
 
 
@@ -208,9 +245,11 @@ int main(void)
 // Sirve para cargar valores por defecto a memoria flash
 // prueba adc
 
-  uint8_t interval = 1;
-  uint8_t max = MAX_COUNTER;
 
+
+
+
+  
 
 
   modulo_debug_print("init program \r\n");
@@ -223,7 +262,7 @@ int main(void)
   gpio_interruption_init();
 
   MX_IWDG_Init();
-  device =FSM_ON_FIELD;// fsm_get_state();
+  device = fsm_get_state();
   pwr_mode_t  modo = RUN ;
   while (1)
   {   
@@ -247,6 +286,7 @@ int main(void)
       }
       flag_params = sim_get_update_params();
       if(flag_params )      {
+        static uint8_t interval,max;
         modo = RUN;
         sim_set_update_params(0);
         uint8_t cmd[40]={0};
