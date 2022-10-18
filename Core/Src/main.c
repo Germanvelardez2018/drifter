@@ -98,7 +98,6 @@ PRIVATE uint8_t max_counter ;
 PRIVATE void get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter){
 
     modulo_debug_print("FSM: ON FIELD\r\n");
-     // Secuencia:
      memset(buffer,0,len);
     // mpu6050_get_measure(buffer,255);
     //sprintf(buffer,"Contador:%d.\r\n",counter);
@@ -140,7 +139,6 @@ static void inline on_field(){
       modulo_debug_print("ON FIELD => DOWNLOAD \r\n");}
   else{
      counter = counter +1 ;
-     // seteo el contador
      mem_s_set_counter(&counter);
   }
 }
@@ -170,9 +168,6 @@ static void inline on_download(void){
   device = FSM_ON_FIELD;
   fsm_set_state(FSM_ON_FIELD); 
   modulo_debug_print("DOWNLOAD => ON FIELD \r\n");
-
-  
-
 }
 
 
@@ -199,22 +194,11 @@ static void app_init(){
   sim7000g_init();
   pwr_init();
   fsm_init();
-  // Sensor
- // mpu6050_init();  
-
-
-
+  mpu6050_init(); //! Sensor  
  // Cargar parametros desde memoria flash
-
    mem_s_get_max_amount_data(&max_counter);
    mem_s_get_counter(&counter);
-
-
 }
-
-
-
-
 
 
 static void mqtt_config(){
@@ -227,7 +211,6 @@ static void mqtt_config(){
   sim7000g_resume();
   sim7000g_mqtt_subscription("CMD");
   sim7000g_sleep();
-
 }
 
 
@@ -246,29 +229,21 @@ int main(void)
 // prueba adc
 
 
-
-
-
-  
-
-
   modulo_debug_print("init program \r\n");
   modulo_debug_print(sim_get_id());
 
-
   mqtt_config();
-  #define PUB_MSG            "check"
+  #define PUB_MSG           sim_get_id()
   sim7000g_mqtt_publish("check",PUB_MSG,strlen(PUB_MSG));
   gpio_interruption_init();
-
   MX_IWDG_Init();
   device = fsm_get_state();
   pwr_mode_t  modo = RUN ;
+
   while (1)
   {   
-    modo = pwr_get_mode();
-    HAL_IWDG_Refresh(&hiwdg);
-
+  modo = pwr_get_mode();   //! Si te levanto una interrupcion por comandos en vez de una IRQ del RTC, volve a dormirs
+  HAL_IWDG_Refresh(&hiwdg);
   if(modo == RUN){
       switch (device)
       {
@@ -294,7 +269,6 @@ int main(void)
         modulo_debug_print("cmd:");
         modulo_debug_print(cmd);
         sim_get_values(cmd,&interval,&max);
-         
         // ! get_value devuelve 0,0 si hay error en parseo
         if( interval != 0 &&  max != 0){
            uint8_t i = 0 , m = 0;
@@ -302,27 +276,22 @@ int main(void)
             mem_s_get_max_amount_data(&m);
             // Con este if se evitan problema de repeticion me mensaje por servidor mqtt problematico
             if(i != interval || max != m){
+              memset(buf,0,255);
               sprintf(buf," INTERVAL:%d  MAX:%d\r\n",interval,max);
               modulo_debug_print(buf);
               mem_s_set_interval(&interval);
               mem_s_set_max_amount_data(&max);
               modulo_debug_print("parametros configurados. Reset \r\n");
               memset(cmd,40,0);
-              while(1);
-                
+              while(1);    
             }
-        
         }
       }    
-
     pwr_sleep();
  }
-
 }
 
 
-
-// +SMSUB: "CMD"," ,1,1, " FORMATEO esta cadena
 
 
 
@@ -342,19 +311,17 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
-}
-#endif /* USE_FULL_ASSERT */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
