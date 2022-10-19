@@ -279,7 +279,6 @@ uint8_t* sim_get_buffer_cmd(){
 }
 
 void sim_copy_buffer_cmd(uint8_t* buffer_command){
-    modulo_debug_print(buffer_cmd);
     uint8_t len = strlen(buffer_cmd);
 
     strncpy(buffer_command,buffer_cmd,len);
@@ -305,8 +304,8 @@ void sim_set_update_params(uint8_t value){
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
         HAL_ResumeTick();
-       // HAL_UART_AbortReceive(&huart1);
-        memset(buffer_cmd,0,COMMAND_SIZE);
+        HAL_UART_AbortReceive(&huart1);
+       // memset(buffer_cmd,0,COMMAND_SIZE);
         HAL_UART_Receive_IT(&huart1,buffer_cmd,COMMAND_SIZE);
         sim_set_update_params(1);
         //! Me aseguro que el buffer siempre sea una cadena valida
@@ -358,8 +357,6 @@ status_t sim7000g_get_NMEA( uint8_t* buff, uint8_t len){
     strcpy(buff,&(SIM7000G_BUFFER[11]));
     uint8_t  l = strlen(buff);
     buff[l-3]=0;
-    
-    delay(1000);
     return ret;
 }
 
@@ -388,9 +385,6 @@ status_t sim7000g_get_signal(){
 status_t sim7000g_open_apn(){
     return send_command(CMD_OPEN_APN_PERSONAL,CMD_OK);
 }
-
-
-
 
 
 

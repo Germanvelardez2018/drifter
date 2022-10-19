@@ -103,22 +103,13 @@ PRIVATE void get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter)
   modulo_debug_print("FSM: ON FIELD\r\n");  
   mpu6050_get_measure(sensor,80);
   delay(1000);
-  sim7000g_get_NMEA(gps,80);
+ // sim7000g_get_NMEA(gps,80);
   sprintf(buffer,"{\r\n gps: %ssensor: %s \r\n}",&(gps[1]),sensor);
   modulo_debug_print(buffer);
   write_data(buffer,counter);
 }
 
 
-PRIVATE  void  get_data_frame_from_memory(){
-
-}
-
-
-
-PRIVATE void send_data_frame_to_server(){
-
-}
 
 
 PRIVATE void check_flag_params(){
@@ -128,7 +119,6 @@ PRIVATE void check_flag_params(){
    static uint8_t max = 0;
    modo = RUN;
    uint8_t cmd[40]={0};
-   //memset(cmd,0,40);
    sim_copy_buffer_cmd(cmd);
    modulo_debug_print("cmd: ");
    modulo_debug_print(cmd);
@@ -261,7 +251,6 @@ int main(void)
   mqtt_config();
  
   // ! Inicia el WDT
-  delay(2500);
   MX_IWDG_Init();
   device = fsm_get_state();
   modo = RUN ;
