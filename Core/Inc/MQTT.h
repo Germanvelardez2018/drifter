@@ -42,7 +42,7 @@ extern "C" {
 
 #define MQTT_PASS                                    "fdZY5b69OhOVsAns"
 #define MQTT_ID                                      "simointi"
-#define MQTT_QOS                                      2
+#define MQTT_QOS                                      1
 #define MQTT_CMD_BROKER                              "SIMO_CONFIG"
 
 /*-----------------------------------------------------------------------------*/

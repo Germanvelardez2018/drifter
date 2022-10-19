@@ -97,23 +97,18 @@ void pwr_sleep(){
     
     //configuro alarma si flag no es SLEEP,
     if(__PWR_FLAG__ == RUN){
-         // leo intervalor from flash (dummy por el momento)
-    uint8_t interval =1;
-
+    uint8_t interval ;
     mem_s_get_interval(&interval);
-
     //leo tiempo    
     uint8_t h,m,s ;
     get_time(&h,&m,&s);  
     __PWR_FLAG__ = SLEEP;
     set_alarm(INTERVAL(h,m,s,interval));
-    sprintf(buffer,"%d:%d:%d=>%d:%d:%d\n",h,m,s,INTERVAL(h,m,s,interval));
+    sprintf(buffer,"\r\n%d:%d:%d=>%d:%d:%d\n",h,m,s,INTERVAL(h,m,s,interval));
     modulo_debug_print(buffer);
     }
     HAL_SuspendTick();
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-
-    
     // A dormir o un intervalo en minutos
 
 }

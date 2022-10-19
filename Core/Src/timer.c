@@ -29,7 +29,9 @@ void TIM1_UP_IRQHandler(void)
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  // led encendido en modo run           
+  // led encendido en modo run  
+    HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
+         
 }
 
 

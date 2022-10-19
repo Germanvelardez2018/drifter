@@ -79,33 +79,34 @@ extern  UART_HandleTypeDef huart1;
 extern IWDG_HandleTypeDef hiwdg;
 // en timer.c
 extern  TIM_HandleTypeDef  htim1;
+// En sim7000g.c
+extern DMA_HandleTypeDef hdma_usart2_tx;
+
+
 PRIVATE  fsm_state_t       device;
 
 #define DATAFRAME_SIZE              255
-PRIVATE  uint8_t           data_frame_buffer[DATAFRAME_SIZE];
-
-PRIVATE  uint8_t  buf[255];
-PRIVATE  uint8_t  counter = 0;
-uint8_t flag = 1;
-uint8_t flag_params = 0;
-
-extern DMA_HandleTypeDef hdma_usart2_tx;
-PRIVATE uint8_t max_counter ;
+PRIVATE  uint8_t    data_frame_buffer[DATAFRAME_SIZE];
+PRIVATE  uint8_t    buf[255];
+PRIVATE  uint8_t    counter = 0;
+PRIVATE pwr_mode_t  modo;
+PRIVATE uint8_t     flag_params = 0;
+PRIVATE uint8_t     max_counter ;
 
 
 
 
 PRIVATE void get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter){
 
-    modulo_debug_print("FSM: ON FIELD\r\n");
-     memset(buffer,0,len);
-    // mpu6050_get_measure(buffer,255);
-    //sprintf(buffer,"Contador:%d.\r\n",counter);
-     sim7000g_get_NMEA(buffer,len);
-     modulo_debug_print(buffer);
-     write_data(buffer,counter);
-
-
+  static uint8_t gps[50],sensor[50];
+  memset(buffer,0,len);
+  modulo_debug_print("FSM: ON FIELD\r\n");  
+  mpu6050_get_measure(sensor,80);
+  delay(1000);
+  sim7000g_get_NMEA(gps,80);
+  sprintf(buffer,"{\r\n gps: %ssensor: %s \r\n}",&(gps[1]),sensor);
+  modulo_debug_print(buffer);
+  write_data(buffer,counter);
 }
 
 
@@ -120,19 +121,46 @@ PRIVATE void send_data_frame_to_server(){
 }
 
 
+PRIVATE void check_flag_params(){
+   flag_params = sim_get_update_params();
+ if(flag_params )      {
+   static uint8_t interval =0;
+   static uint8_t max = 0;
+   modo = RUN;
+   uint8_t cmd[40]={0};
+   //memset(cmd,0,40);
+   sim_copy_buffer_cmd(cmd);
+   modulo_debug_print("cmd: ");
+   modulo_debug_print(cmd);
+   sim_get_values(cmd,&interval,&max);
+   // ! get_value devuelve 0,0 si hay error en parseo
+   if( interval != 0 &&  max != 0){
+      uint8_t i = 0 , m = 0;
+       mem_s_get_interval(&i);
+       mem_s_get_max_amount_data(&m);
+       // Con este if se evitan problema de repeticion me mensaje por servidor mqtt problematico
+       if(i != interval || max != m){
+         memset(buf,0,255);
+         sprintf(buf," Nueva configuracion:\r\r\n INTERVAL:%d  MAX:%d\r\n",interval,max);
+         modulo_debug_print(buf);
+         mem_s_set_interval(&interval);
+         mem_s_set_max_amount_data(&max);
+         while(1);    
+       }
+   }
+  sim_set_update_params(0);
+
+ }    
+}
 
 
 
 static void inline on_field(){
+
   // leo el contador
   mem_s_get_counter(&counter);
-
-
   get_data_frame_to_save(data_frame_buffer,DATAFRAME_SIZE,counter);
   //Aumento contador de muestras almacenadas
-
-
-
   if( counter >= max_counter){
       device = FSM_MEMORY_DOWNLOAD;   
       fsm_set_state(FSM_MEMORY_DOWNLOAD); 
@@ -142,7 +170,6 @@ static void inline on_field(){
      mem_s_set_counter(&counter);
   }
 }
-
 
 
 static void inline on_download(void){
@@ -155,7 +182,7 @@ static void inline on_download(void){
     memset(data_frame_buffer,0,255);
     read_data(data_frame_buffer,counter);
     sim7000g_mqtt_publish(MQTT_TOPIC,data_frame_buffer,strlen(data_frame_buffer));
-    modulo_debug_print("send=>");
+    modulo_debug_print("\r\n=>");
     modulo_debug_print(data_frame_buffer);
     HAL_IWDG_Refresh(&hiwdg);
     HAL_Delay(1000); 
@@ -195,7 +222,7 @@ static void app_init(){
   pwr_init();
   fsm_init();
   mpu6050_init(); //! Sensor  
- // Cargar parametros desde memoria flash
+  // Cargar parametros desde memoria flash
    mem_s_get_max_amount_data(&max_counter);
    mem_s_get_counter(&counter);
 }
@@ -209,8 +236,12 @@ static void mqtt_config(){
   sim7000g_set_gps(1);
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
-  sim7000g_mqtt_subscription("CMD");
-  sim7000g_sleep();
+  #define PUB_MSG           sim_get_id()
+  sim7000g_mqtt_publish("SIMO INIT",PUB_MSG,strlen(PUB_MSG));
+  //sim7000g_sleep();
+  gpio_interruption_init();
+
+
 }
 
 
@@ -223,70 +254,36 @@ int main(void)
 {
   app_init();
 
-
-
 // Sirve para cargar valores por defecto a memoria flash
 // prueba adc
 
-
   modulo_debug_print("init program \r\n");
-  modulo_debug_print(sim_get_id());
-
   mqtt_config();
-  #define PUB_MSG           sim_get_id()
-  sim7000g_mqtt_publish("check",PUB_MSG,strlen(PUB_MSG));
-  gpio_interruption_init();
+ 
+  // ! Inicia el WDT
+  delay(2500);
   MX_IWDG_Init();
   device = fsm_get_state();
-  pwr_mode_t  modo = RUN ;
+  modo = RUN ;
 
   while (1)
   {   
-  modo = pwr_get_mode();   //! Si te levanto una interrupcion por comandos en vez de una IRQ del RTC, volve a dormirs
+  modo = pwr_get_mode();   //! Si te levanto una interrupcion por comandos en vez de una IRQ del RTC, volve a dormir
   HAL_IWDG_Refresh(&hiwdg);
   if(modo == RUN){
       switch (device)
       {
        case FSM_ON_FIELD:
             on_field();
-
           break;
        case FSM_MEMORY_DOWNLOAD:
            on_download();
           break;
         default:
-           //nothing
         break;
       }
-      }
-      flag_params = sim_get_update_params();
-      if(flag_params )      {
-        static uint8_t interval,max;
-        modo = RUN;
-        sim_set_update_params(0);
-        uint8_t cmd[40]={0};
-        sim_copy_buffer_cmd(cmd);
-        modulo_debug_print("cmd:");
-        modulo_debug_print(cmd);
-        sim_get_values(cmd,&interval,&max);
-        // ! get_value devuelve 0,0 si hay error en parseo
-        if( interval != 0 &&  max != 0){
-           uint8_t i = 0 , m = 0;
-            mem_s_get_interval(&i);
-            mem_s_get_max_amount_data(&m);
-            // Con este if se evitan problema de repeticion me mensaje por servidor mqtt problematico
-            if(i != interval || max != m){
-              memset(buf,0,255);
-              sprintf(buf," INTERVAL:%d  MAX:%d\r\n",interval,max);
-              modulo_debug_print(buf);
-              mem_s_set_interval(&interval);
-              mem_s_set_max_amount_data(&max);
-              modulo_debug_print("parametros configurados. Reset \r\n");
-              memset(cmd,40,0);
-              while(1);    
-            }
-        }
-      }    
+    }
+    check_flag_params();
     pwr_sleep();
  }
 }
