@@ -33,6 +33,11 @@ extern "C" {
 void MX_IWDG_Init(void);
 
 
+
+void wdt_reset();
+
+
+
 #ifdef __cplusplus
 }
 #endif

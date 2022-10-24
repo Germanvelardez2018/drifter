@@ -66,9 +66,6 @@ if(__DRIVER_STARTED_DEBUG__ == DRIVER_STARTED){
 
 
 
- HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-}
-
 
 void USART2_IRQHandler(void){
      HAL_UART_IRQHandler(&huart2);

@@ -5,6 +5,9 @@
 extern I2C_HandleTypeDef hi2c2;
 
 
+
+#define PRINT_FLAG_MPU6050                          (0)
+
 #define MPU6050_INSTANCE                            (&hi2c2)
 #define MPU6050_ADDRESS                             (0xD0)
 #define MPU6050_AVAILABLE                           (0x68)
@@ -31,10 +34,7 @@ extern I2C_HandleTypeDef hi2c2;
 #define PWR_MGMT_1                                  (0x6B)
 #define PWR_MGMT_2                                  (0x6C)
 #define WHO_I_AM                                    (0x75) // Default: 0x68
-
-
-
-#define MPU6050_TIMEOUT                             (1000)
+#define MPU6050_TIMEOUT                             (500)
 // Esta definido en el archivo i2c.c (en el metodo de inicializacion)
 #define I2C_CLOCK                                   (100000) 
 
@@ -44,8 +44,6 @@ extern I2C_HandleTypeDef hi2c2;
 PRIVATE int16_t offset_x,offset_y,offset_z ;
 
 PRIVATE float SCALA_DIV = 0;
-
-
 
 
 
@@ -59,21 +57,25 @@ PRIVATE status_t i2c_read_mem( uint8_t address_reg,uint8_t* buffer,uint32_t len)
     return ret;
 }
 
+
+PRIVATE     __MPU6050_set_offset(offset_x, offset_y, offset_z){
+    // guardar en memoria quizas?
+}
+
+
+
 /**
  * @brief Comprueba si el dispositivo esta ready
  * 
  * @return ** PRIVATE 
  */
 PRIVATE status_t mpu6050_check(){
-
     status_t ret = STATUS_ERROR;
     uint8_t value = 0;
     ret = i2c_read_mem(WHO_I_AM,&value,1);
     ret = (value == MPU6050_AVAILABLE) ?STATUS_OK:ret;
     return ret;
 }
-
-
 
 
 /**
@@ -103,7 +105,7 @@ PRIVATE void mpu6050_calibration(int16_t x_e, int16_t y_e, int16_t z_e){
     if(delta_y !=0) offset_y = (delta_y >0)? (offset_y+1): (offset_y-1);
     if(delta_z !=0) offset_z = (delta_z >0)? (offset_z+1): (offset_z-1);
     //recargo los offset
-    //__MPU6050_set_offset(x_offset, y_offset, z_offset);
+   //__MPU6050_set_offset(offset_x, offset_y, offset_z);
     }    
 }
 
@@ -234,7 +236,9 @@ status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
     float fy = (float) (y/(SCALA_DIV/2.0)); // 
     float fz = (float) (z/(SCALA_DIV/2.0)); // 
     sprintf(buffer,"t:%.2f , x:%.2f , y:%.2f , z:%.2f \n",ft,fx,fy,fz);
-    modulo_debug_print(buffer);
+    #if   1// PRINT_FLAG_MPU6050
+        modulo_debug_print(buffer);
+    #endif
     mpu6050_sleep();
     return ret;
 }
