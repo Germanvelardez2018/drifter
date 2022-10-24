@@ -28,8 +28,8 @@
 // Modulos
 #include "fsm.h"
 #include "debug.h"
-#include "MPU6050.h"
-#include "SIM7000G.h"
+#include "mpu6050.h"
+#include "sim7000g.h"
 #include "AT45DB041.h"
 #include "MQTT.h"
 #include "battery.h" // 

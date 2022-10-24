@@ -1,5 +1,5 @@
 #include "i2c.h"
-#include "MPU6050.h"
+#include "mpu6050.h"
 #include "debug.h"
 
 extern I2C_HandleTypeDef hi2c2;
@@ -194,9 +194,9 @@ status_t mpu6050_get_acceleration( int16_t* x, int16_t* y, int16_t* z){
     status_t ret = STATUS_ERROR;
     // Leer los 6 registros juntos
     uint8_t address_mem = ACCEL_XOUT_H;  // el primer elemento
-    #define MEM_SIZE  (6)
-    uint8_t data[MEM_SIZE]={0};
-    ret = i2c_read_mem(address_mem,data,MEM_SIZE);
+    #define MEM_SIZE_ACCEL  (6)
+    uint8_t data[MEM_SIZE_ACCEL]={0};
+    ret = i2c_read_mem(address_mem,data,MEM_SIZE_ACCEL);
     (*x) = (int16_t)(data[0] << 8 | data [1]);
     (*x) = (*x) + offset_x;
     (*y) = (int16_t)(data[2] << 8 | data [3]);
@@ -212,9 +212,9 @@ status_t mpu6050_get_acceleration( int16_t* x, int16_t* y, int16_t* z){
 status_t mpu6050_get_temperature( int16_t* temp){
     status_t ret = STATUS_ERROR;
     uint8_t address_mem = ACCEL_TOUT_H;  // el primer elemento
-    #define MEM_SIZE  (2)
-    uint8_t data[MEM_SIZE]={0};
-    ret = i2c_read_mem(address_mem,data,MEM_SIZE);
+    #define MEM_SIZE_T  (2)
+    uint8_t data[MEM_SIZE_T]={0};
+    ret = i2c_read_mem(address_mem,data,MEM_SIZE_T);
     (*temp) = (int16_t)((int16_t)(data[0] << 8) | ((int16_t)data[1]));
     return ret;
 }

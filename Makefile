@@ -74,7 +74,7 @@ Core/Src/dma.c \
 Core/Src/power_save.c \
 Core/Src/modulos/debug.c \
 Core/Src/modulos/AT45DB041.c \
-Core/Src/modulos/MPU6050.c \
+Core/Src/modulos/mpu6050.c \
 Core/Src/modulos/sim7000g.c \
 Core/Src/modulos/fsm.c \
 Core/Src/modulos/mem_services.c \
