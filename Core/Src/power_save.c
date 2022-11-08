@@ -4,7 +4,7 @@
 #include "mem_services.h"
 
 //define aqui el intervalo
-#define INTERVAL(h,m,s,i)                 h,m,s+20 // h,m+i,s
+#define INTERVAL(h,m,s,i)                 h,m+i,s // h,m+i,s
 
 
 extern  RTC_HandleTypeDef hrtc;

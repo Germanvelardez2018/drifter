@@ -90,7 +90,7 @@ void inline get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter){
 
   memset(buffer,0,len);
   modulo_debug_print("FSM: ON FIELD\r\n");  
- // mpu6050_get_measure(sensor,80);
+  mpu6050_get_measure(sensor,80);
   sim7000g_get_NMEA(gps,120);
   sprintf(buffer,"{ gps: %s sensor: %s \r\n}",gps,sensor);
   modulo_debug_print(buffer);
@@ -234,7 +234,7 @@ int main(void)
   // ! Inicia el WDT
   uint8_t gps_buffer[200] ={"hola gps"};
 
-  while(1){
+  while(0){
     delay(5000);
     sim7000g_get_NMEA(&gps_buffer,200);
     modulo_debug_print("\r\ngps:");
