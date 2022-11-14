@@ -75,8 +75,27 @@ typedef enum {
 
 
 
-#define delay(t)                     HAL_Delay(t)
 
+
+
+
+
+/// @brief  Valores predefinidos de intervalos validos
+typedef enum {
+
+                SLEEP_1MINUTE     =  0,        //        1 minuto
+                SLEEP_5MINUTES    =  1,        //        5 minutos
+                SLEEP_10MINUTES   =  2,        //        10 minutos
+                SLEEP_30MINUTES   =  3,        //        30 minutos
+                SLEEP_1HOUR       =  4         //        60 minutos
+
+} sleep_interval_t;
+
+
+
+
+
+#define delay(t)                     HAL_Delay(t)
 
 
 /*-----------------------------------------------------------------------------*/

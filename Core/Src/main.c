@@ -70,15 +70,15 @@ extern  TIM_HandleTypeDef  htim1;
 extern DMA_HandleTypeDef hdma_usart2_tx;
 
 
-PRIVATE  fsm_state_t       device;
+PRIVATE  fsm_state_t               device;
 
-#define DATAFRAME_SIZE              255
+#define  DATAFRAME_SIZE              255
 PRIVATE  uint8_t    data_frame_buffer[DATAFRAME_SIZE];
 PRIVATE  uint8_t    buf[255];
 PRIVATE  uint8_t    counter = 0;
-PRIVATE pwr_mode_t  modo = RUN ;
-PRIVATE uint8_t     flag_params = 0;
-PRIVATE uint8_t     max_counter ;
+PRIVATE  pwr_mode_t  modo = RUN ;
+PRIVATE  uint8_t     flag_params = 0;
+PRIVATE  uint8_t     max_counter ;
 
 
 static uint8_t gps[120] = {"SOY EL GPS \r\n"},sensor[80];

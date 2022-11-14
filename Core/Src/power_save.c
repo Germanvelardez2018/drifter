@@ -15,10 +15,21 @@ PRIVATE  pwr_mode_t __PWR_FLAG__= RUN;
 PRIVATE  uint8_t buffer[100];
 
 
+//Valor en sram del perido
+
+
+PRIVATE sleep_interval_t __INTERVAL__ = 0;
+
+
+
 //  intervalo en sleep mode en SRAM, 
 //  se recarga desde memoria flash en momentos especificos
 
 
+
+PRIVATE uint8_t pwr_get_interval(){
+    return __INTERVAL__;
+}
 
 
 PRIVATE status_t set_time(uint8_t hours, uint8_t minutes, uint8_t seconds){  
@@ -63,14 +74,9 @@ PRIVATE status_t set_alarm(uint8_t hours, uint8_t minutes, uint8_t seconds){
 }
 
 
-
-
-
 pwr_mode_t pwr_get_mode(){
     return __PWR_FLAG__;
 }
-
-
 
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc){
@@ -80,12 +86,8 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc){
 }
 
 
-
-
 void pwr_init(){
     set_time(0,0,0);
-
-
 }
 
 
@@ -94,14 +96,11 @@ void pwr_sleep(){
     
     //configuro alarma si flag no es SLEEP,
     if(__PWR_FLAG__ == RUN){
-    uint8_t interval ;
-    mem_s_get_interval(&interval);
-    //leo tiempo    
     uint8_t h,m,s ;
     get_time(&h,&m,&s);  
     __PWR_FLAG__ = SLEEP;
-    set_alarm(INTERVAL(h,m,s,interval));
-    sprintf(buffer,"\r\n%d:%d:%d=>%d:%d:%d\n",h,m,s,INTERVAL(h,m,s,interval));
+    set_alarm(INTERVAL(h,m,s,__INTERVAL__));
+    sprintf(buffer,"\r\n%d:%d:%d=>%d:%d:%d\n",h,m,s,INTERVAL(h,m,s,__INTERVAL__));
     modulo_debug_print(buffer);
     }
     HAL_SuspendTick();
@@ -109,3 +108,57 @@ void pwr_sleep(){
     // A dormir o un intervalo en minutos
 
 }
+
+
+
+/***
+ *  NUEVAS CARACTERISTICAS EN EL DISPOSITIVO
+ *  
+ * 
+ * 1) El periodo en modo bajo consumo pueden ser 
+ *  ciertos valores puntuales predefinidos   :
+ *                  1) 1 minuto
+ *                  2) 5 minutos
+ *                  3) 10 minutos
+ *                  4) 30 minutos
+ *                  5) 60 minutos
+ *                  
+ * 
+ * 2) El dispositivo calibra sensor cuando 
+ *  recibe el comando correspondiente
+ * 
+ * 
+ * 
+ * 
+*/
+
+
+
+void pwr_set_interval( sleep_interval_t periode){
+
+    uint8_t value = 0;
+    switch (periode)
+    {
+        case SLEEP_1MINUTE:
+            value = 1;
+            break;
+        case SLEEP_5MINUTES:
+            value = 5;
+            break;
+        case SLEEP_10MINUTES:
+            value = 10;
+            break;
+        case SLEEP_30MINUTES:
+            value = 30;
+            break;
+        case SLEEP_1HOUR:
+            value = 60;
+            break;
+        default:
+            value = 1;
+            break;
+    }
+        __INTERVAL__ = value;
+}
+
+
