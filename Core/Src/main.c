@@ -215,7 +215,7 @@ static void mqtt_config(){
   sim7000g_resume();
   #define PUB_MSG           sim_get_id()
   sim7000g_mqtt_publish("SIMO INIT",PUB_MSG,strlen(PUB_MSG));
-  //gpio_interruption_init();
+//  gpio_interruption_init();
 }
 
 
