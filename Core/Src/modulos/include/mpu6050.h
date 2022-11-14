@@ -37,6 +37,13 @@ typedef enum {
 
 
 
+/*@brief Calibramos el acelerometro del dispositivo en la posicion estandar.
+ 
+*/
+void mpu6050_calibration_routine();
+
+
+
 status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len);
 
 

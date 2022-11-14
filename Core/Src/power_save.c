@@ -18,7 +18,7 @@ PRIVATE  uint8_t buffer[100];
 //Valor en sram del perido
 
 
-PRIVATE sleep_interval_t __INTERVAL__ = 0;
+PRIVATE sleep_interval_t __INTERVAL__ = 1;
 
 
 

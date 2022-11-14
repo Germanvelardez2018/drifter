@@ -37,7 +37,13 @@
 #define MMAP_FSM_STATE                                      (MMAP_OFFSET_CONFIG + 5)
 
 // Almacena los 6 bytes del ofsset  del acelerometro. Eje X, eje y, eje z 
-#define MMAP_OFFSET_ACELEROMETER                            (MMAP_OFFSET_CONFIG + 10)
+#define MMAP_OFFSET_ACELEROMETER                              (MMAP_OFFSET_CONFIG + 10)
+
+#define MMAP_OFFSET_ACELEROMETER_X                            (MMAP_OFFSET_ACELEROMETER + 1)
+
+#define MMAP_OFFSET_ACELEROMETER_Y                            (MMAP_OFFSET_ACELEROMETER + 2)
+
+#define MMAP_OFFSET_ACELEROMETER_Z                            (MMAP_OFFSET_ACELEROMETER + 3)
 
 
 

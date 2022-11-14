@@ -110,6 +110,19 @@ PRIVATE void mpu6050_calibration(int16_t x_e, int16_t y_e, int16_t z_e){
 }
 
 
+
+
+
+// Calibramos en posicion estandar
+
+
+void mpu6050_calibration_routine(){
+    mpu6050_calibration(0, 0, (SCALA_DIV / 2.0));   // ESPERAMOS X=0G , Y=0G y Z=1G
+}
+
+
+
+
 status_t mpu6050_init(){
     I2C_init();
     status_t ret = STATUS_ERROR;
@@ -122,7 +135,7 @@ status_t mpu6050_init(){
     ret = mpu6050_set_scala(  SCALA_2G);
     if( ret == STATUS_ERROR)    modulo_debug_print("error en configuracion de escala\n");
     // Calibramos
-    mpu6050_calibration(0, 0, (SCALA_DIV / 2.0));   // ESPERAMOS X=0G , Y=0G y Z=1G
+  //  mpu6050_calibration(0, 0, (SCALA_DIV / 2.0));   // ESPERAMOS X=0G , Y=0G y Z=1G
     ret = mpu6050_sleep();
     return ret;
 }
@@ -204,6 +217,10 @@ status_t mpu6050_get_acceleration( int16_t* x, int16_t* y, int16_t* z){
     (*z) = (int16_t)(data[4] << 8 | data [5]);   
     (*z) = (*z) + offset_z;
     return ret;
+
+    //el string de datos
+    // 6 bytes =  |  XH  | XL |  YH | YL |  ZH | ZL |  
+
 }
 
 
@@ -250,7 +267,10 @@ status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
 
 
 
-
+void mpu6050_set_buffer_offset(){
+    uint8_t buffer[6]={0};
+    
+}
 
 
 
