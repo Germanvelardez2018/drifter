@@ -75,13 +75,13 @@ status_t mem_s_get_z_offset(int16_t* z);
 
 
 
-status_t mem_s_set_x_offset(int16_t* x);
+status_t mem_s_set_x_offset(int16_t x);
 
 
-status_t mem_s_set_y_offset(int16_t* y);
+status_t mem_s_set_y_offset(int16_t y);
 
 
-status_t mem_s_set_z_offset(int16_t* z);
+status_t mem_s_set_z_offset(int16_t z);
 
 
 

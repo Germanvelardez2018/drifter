@@ -166,9 +166,9 @@ status_t mem_s_get_max_amount_data(uint8_t* max_amount_data){
 
 status_t mem_s_set_max_amount_data(uint8_t* max_amount_data){
      status_t ret = STATUS_OK; 
-       mem_resume();
+    mem_resume();
     ret = mem_write_page(max_amount_data,1,MMAP_MAX_AMOUNT_DATA,0);    
-       mem_sleep();
+    mem_sleep();
     return ret;
 }
 
@@ -178,32 +178,56 @@ status_t mem_s_set_max_amount_data(uint8_t* max_amount_data){
 
 status_t mem_s_get_x_offset(int16_t* x){
     status_t ret = STATUS_OK;
+    mem_resume();
+    ret = mem_read_page(x,2,MMAP_OFFSET_ACELEROMETER_X,0);
+    mem_sleep();
     return ret;
 }
 status_t mem_s_get_y_offset(int16_t* y){
     status_t ret = STATUS_OK;
+    mem_resume();
+    ret = mem_read_page(y,2,MMAP_OFFSET_ACELEROMETER_Y,0);
+    mem_sleep();
     return ret;
 }
 
 status_t mem_s_get_z_offset(int16_t* z){
     status_t ret = STATUS_OK;
+    mem_resume();
+    ret = mem_read_page(z,2,MMAP_OFFSET_ACELEROMETER_Z,0);
+    mem_sleep();
     return ret;
 }
 
 
 
-
-status_t mem_s_set_x_offset(int16_t* x){
+// La clave aqui es darle un formato al paso de uint8_t a 16 y respetarlo
+status_t mem_s_set_x_offset(int16_t x){
     status_t ret = STATUS_OK;
+    uint8_t buffer[2]= {x & 0xff, x >> 8 };
+    mem_resume();
+    ret = mem_write_page(x,2,MMAP_OFFSET_ACELEROMETER_X,0);    
+    mem_sleep();
     return ret;
 }
-status_t mem_s_set_y_offset(int16_t* y){
+
+
+status_t mem_s_set_y_offset(int16_t y){
     status_t ret = STATUS_OK;
+    uint8_t buffer[2]= {y & 0xff, y >> 8 };
+    mem_resume();
+    ret = mem_write_page(y,2,MMAP_OFFSET_ACELEROMETER_Y,0);    
+    mem_sleep();
     return ret;
 }
 
-status_t mem_s_set_z_offset(int16_t* z){
+
+status_t mem_s_set_z_offset(int16_t z){
     status_t ret = STATUS_OK;
+    uint8_t buffer[2]= {z & 0xff, z >> 8 };
+    mem_resume();
+    ret = mem_write_page(z,2,MMAP_OFFSET_ACELEROMETER_Z,0);    
+    mem_sleep();
     return ret;
 }
 
