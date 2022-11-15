@@ -178,6 +178,7 @@ PRIVATE void BAT_ENA_set(level_t level){
 
 
 PRIVATE status_t uart_write(uint8_t* buffer,uint8_t len,uint32_t timeout){
+    HAL_UART_Abort_IT(SIM7000G_UART);
     HAL_StatusTypeDef res = HAL_UART_Transmit(SIM7000G_UART,buffer,len,timeout) ;
     status_t ret = (res == HAL_OK)?STATUS_OK:STATUS_ERROR;
     return ret;
@@ -274,24 +275,17 @@ void sim_set_update_params(uint8_t value){
 
 
  HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-        if(buffer_cmd[buffer_counter] != CHAR_END ){
-            buffer_counter++;
-            HAL_UART_Receive_IT(&huart1,&(buffer_cmd[buffer_counter]),1);
-            HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
-        }
-        else{
-                buffer_cmd[buffer_counter]=0;
-                sim_set_update_params(1);
-            }
+         HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
+
         }
 
-
+#define CMD_FORMAT_SIZE                                         (10)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
         HAL_ResumeTick();
         buffer_counter= 0;   
         memset(buffer_cmd,0,COMMAND_SIZE);
-        HAL_UART_Receive_IT(&huart1,buffer_cmd,1);
+        HAL_UART_Receive_IT(&huart1,buffer_cmd,CMD_FORMAT_SIZE);
 }
 
 

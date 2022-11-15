@@ -255,7 +255,7 @@ int main(void)
         break;
       }
     }
-   check_flag_params();
+ //  check_flag_params();
     pwr_sleep();
  }
 }
