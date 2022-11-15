@@ -234,27 +234,20 @@ int main(void)
   // ! Inicia el WDT
   uint8_t string[200]={0};
 
-#define TEST        1
-
+  #define TEST        0
   modulo_debug_print("INIT PROGRAM \r\n");
-
   while(TEST){
     delay(5000);
-   
-
     uint16_t ex = 0xff00;
     uint16_t ey = 0x00ff;
-
     uint16_t ez = 0x0ff0;
 
     sprintf(string,"Init values: \r\nx:%d  \r\ny:%d  \r\nz:%d\r\n",ex,ey,ez);
     modulo_debug_print(string);
 
-    
-
-   // mem_s_set_x_offset(ex);
-   // mem_s_set_y_offset(ey);
-   // mem_s_set_z_offset(ez);
+    mem_s_set_x_offset(ex);
+    mem_s_set_y_offset(ey);
+    mem_s_set_z_offset(ez);
 
     ex = 0;
     ey = 0;
@@ -268,15 +261,10 @@ int main(void)
 
     sprintf(string,"Final Values: \r\nx:%d  \r\ny:%d  \r\nz:%d\r\n",ex,ey,ez);
     modulo_debug_print(string);
-
-
-
     while(1);
-
-
-
-
   }
+
+
   //MX_IWDG_Init();
   device = fsm_get_state();
   while (1)

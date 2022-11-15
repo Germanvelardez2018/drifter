@@ -37,10 +37,14 @@ typedef enum {
 
 
 
-/*@brief Calibramos el acelerometro del dispositivo en la posicion estandar.
- 
+
+
+/**
+ * @brief Calibro el sistema (opcional) y ob
+ * 
+ * 
 */
-void mpu6050_calibration_routine();
+void mpu6050_calibrate_and_save_offset();
 
 
 

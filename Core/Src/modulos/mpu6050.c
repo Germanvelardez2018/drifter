@@ -116,7 +116,7 @@ PRIVATE void mpu6050_calibration(int16_t x_e, int16_t y_e, int16_t z_e){
 // Calibramos en posicion estandar
 
 
-void mpu6050_calibration_routine(){
+PRIVATE void mpu6050_calibration_routine(){
     mpu6050_calibration(0, 0, (SCALA_DIV / 2.0));   // ESPERAMOS X=0G , Y=0G y Z=1G
 }
 
@@ -135,7 +135,9 @@ status_t mpu6050_init(){
     ret = mpu6050_set_scala(  SCALA_2G);
     if( ret == STATUS_ERROR)    modulo_debug_print("error en configuracion de escala\n");
     // Calibramos
-  //  mpu6050_calibration(0, 0, (SCALA_DIV / 2.0));   // ESPERAMOS X=0G , Y=0G y Z=1G
+
+   // mpu6050_calibrate_and_save_offset();
+    mpu6050_get_offset();
     ret = mpu6050_sleep();
     return ret;
 }
@@ -266,9 +268,23 @@ status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
 
 
 
+void mpu6050_get_offset(){
+    mem_s_get_x_offset( &offset_x); // guardo en memoria flash
+    mem_s_get_y_offset( &offset_y); // guardo en memoria flash
+    mem_s_get_z_offset( &offset_z); // guardo en memoria flash
 
-void mpu6050_set_buffer_offset(){
+}
+
+
+
+void mpu6050_calibrate_and_save_offset(){
     uint8_t buffer[6]={0};
+    // Extraigo los offset y los guardo en memoria flash
+    mpu6050_calibration_routine(); // Esta funcion guarda offset en static x, offset_x offset_y, offset_z
+    mem_s_set_x_offset( offset_x); // guardo en memoria flash
+    mem_s_set_y_offset( offset_y); // guardo en memoria flash
+    mem_s_set_z_offset( offset_z); // guardo en memoria flash
+
     
 }
 
