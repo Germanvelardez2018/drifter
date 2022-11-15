@@ -232,13 +232,50 @@ int main(void)
   modulo_debug_print("init program \r\n");
   mqtt_config();
   // ! Inicia el WDT
-  uint8_t gps_buffer[200] ={"hola gps"};
+  uint8_t string[200]={0};
 
-  while(0){
+#define TEST        1
+
+  modulo_debug_print("INIT PROGRAM \r\n");
+
+  while(TEST){
     delay(5000);
-    sim7000g_get_NMEA(&gps_buffer,200);
-    modulo_debug_print("\r\ngps:");
-    modulo_debug_print(gps_buffer);
+   
+
+    uint16_t ex = 0xff00;
+    uint16_t ey = 0x00ff;
+
+    uint16_t ez = 0x0ff0;
+
+    sprintf(string,"Init values: \r\nx:%d  \r\ny:%d  \r\nz:%d\r\n",ex,ey,ez);
+    modulo_debug_print(string);
+
+    
+
+   // mem_s_set_x_offset(ex);
+   // mem_s_set_y_offset(ey);
+   // mem_s_set_z_offset(ez);
+
+    ex = 0;
+    ey = 0;
+    ez = 0;
+    sprintf(string,"Reset values: \r\nx:%d  \r\ny:%d  \r\nz:%d\r\n",ex,ey,ez);
+    modulo_debug_print(string);
+
+    mem_s_get_x_offset(&ex);
+    mem_s_get_y_offset(&ey);
+    mem_s_get_z_offset(&ez);
+
+    sprintf(string,"Final Values: \r\nx:%d  \r\ny:%d  \r\nz:%d\r\n",ex,ey,ez);
+    modulo_debug_print(string);
+
+
+
+    while(1);
+
+
+
+
   }
   //MX_IWDG_Init();
   device = fsm_get_state();
