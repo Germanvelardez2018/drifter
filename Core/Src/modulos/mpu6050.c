@@ -255,8 +255,8 @@ status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
     float fy = (float) (y/(SCALA_DIV/2.0)); // 
     float fz = (float) (z/(SCALA_DIV/2.0)); // 
     sprintf(buffer,"t:%.2f , x:%.2f , y:%.2f , z:%.2f \n",ft,fx,fy,fz);
-    #if   1// PRINT_FLAG_MPU6050
-        modulo_debug_print(buffer);
+    #if     1// PRINT_FLAG_MPU6050
+    modulo_debug_print(buffer);
     #endif
     mpu6050_sleep();
     return ret;
@@ -272,7 +272,6 @@ void mpu6050_get_offset(){
     mem_s_get_x_offset( &offset_x); // guardo en memoria flash
     mem_s_get_y_offset( &offset_y); // guardo en memoria flash
     mem_s_get_z_offset( &offset_z); // guardo en memoria flash
-
 }
 
 

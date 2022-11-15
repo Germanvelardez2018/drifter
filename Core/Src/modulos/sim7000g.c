@@ -363,18 +363,24 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     uint8_t* buffer[MQTT_BUFFER_CONFIG]={0};
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_URL,url);    
     ret = send_command(buffer,CMD_OK,500);
-    delay(250);
+    delay(500);
     ret = send_command(CMD_MQTT_KEEK_ALIVE,CMD_OK,500);
-    delay(250);
-    sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
-    delay(250);
+    delay(500);
+    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
+    delay(500);
     ret = send_command(buffer,CMD_OK,500);
-    delay(250);
-    ret = send_command(CMD_MQTT_COMMIT,CMD_OK,500);
-    delay(250);   
+    sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
+    delay(500);
+    ret= send_command(buffer,CMD_OK,500);
+    sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
+    delay(500);
+    ret = send_command(buffer,CMD_OK,500);
+    delay(500);
+    ret = send_command(CMD_MQTT_COMMIT,CMD_OK,2000);
+    delay(500);   
     sprintf(buffer,CMD_MQTT_SUBSCRIBE,"CMD",1);    
     ret = send_command(buffer,CMD_OK,500);
-    delay(250);
+    delay(500);
     // configurar la interrupcion del PIN RI SIM7000G
     ret = send_command("AT+CFGRI=1\r\n",CMD_OK,500); // 
     return ret;

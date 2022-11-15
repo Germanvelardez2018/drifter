@@ -214,8 +214,8 @@ static void mqtt_config(){
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
   #define PUB_MSG           sim_get_id()
-  sim7000g_mqtt_publish("SIMO INIT",PUB_MSG,strlen(PUB_MSG));
-//  gpio_interruption_init();
+  sim7000g_mqtt_publish("SIMO_INIT",PUB_MSG,strlen(PUB_MSG));
+  gpio_interruption_init();
 }
 
 
@@ -234,35 +234,7 @@ int main(void)
   // ! Inicia el WDT
   uint8_t string[200]={0};
 
-  #define TEST        0
-  modulo_debug_print("INIT PROGRAM \r\n");
-  while(TEST){
-    delay(5000);
-    uint16_t ex = 0xff00;
-    uint16_t ey = 0x00ff;
-    uint16_t ez = 0x0ff0;
-
-    sprintf(string,"Init values: \r\nx:%d  \r\ny:%d  \r\nz:%d\r\n",ex,ey,ez);
-    modulo_debug_print(string);
-
-    mem_s_set_x_offset(ex);
-    mem_s_set_y_offset(ey);
-    mem_s_set_z_offset(ez);
-
-    ex = 0;
-    ey = 0;
-    ez = 0;
-    sprintf(string,"Reset values: \r\nx:%d  \r\ny:%d  \r\nz:%d\r\n",ex,ey,ez);
-    modulo_debug_print(string);
-
-    mem_s_get_x_offset(&ex);
-    mem_s_get_y_offset(&ey);
-    mem_s_get_z_offset(&ez);
-
-    sprintf(string,"Final Values: \r\nx:%d  \r\ny:%d  \r\nz:%d\r\n",ex,ey,ez);
-    modulo_debug_print(string);
-    while(1);
-  }
+  
 
 
   //MX_IWDG_Init();
