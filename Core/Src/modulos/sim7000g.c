@@ -186,6 +186,7 @@ PRIVATE status_t uart_write(uint8_t* buffer,uint8_t len,uint32_t timeout){
 
 
 PRIVATE status_t uart_read(uint8_t* buffer,uint8_t len,uint32_t timeout){
+    HAL_UART_Abort_IT(SIM7000G_UART);
     memset(SIM7000G_BUFFER,0,SIM_BUFFER_SIZE);
     HAL_StatusTypeDef res = HAL_UART_Receive(SIM7000G_UART,buffer,len,timeout);
     status_t ret = ( res == HAL_OK)?STATUS_OK:STATUS_ERROR;
