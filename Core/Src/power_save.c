@@ -159,6 +159,7 @@ void pwr_set_interval( sleep_interval_t periode){
             break;
     }
         __INTERVAL__ = value;
+        mem_s_set_interval(&__INTERVAL__);
 }
 
 

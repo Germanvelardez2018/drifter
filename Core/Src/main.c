@@ -99,37 +99,78 @@ void inline get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter){
 
 
 void  check_flag_params(){
+  static buffer[40];
    flag_params = sim_get_update_params();
    if(flag_params )      {
-   static uint8_t interval =0;
-   static uint8_t max = 0;
+  
    modo = RUN;
    uint8_t cmd[40]={0};
    memset(cmd,0,40);
    sim_copy_buffer_cmd(cmd);
    modulo_debug_print("\r\ncmd:");
    modulo_debug_print(cmd);
-   sim_get_values(cmd,&interval,&max);
-   sprintf(buf," get value:\r\r\n INTERVAL:%d  MAX:%d\r\n",interval,max);
-   modulo_debug_print(buf);
-   if( (interval != 0) &&  (max != 0)){
-      uint8_t i = 0 , m = 0;
-       mem_s_get_interval(&i);
-       mem_s_get_max_amount_data(&m);
-       // Con este if se evitan problema de repeticion me mensaje por servidor mqtt problematico
-       if(i != interval && max != m){
-         memset(buf,0,255);
-         sprintf(buf," Nueva configuracion:\r\r\n INTERVAL:%d  MAX:%d\r\n",interval,max);
-         modulo_debug_print(buf);
-         mem_s_set_interval(&interval);
-         mem_s_set_max_amount_data(&max);
-         while(1);    
-       }
-   }
-   else{
-    modulo_debug_print("Parametros invalidos \r\n");
-   }
+  
+   
   sim_set_update_params(0);
+  int value = sim7000g_get_parse(cmd);
+
+  sprintf(buffer,"\r\nvalor extraido:%d\r\n",value);
+  modulo_debug_print(buffer);
+
+  sleep_interval_t interval = SLEEP_1MINUTE;
+  uint8_t enable = 0;
+  switch (value)
+  {
+    case 0:
+      /* code */
+      //ERROR en parse
+      break;
+    case 1:
+      // Intervalo 1m
+      interval =  SLEEP_1MINUTE;
+      enable = 1;
+      break;
+    case 2:
+      // Intervalo 5m
+      interval =   SLEEP_5MINUTES;
+      enable = 1;
+      break;
+    case 3:
+      // Intervalo 10m
+      interval =  SLEEP_10MINUTES;
+      enable = 1;
+      break;
+    case 4:
+      //Intervalo 30m
+      interval =   SLEEP_30MINUTES;
+      enable = 1;
+      break;
+    case 5:
+      //Intervalo 60m
+      interval =  SLEEP_1HOUR ;
+      enable = 1;
+      break;
+    case 6:
+      //Get calibration
+      modulo_debug_print("Se calibro dispositivo \r\n");
+      mpu6050_calibrate_and_save_offset();
+    default:
+      // No hacer nada
+      break;
+  }
+  if(enable){
+
+  sprintf(buffer,"\r\n Se cambio el intervalo \r\n");
+  modulo_debug_print(buffer);
+ // uint8_t last_interval = 0;
+ // mem_s_get_interval(&last_interval);
+  // Si el intervalo es el mismo no hago nada
+  //if(last_interval != interval){
+    pwr_set_interval(interval); 
+    while(1);
+  //}   
+  }
+
  }    
 }
 
@@ -232,12 +273,9 @@ int main(void)
   modulo_debug_print("init program \r\n");
   mqtt_config();
   // ! Inicia el WDT
-  uint8_t string[200]={0};
+ 
 
-  
-
-
-  //MX_IWDG_Init();
+  MX_IWDG_Init();
   device = fsm_get_state();
   while (1)
   {   
@@ -255,7 +293,7 @@ int main(void)
         break;
       }
     }
- //  check_flag_params();
+   check_flag_params();
     pwr_sleep();
  }
 }
