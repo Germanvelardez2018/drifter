@@ -50,9 +50,17 @@
 //si esta definido default value, recargamos flash con valores default
 //#define DEFAULT_VALUES
 
- #define MSG_INIT            "test drifter modular \n"
+#define   MSG_INIT                                   "test drifter modular \n"
+#define   SENSOR_FORMAT                              "{ gps: %s sensor: %s \r\n}"
+
+#define   TAG_INIT                                   "SIMO_INIT"
+#define   DEVICE_ID                                  "device connected \r\n"
     
 
+#define   FSM_ONFIELD                               "FSM: ON FIELD\r\n"
+#define   FSM_DOWNLOAD                              "FSM: DOWNLOAD\r\n"
+#define   FSM_CHANGE1                               "ON FIELD => DOWNLOAD \r\n"
+#define   FSM_CHANGE2                               "DOWNLOAD => ON FIELD \r\n"
 
 /* USER CODE END PM */
 /* Private variables ---------------------------------------------------------*/
@@ -81,110 +89,106 @@ PRIVATE  uint8_t     flag_params = 0;
 PRIVATE  uint8_t     max_counter ;
 
 
-static uint8_t gps[120] = {"SOY EL GPS \r\n"},sensor[80];
-
-
 
 void inline get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter){
-  
 
+
+  uint8_t  gps[100]   =  {0};
+  uint8_t  sensor[60] =  {0};
   memset(buffer,0,len);
-  modulo_debug_print("FSM: ON FIELD\r\n");  
-  mpu6050_get_measure(sensor,80);
-  sim7000g_get_NMEA(gps,120);
-  sprintf(buffer,"{ gps: %s sensor: %s \r\n}",gps,sensor);
+  mpu6050_get_measure(sensor,60);
+  sim7000g_get_NMEA(gps,100);
+  sprintf(buffer,SENSOR_FORMAT,gps,sensor);
   modulo_debug_print(buffer);
   write_data(buffer,counter);
 }
 
 
+
+
 void  check_flag_params(){
-  static buffer[40];
-   flag_params = sim_get_update_params();
-   if(flag_params )      {
-  
-   modo = RUN;
-   uint8_t cmd[40]={0};
-   memset(cmd,0,40);
-   sim_copy_buffer_cmd(cmd);
-   modulo_debug_print("\r\ncmd:");
-   modulo_debug_print(cmd);
-  
-   
-  sim_set_update_params(0);
-  int value = sim7000g_get_parse(cmd);
+  wdt_reset();
+  static buffer[50];
+  flag_params = sim_get_update_params();
+  if(flag_params )      {
+    modo = RUN;
+    uint8_t cmd[25]={0};
+    memset(cmd,0,25);
+    sim_copy_buffer_cmd(cmd);
+    modulo_debug_print(cmd);
+    int value = sim7000g_get_parse(cmd);
+    sprintf(buffer,"\r\nCMD: valor extraido:%d\r\n",value);
+    modulo_debug_print(buffer);
 
-  sprintf(buffer,"\r\nvalor extraido:%d\r\n",value);
-  modulo_debug_print(buffer);
+    sleep_interval_t interval = SLEEP_1MINUTE;
+    uint8_t enable = 0;
 
-  sleep_interval_t interval = SLEEP_1MINUTE;
-  uint8_t enable = 0;
-  switch (value)
-  {
-    case 0:
-      /* code */
-      //ERROR en parse
-      break;
-    case 1:
-      // Intervalo 1m
-      interval =  SLEEP_1MINUTE;
-      enable = 1;
-      break;
-    case 2:
-      // Intervalo 5m
-      interval =   SLEEP_5MINUTES;
-      enable = 1;
-      break;
-    case 3:
-      // Intervalo 10m
-      interval =  SLEEP_10MINUTES;
-      enable = 1;
-      break;
-    case 4:
-      //Intervalo 30m
-      interval =   SLEEP_30MINUTES;
-      enable = 1;
-      break;
-    case 5:
-      //Intervalo 60m
-      interval =  SLEEP_1HOUR ;
-      enable = 1;
-      break;
-    case 6:
-      //Get calibration
-      modulo_debug_print("Se calibro dispositivo \r\n");
-      mpu6050_calibrate_and_save_offset();
-    default:
-      // No hacer nada
-      break;
-  }
-  if(enable){
+    switch (value)
+    {
+      case 0:
+        //ERROR en parse
+        break;
+      case 1:
+        interval =   SLEEP_1MINUTE;         enable = 1;
+        break;
+      case 2:
+        interval =   SLEEP_5MINUTES;        enable = 1;
+        break;
+      case 3:
+        interval =  SLEEP_10MINUTES;        enable = 1;
+        break;
+      case 4:
+        interval =   SLEEP_30MINUTES;       enable = 1;
+        break;
+      case 5:
+        interval =   SLEEP_1HOUR ;          enable = 1;
+        break;
+      case 6:
+        //Get calibration
+        modulo_debug_print("\r\nSe calibro dispositivo \r\n");
+        mpu6050_calibrate_and_save_offset();
+        break;
+    
+      case 7:
+        // Forzar envio de datos a la nube
+        modulo_debug_print("\r\nForzar download\r\n");
+        break;// No hacer nada
+      case 8:
+        //Almacenar hasta 20 datos
+        modulo_debug_print("\r\nContador maximo 20 \r\n");
+        break;
+      case 9:
+        //Almacenar hasta 50
+          modulo_debug_print("\r\nContador maximo 20 \r\n");
+        break;
 
-  sprintf(buffer,"\r\n Se cambio el intervalo \r\n");
-  modulo_debug_print(buffer);
- // uint8_t last_interval = 0;
- // mem_s_get_interval(&last_interval);
-  // Si el intervalo es el mismo no hago nada
-  //if(last_interval != interval){
-    pwr_set_interval(interval); 
-    while(1);
-  //}   
-  }
+        default:
+        break;
+    }
+      sim_set_update_params(0);
+      wdt_reset();
 
- }    
+    if(enable){
+        sprintf(buffer,"\r\n Se cambio el intervalo \r\n");
+        modulo_debug_print(buffer);
+        mem_s_set_interval(&interval);
+        while(1);
+    }
+  }    
 }
 
 
 
 static void inline on_field(){
   // leo el contador
+  modulo_debug_print(FSM_ON_FIELD);  
   mem_s_get_counter(&counter);
   get_data_frame_to_save(data_frame_buffer,DATAFRAME_SIZE,counter);
   //Aumento contador de muestras almacenadas
   if( counter >= max_counter){
       device = FSM_MEMORY_DOWNLOAD;   
       fsm_set_state(FSM_MEMORY_DOWNLOAD); 
-      modulo_debug_print("ON FIELD => DOWNLOAD \r\n");}
+      modulo_debug_print(FSM_CHANGE1);}
   else{
      counter = counter +1 ;
      mem_s_set_counter(&counter);
@@ -193,7 +197,7 @@ static void inline on_field(){
 
 
 static void inline on_download(void){
-  modulo_debug_print("FSM: DOWNLOAD\r\n");  
+  modulo_debug_print(FSM_DOWNLOAD);  
   counter = (max_counter< counter)? max_counter: counter;
  // counter = MAX_COUNTER;
   sprintf(data_frame_buffer,"extraer :%d datos\n",counter);
@@ -212,7 +216,7 @@ static void inline on_download(void){
   mem_s_set_counter(&counter);
   device = FSM_ON_FIELD;
   fsm_set_state(FSM_ON_FIELD); 
-  modulo_debug_print("DOWNLOAD => ON FIELD \r\n");
+  modulo_debug_print(FSM_CHANGE2);
 }
 
 
@@ -255,10 +259,11 @@ static void mqtt_config(){
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
   #define PUB_MSG           sim_get_id()
-  sim7000g_mqtt_publish("SIMO_INIT",PUB_MSG,strlen(PUB_MSG));
+ // char* p_id = PUB_MSG;
+
+  sim7000g_mqtt_publish(TAG_INIT,DEVICE_ID,strlen(DEVICE_ID));
   gpio_interruption_init();
 }
-
 
 
 /**

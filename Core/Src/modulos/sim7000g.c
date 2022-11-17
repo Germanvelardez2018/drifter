@@ -95,8 +95,8 @@ extern  UART_HandleTypeDef huart2;
 #define SIM7000G_PWRKEY_Pin GPIO_PIN_12
 #define SIM7000G_PWRKEY_GPIO_Port GPIOA
 #define SIM_BUFFER_SIZE                               (254)
-#define COMMAND_SIZE                                    40
-#define BUFFER_ID_SIZE                                (100)
+#define COMMAND_SIZE                                   30
+#define BUFFER_ID_SIZE                                (120)
 
 #define CHAR_END                                        ('x')
 
@@ -109,13 +109,7 @@ PRIVATE uint8_t buffer_cmd[COMMAND_SIZE]={0};
 PRIVATE uint8_t _UPDATE_PARAMS_ = 0;
 PRIVATE uint8_t interval = 0 , m = 0;
 PRIVATE uint8_t flag_cmd = 0;
-PRIVATE uint8_t buffer_id[BUFFER_ID_SIZE]="Sin datos del dispositivo \r\n";
-
-
-
-
-
-
+PRIVATE uint8_t buffer_id[BUFFER_ID_SIZE]={0};
 
 
 
@@ -123,8 +117,7 @@ PRIVATE uint8_t buffer_id[BUFFER_ID_SIZE]="Sin datos del dispositivo \r\n";
 
 #define PARSE_CHAR                              ","
 #define PARSE_ERROR                             (0)
-#define CMD_FORMAT                             ("tag : value")
-#define EXAMPLE_CMD                            "+SMSUB: \"CMD\",\"7\"␍␊"
+#define CMD_FORMAT                             ("tag , value")
 
 
 // Value sera un valor numerico del 0 al 9
@@ -154,18 +147,14 @@ PRIVATE uint8_t buffer_id[BUFFER_ID_SIZE]="Sin datos del dispositivo \r\n";
 
 // SI error retorna 0
 static int get_parse(char* string){
-
     int ret = PARSE_ERROR;
-
     printf("Dummy function:\r\n%s\r\n",string);
-
     char* token = strtok(string,PARSE_CHAR); // TAG
     printf("token: %s \r\n",token);
     token = strtok(NULL,PARSE_CHAR);           // VALUE
     token[0]= " ";
     token[2]=(char)0;
     printf("token: %s \r\n",&(token[1]));
-    
     ret = atoi(&(token[1]));
     return ret;
 }
@@ -184,39 +173,6 @@ uint8_t sim7000g_get_parse(char* string){
 
 
 
-
-// YA NO SE USA, ELIMINAR
-// formato interval, max    
-PRIVATE   void get_values(char* b,int8_t* interval, uint8_t* max)
-{
-    uint8_t ret = 0;
-    uint8_t index = 0;
-    uint8_t len = 0;
-    char *token = strtok(b,",");
-    uint8_t n;
-     if(token != NULL){
-        while(token != NULL){
-          n =(uint8_t) atoi(token);
-          if(n != 0){
-          if(index == 0){
-          *interval =n; 
-          }else{
-          *max = n;
-          }
-            index ++;
-        }     
-            token = strtok(NULL, ",");
- }
- }
-}
-
-
-
-void sim_get_values(char* b,int8_t* i, uint8_t* m){
-     get_values(b, i,  m);
-}
-
-
 PRIVATE status_t uart_init(){
     status_t ret = STATUS_OK;
     UART_SIMCOM_init();
@@ -231,7 +187,7 @@ uint8_t* sim_get_id(void){
     mem_s_get_max_amount_data(&max_counter);
     mem_s_get_interval(&interval);
     state = fsm_get_state();
-    sprintf(buffer_id,"Params: counter:%d, max_counter:%d, interval:%d, last state:%s \r\n",counter,max_counter,interval,((state == FSM_ON_FIELD)?"ON FIELD": "DOWNLOAD"));
+    sprintf(buffer_id,"DEv: counter:%d, max_counter:%d, interval:%d,last state:%s \r\n",counter,max_counter,interval,((state == FSM_ON_FIELD)?"ON FIELD": "DOWNLOAD"));
     modulo_debug_print(buffer_id);
     return buffer_id;
 }
@@ -317,7 +273,7 @@ status_t sim7000g_check(){
     modulo_debug_print("Check SIMG7000G\r\n");
     while ( ret == STATUS_ERROR){
         ret = send_command(CMD_VERSION,CMD_OK,500);
-        delay(400);
+        delay(1000);
     }
     ret = send_command(CMD_ECHO_OFF,CMD_OK,500);
     ret = send_command(CMD_AT,CMD_OK,500);
@@ -331,7 +287,9 @@ uint8_t* sim_get_buffer_cmd(){
 
 
 void sim_copy_buffer_cmd(uint8_t* buffer_command){
-    strncpy(buffer_command,buffer_cmd,buffer_counter+1);
+  //  strncpy(buffer_command,buffer_cmd,buffer_counter+1);
+        strncpy(buffer_command,buffer_cmd,19);
+
 }
 
 
@@ -349,34 +307,31 @@ void sim_set_update_params(uint8_t value){
 
 
  HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+    HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
+    buffer_cmd[18]=0;
+    sim_set_update_params(1);
+
+#if 0
         if(buffer_cmd[buffer_counter] != CHAR_END ){
             buffer_counter++;
-            HAL_UART_Receive_IT(SIM7000G_UART,&(buffer_cmd[buffer_counter]),1);
-          //  HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
+            HAL_UART_Receive_IT(SIM7000G_UART,&(buffer_cmd[buffer_counter]),1);    
         }
         else{
                 buffer_cmd[buffer_counter]=0;
                 sim_set_update_params(1);
                 HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
-
             }
-        
-
+#endif
 }
 
 
-
-#define CMD_FORMAT_SIZE                                         (10)
-
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
         HAL_ResumeTick();
-        HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
-
-        
-        buffer_counter= 0;   
+     //   buffer_counter= 0;   
         memset(buffer_cmd,0,COMMAND_SIZE);
-        HAL_UART_Receive_IT(SIM7000G_UART,buffer_cmd,1);
-       // HAL_UART_Receive_IT(&huart1,buffer_cmd,CMD_FORMAT_SIZE);
+    //    HAL_UART_Receive_IT(SIM7000G_UART,buffer_cmd,1);
+        HAL_UART_Receive_IT(SIM7000G_UART,buffer_cmd,18);
+
 }
 
 
@@ -384,7 +339,7 @@ status_t sim7000g_init(){
     uart_init();
     // Necesario para alimentar la placa y encender el sim7000g   
     status_t ret = STATUS_OK;
-    modulo_debug_print("SIM7000G init\n");
+    modulo_debug_print("SIM init\n");
     PWRKEY_set(LEVEL_HIGH);
     BAT_ENA_set(LEVEL_HIGH);
     return ret;
@@ -419,7 +374,7 @@ status_t sim7000g_set_gps(uint8_t value){
 
 status_t sim7000g_get_NMEA( uint8_t* buff, uint8_t len){
     status_t ret = STATUS_OK;
-    send_command(CMD_GETGPSINFO,CMD_OK,2000);
+    send_command(CMD_GETGPSINFO,CMD_OK,800);
     uint8_t len_response = strlen(SIM7000G_BUFFER);
     strcpy(buff,SIM7000G_BUFFER);
     return ret;
@@ -444,41 +399,41 @@ status_t sim7000g_open_apn(){
 status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password, uint8_t* qos){
     status_t ret = STATUS_ERROR;
     if ((url == NULL) || ( user == NULL) || (password == NULL) || (qos == NULL)) return ret;
-    #define MQTT_BUFFER_CONFIG             150
+    #define MQTT_BUFFER_CONFIG             120
     uint8_t* buffer[MQTT_BUFFER_CONFIG]={0};
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_URL,url);    
-    ret = send_command(buffer,CMD_OK,800);
-    delay(800);
-    ret = send_command(CMD_MQTT_KEEK_ALIVE,CMD_OK,800);
-    delay(800);
+    ret = send_command(buffer,CMD_OK,900);
+    delay(900);
+    ret = send_command(CMD_MQTT_KEEK_ALIVE,CMD_OK,900);
+    delay(900);
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
-    delay(800);
-    ret = send_command(buffer,CMD_OK,800);
+    delay(900);
+    ret = send_command(buffer,CMD_OK,900);
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
-    delay(800);
-    ret= send_command(buffer,CMD_OK,800);
+    delay(900);
+    ret= send_command(buffer,CMD_OK,900);
     sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
-    delay(800);
-    ret = send_command(buffer,CMD_OK,800);
-    delay(800);
-    ret = send_command(CMD_MQTT_COMMIT,CMD_OK,800);
-    delay(800);   
+    delay(900);
+    ret = send_command(buffer,CMD_OK,900);
+    delay(900);
+    ret = send_command(CMD_MQTT_COMMIT,CMD_OK,900);
+    delay(900);   
     sprintf(buffer,CMD_MQTT_SUBSCRIBE,"CMD",1);    
-    ret = send_command(buffer,CMD_OK,800);
-    delay(800);
+    ret = send_command(buffer,CMD_OK,900);
+    delay(900);
     // configurar la interrupcion del PIN RI SIM7000G
-    ret = send_command("AT+CFGRI=1\r\n",CMD_OK,800); // 
+    ret = send_command("AT+CFGRI=1\r\n",CMD_OK,900); // 
     return ret;
 }
 
 
 status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_payload){
     status_t ret = STATUS_ERROR;
-    uint8_t  buffer[255]={0};
+    uint8_t  buffer[240]={0};
     if( (topic != NULL) || (payload != NULL)){
         sprintf(buffer,CMD_MQTT_PUBLISH,topic,len_payload);    
-        ret = send_command(buffer,CMD_OK,500);
-        ret = send_command(payload,CMD_OK,500);
+        ret = send_command(buffer,CMD_OK,600);
+        ret = send_command(payload,CMD_OK,600);
     }
     return ret;
 }
