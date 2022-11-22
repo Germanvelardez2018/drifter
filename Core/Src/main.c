@@ -107,19 +107,20 @@ void inline get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter){
 
 
 void  check_flag_params(){
-  wdt_reset();
   static buffer[50];
   flag_params = sim_get_update_params();
   if(flag_params )      {
+    modulo_debug_print("\r\ninto check flag \r\n");
+    wdt_reset();
     modo = RUN;
     uint8_t cmd[25]={0};
     memset(cmd,0,25);
     sim_copy_buffer_cmd(cmd);
     modulo_debug_print(cmd);
+    modulo_debug_print("\r\ncheck flag ...");
     int value = sim7000g_get_parse(cmd);
     sprintf(buffer,"\r\nCMD: valor extraido:%d\r\n",value);
     modulo_debug_print(buffer);
-
     sleep_interval_t interval = SLEEP_1MINUTE;
     uint8_t enable = 0;
 
@@ -127,6 +128,7 @@ void  check_flag_params(){
     {
       case 0:
         //ERROR en parse
+        modulo_debug_print("error parse\r\n");
         break;
       case 1:
         interval =   SLEEP_1MINUTE;         enable = 1;

@@ -36,8 +36,13 @@ extern "C" {
 
 
 
+
+#define NEW_BROKER                                      (1)
+
+#define NEW_BROKER_URL                              "broker.hivemq.com"
+
 #define MQTT_TOPIC                                   "X1111"
-#define MQTT_URL                                     "simointi.cloud.shiftr.io"
+#define MQTT_URL                                    NEW_BROKER_URL //"simointi.cloud.shiftr.io"
 #define MQTT_URL2                                      "lseserver.ddns.net"
 
 #define MQTT_PASS                                    "fdZY5b69OhOVsAns"
