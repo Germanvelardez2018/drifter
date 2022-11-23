@@ -56,7 +56,7 @@
 #define   TAG_INIT                                   "SIMO_INIT"
 #define   DEVICE_ID                                  "device connected \r\n"
     
-
+#define ID_FORMAT                                   "Dev: counter:%d, max_counter:%d, interval:%d,last state:%s \r\n"
 #define   FSM_ONFIELD                               "FSM: ON FIELD\r\n"
 #define   FSM_DOWNLOAD                              "FSM: DOWNLOAD\r\n"
 #define   FSM_CHANGE1                               "ON FIELD => DOWNLOAD \r\n"
@@ -107,21 +107,22 @@ void inline get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter){
 
 
 void  check_flag_params(){
-  static buffer[50];
+  static buffer[35];
   flag_params = sim_get_update_params();
   if(flag_params )      {
-    modulo_debug_print("\r\ninto check flag \r\n");
     wdt_reset();
     modo = RUN;
-    uint8_t cmd[25]={0};
-    memset(cmd,0,25);
+    uint8_t cmd[20]={0};
+    memset(cmd,0,20);
     sim_copy_buffer_cmd(cmd);
     modulo_debug_print(cmd);
-    modulo_debug_print("\r\ncheck flag ...");
-    int value = sim7000g_get_parse(cmd);
+    modulo_debug_print("\r\nParseo string");
+    uint8_t value = sim7000g_get_parse(cmd);
+    modulo_debug_print("\r\nfin parseo ");
+
     sprintf(buffer,"\r\nCMD: valor extraido:%d\r\n",value);
     modulo_debug_print(buffer);
-    sleep_interval_t interval = SLEEP_1MINUTE;
+    uint8_t interval = 0;
     uint8_t enable = 0;
 
     switch (value)
@@ -171,7 +172,7 @@ void  check_flag_params(){
       wdt_reset();
 
     if(enable){
-        sprintf(buffer,"\r\n Se cambio el intervalo \r\n");
+        sprintf(buffer,"\r\n Se cambio el intervalo %d\r\n", interval);
         modulo_debug_print(buffer);
         mem_s_set_interval(&interval);
         while(1);
@@ -260,11 +261,16 @@ static void mqtt_config(){
   sim7000g_set_gps(1);
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
-  #define PUB_MSG           sim_get_id()
- // char* p_id = PUB_MSG;
-
-  sim7000g_mqtt_publish(TAG_INIT,DEVICE_ID,strlen(DEVICE_ID));
+ 
+  uint8_t id[120];
+  uint8_t interval;
+  fsm_state_t state = FSM_ON_FIELD;
+  //mem_s_get_interval(&interval);
+  state = fsm_get_state();
+  sprintf(id,ID_FORMAT,counter,max_counter,interval,((state == FSM_ON_FIELD)?"ON FIELD": "DOWNLOAD"));
+  sim7000g_mqtt_publish(TAG_INIT,id,strlen(id));
   gpio_interruption_init();
+
 }
 
 
@@ -280,8 +286,7 @@ int main(void)
   modulo_debug_print("init program \r\n");
   mqtt_config();
   // ! Inicia el WDT
- 
-
+  modulo_debug_print("inicio el programa \r\n");
   MX_IWDG_Init();
   device = fsm_get_state();
   while (1)

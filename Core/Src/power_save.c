@@ -82,10 +82,9 @@ PRIVATE void __set_time__(){
     uint8_t eh = 0,em = 0;
     get_time(&h,&m,&s);
     __PWR_FLAG__ = SLEEP;
-   __INTERVAL__ = 5;
+   __INTERVAL__ = 1;
     //mem_s_set_interval(&__INTERVAL__);
     mem_s_get_interval(&__INTERVAL__);
-    if(__INTERVAL__ == 0) __INTERVAL__ = 1;
     eh = (__INTERVAL__ >= 60)?1: 0;
     em = (__INTERVAL__ < 60)?__INTERVAL__ : 0;
     set_alarm(h +eh, m +em, s);

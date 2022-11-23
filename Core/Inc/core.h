@@ -83,11 +83,11 @@ typedef enum {
 /// @brief  Valores predefinidos de intervalos validos
 typedef enum {
 
-                SLEEP_1MINUTE     =  1,        //        1 minuto
-                SLEEP_5MINUTES    =  5,        //        5 minutos
-                SLEEP_10MINUTES   =  10,        //        10 minutos
-                SLEEP_30MINUTES   =  30,        //        30 minutos
-                SLEEP_1HOUR       =  60         //        60 minutos
+                SLEEP_1MINUTE     = (uint8_t)  1,        //        1 minuto
+                SLEEP_5MINUTES    = (uint8_t)  5,        //        5 minutos
+                SLEEP_10MINUTES   = (uint8_t)  10,        //        10 minutos
+                SLEEP_30MINUTES   = (uint8_t)  30,        //        30 minutos
+                SLEEP_1HOUR       = (uint8_t)  60         //        60 minutos
 
 } sleep_interval_t;
 

@@ -159,32 +159,21 @@ PRIVATE uint8_t __GET_ONLINE_STATUS__(){
 
 
 // SI error retorna 0
-static int get_parse(char* string){
-    int ret = PARSE_ERROR;
-    uint8_t buff[100]={0};
-    //modulo_debug_print("x\r\n");
-    char* token = strtok(string,PARSE_CHAR); // TAG
-    sprintf(buff,"token 1: %s \r\n",token);
-    //modulo_debug_print(buff);
-
-    uint8_t len  = strlen(token)+2; // me muevo 2 posiciones    string  = "token1" cero "token2" y token2 empieza
+static uint8_t get_parse(char* string){
+    uint8_t ret = PARSE_ERROR;
+    uint8_t buff[50]={0};
+ 
     
-   // token[0]= " ";
-   // token[2]=(char)0;
-    sprintf(buffer,"token 2: %s \r\n",&(token[len]));
-
-    //sprintf(buffer,"token: %s \r\n",&(token[1]));
-    //modulo_debug_print(buffer);
-
-    ret = atoi(&(token[len]));
+    sprintf(buffer,"token 2: %s \r\n",&(string[17]));
+    modulo_debug_print(buffer);
+    ret = (uint8_t) atoi(&(string[17]));
     return ret;
 }
 
 
 
 uint8_t sim7000g_get_parse(char* string){
-    uint8_t ret = 0;
-    ret = get_parse(string);
+    uint8_t ret = get_parse(string);
     return ret;
 }
 
@@ -196,22 +185,6 @@ PRIVATE status_t uart_init(){
     UART_SIMCOM_init();
     return ret;
 }
-
-
-
-
-uint8_t* sim_get_id(void){
-    uint8_t counter,interval, max_counter ;
-    fsm_state_t state = FSM_ON_FIELD;
-    mem_s_get_counter(&counter);
-    mem_s_get_max_amount_data(&max_counter);
-    mem_s_get_interval(&interval);
-    state = fsm_get_state();
-    sprintf(buffer_id,"DEv: counter:%d, max_counter:%d, interval:%d,last state:%s \r\n",counter,max_counter,interval,((state == FSM_ON_FIELD)?"ON FIELD": "DOWNLOAD"));
-    modulo_debug_print(buffer_id);
-    return buffer_id;
-}
-
 
 
 
@@ -307,7 +280,7 @@ uint8_t* sim_get_buffer_cmd(){
 
 
 void sim_copy_buffer_cmd(uint8_t* buffer_command){
-        strncpy(buffer_command,buffer_cmd,18);
+        strcpy(buffer_command,buffer_cmd);
 
 }
 
@@ -326,18 +299,16 @@ void sim_set_update_params(uint8_t value){
 
  HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
     HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
-    buffer_cmd[18]=0;
+    buffer_cmd[18]=0; // quiero evitar la ultima (comilla)"
     sim_set_update_params(1);
-
+    // Si el micro duerme
 }
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-        HAL_ResumeTick();
-     //   buffer_counter= 0;   
-        memset(buffer_cmd,0,COMMAND_SIZE);
-    //    HAL_UART_Receive_IT(SIM7000G_UART,buffer_cmd,1);
-        HAL_UART_Receive_IT(SIM7000G_UART,buffer_cmd,18);
+    HAL_ResumeTick();
+    memset(buffer_cmd, 0, COMMAND_SIZE);
+    HAL_UART_Receive_IT(SIM7000G_UART, buffer_cmd, 19);
 
 }
 
@@ -381,7 +352,7 @@ status_t sim7000g_set_gps(uint8_t value){
 
 status_t sim7000g_get_NMEA( uint8_t* buff, uint8_t len){
     status_t ret = STATUS_OK;
-    SEND_COMMAND(CMD_GETGPSINFO,CMD_OK,800);
+    SEND_COMMAND(CMD_GETGPSINFO,CMD_OK,600);
     uint8_t len_response = strlen(SIM7000G_BUFFER);
     strcpy(buff,SIM7000G_BUFFER);
     return ret;
@@ -410,27 +381,27 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     uint8_t* buffer[MQTT_BUFFER_CONFIG]={0};
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_URL,url);    
     ret = SEND_COMMAND(buffer,CMD_OK,800);
-    delay(800);
+    delay(600);
     ret = SEND_COMMAND(CMD_MQTT_KEEK_ALIVE,CMD_OK,800);
-    delay(800);
+    delay(600);
     #if NEW_BROKER == 0
         sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
-        delay(800);
+        delay(600);
         ret = SEND_COMMAND(buffer,CMD_OK,800);
         sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
-        delay(800);
+        delay(600);
         ret= SEND_COMMAND(buffer,CMD_OK,800);
     #endif
     sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
-    delay(800);
+    delay(600);
     ret = SEND_COMMAND(buffer,CMD_OK,800);
-    delay(800);
+    delay(600);
     ret = SEND_COMMAND(CMD_MQTT_COMMIT,CMD_OK,800);
     __SET_ONLINE__(ret); // IMPORTANTE, asigno a la variable ONLINE el estado de la comunicacion
-    delay(800);   
+    delay(600);   
     sprintf(buffer,CMD_MQTT_SUBSCRIBE,"CMD",1);    
     ret = SEND_COMMAND(buffer,CMD_OK,800);
-    delay(800);
+    delay(600);
     // configurar la interrupcion del PIN RI SIM7000G
     ret = SEND_COMMAND("AT+CFGRI=1\r\n",CMD_OK,800); // 
     return ret;
@@ -439,11 +410,11 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
 
 status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_payload){
     status_t ret = STATUS_ERROR;
-    uint8_t  buffer[240]={0};
+    uint8_t  buffer[120]={0};
     if( (topic != NULL) || (payload != NULL)){
         sprintf(buffer,CMD_MQTT_PUBLISH,topic,len_payload);    
-        ret = SEND_COMMAND(buffer,CMD_OK,600);
-        ret = SEND_COMMAND(payload,CMD_OK,600);
+        ret = SEND_COMMAND(buffer,CMD_OK,650);
+        ret = SEND_COMMAND(payload,CMD_OK,650);
     }
     return ret;
 }
