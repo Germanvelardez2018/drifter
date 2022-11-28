@@ -34,7 +34,6 @@ PRIVATE void fsm_set_state_into_flash(fsm_state_t state){
 
 status_t fsm_init(){
     status_t ret = STATUS_OK;
-  
     // Leo estado desde flash
     __DEVICE_STATE_IN_SRAM__ = fsm_get_state_from_flash();
   
@@ -53,27 +52,24 @@ status_t fsm_init(){
 status_t fsm_set_state( fsm_state_t new_state){
     status_t ret = STATUS_ERROR;
     // Cargo el nuevo estado en memoria
-    fsm_set_state_into_flash(new_state);
-    // Si no tenemos error actualizo estado en sram
+    uint8_t value = (new_state == FSM_MEMORY_DOWNLOAD)? 1 : 0;
+    mem_s_set_fsm_state(&value);    // Si no tenemos error actualizo estado en sram
     __DEVICE_STATE_IN_SRAM__ = new_state;
     return ret;
 }
 
 
  fsm_state_t fsm_get_state(void){
-    fsm_get_state_from_flash(&__DEVICE_STATE_IN_SRAM__);
-    return __DEVICE_STATE_IN_SRAM__;
+ // Funcion dummy por el momento
+    fsm_state_t state = FSM_ON_FIELD;
+    uint8_t buf_state = 0;
+    mem_s_get_fsm_state(&buf_state);
+
+    // if state es 1, entonces state = DOWNLOAD
+    if(buf_state == 1) state = FSM_MEMORY_DOWNLOAD;
+    return state;    
  }
 
-
-
-
-
-void fms_get_value(){
-   uint8_t max_counter, counter; 
-   mem_s_get_max_amount_data(&max_counter);
-   mem_s_get_counter(&counter);
-}
 
 
 

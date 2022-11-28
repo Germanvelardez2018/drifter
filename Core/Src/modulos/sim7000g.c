@@ -143,10 +143,6 @@ PRIVATE uint8_t __SIM_ONLINE__ = 0;
 // NUEVA FUNCION PARA PARSEAR COMANDO
 
 
-
-
-
-
 // SI NO CONECTO CON SERVIDOR, SE DEBER REINICIAR SISTEMA Y VOLVER A INTENTAR
 
 PRIVATE void __SET_ONLINE__(status_t sim_connect){
@@ -327,14 +323,14 @@ status_t sim7000g_init(){
 
 status_t sim7000g_resume(){
     status_t ret = STATUS_ERROR;
-      ret = SEND_COMMAND(CMD_LOW_PWR_OFF,CMD_OK,450);
+      ret = SEND_COMMAND(CMD_LOW_PWR_OFF,CMD_OK,500);
     return ret;
 }
 
 
 status_t sim7000g_sleep(){
     status_t ret = STATUS_ERROR;
-     ret = SEND_COMMAND(CMD_LOW_PWR_ON,CMD_OK,450);
+     ret = SEND_COMMAND(CMD_LOW_PWR_ON,CMD_OK,500);
     return ret;
 }
 
@@ -381,30 +377,30 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
     #define MQTT_BUFFER_CONFIG             120
     uint8_t* buffer[MQTT_BUFFER_CONFIG]={0};
     sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_URL,url);    
-    ret = SEND_COMMAND(buffer,CMD_OK,800);
-    delay(600);
-    ret = SEND_COMMAND(CMD_MQTT_KEEK_ALIVE,CMD_OK,800);
-    delay(600);
+    ret = SEND_COMMAND(buffer,CMD_OK,750);
+    delay(500);
+    ret = SEND_COMMAND(CMD_MQTT_KEEK_ALIVE,CMD_OK,750);
+    delay(500);
     #if NEW_BROKER == 0
         sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_USER,user);    
-        delay(600);
-        ret = SEND_COMMAND(buffer,CMD_OK,800);
+        delay(500);
+        ret = SEND_COMMAND(buffer,CMD_OK,750);
         sprintf(buffer,"%s %s,\"%s\" \r\n",CMD_MQTT,CMD_MQTT_PASSWORD,password);    
-        delay(600);
-        ret= SEND_COMMAND(buffer,CMD_OK,800);
+        delay(500);
+        ret= SEND_COMMAND(buffer,CMD_OK,750);
     #endif
     sprintf(buffer,"%s %s,%d \r\n",CMD_MQTT,CMD_MQTT_QOS,qos);    
-    delay(600);
-    ret = SEND_COMMAND(buffer,CMD_OK,800);
-    delay(600);
-    ret = SEND_COMMAND(CMD_MQTT_COMMIT,CMD_OK,800);
+    delay(500);
+    ret = SEND_COMMAND(buffer,CMD_OK,750);
+    delay(500);
+    ret = SEND_COMMAND(CMD_MQTT_COMMIT,CMD_OK,750);
     __SET_ONLINE__(ret); // IMPORTANTE, asigno a la variable ONLINE el estado de la comunicacion
-    delay(600);   
+    delay(500);   
     sprintf(buffer,CMD_MQTT_SUBSCRIBE,"CMD",1);    
-    ret = SEND_COMMAND(buffer,CMD_OK,800);
-    delay(600);
-    // configurar la interrupcion del PIN RI SIM7000G
-    ret = SEND_COMMAND("AT+CFGRI=1\r\n",CMD_OK,800); // 
+    ret = SEND_COMMAND(buffer,CMD_OK,750);
+    delay(500);
+    // configurar la interrupcion del PIN RI SIM7500G
+    ret = SEND_COMMAND("AT+CFGRI=1\r\n",CMD_OK,750); // 
     return ret;
 }
 
@@ -444,3 +440,5 @@ status_t sim7000g_mqtt_check(){
     ret = SEND_COMMAND(CMD_MQTT_CHECK_STATUS,CMD_OK,500);
     return ret;
 }
+
+
