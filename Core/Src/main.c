@@ -109,17 +109,14 @@ void inline get_data_frame_to_save(uint8_t* buffer,uint8_t len,uint8_t counter){
 void  check_flag_params(){
   static buffer[35];
   flag_params = sim_get_update_params();
-  if(flag_params )      {
+  if(flag_params ){
     wdt_reset();
     modo = RUN;
     uint8_t cmd[20]={0};
     memset(cmd,0,20);
     sim_copy_buffer_cmd(cmd);
     modulo_debug_print(cmd);
-    modulo_debug_print("\r\nParseo string");
     uint8_t value = sim7000g_get_parse(cmd);
-    modulo_debug_print("\r\nfin parseo ");
-
     sprintf(buffer,"\r\nCMD: valor extraido:%d\r\n",value);
     modulo_debug_print(buffer);
     uint8_t interval = 0;
@@ -155,14 +152,24 @@ void  check_flag_params(){
       case 7:
         // Forzar envio de datos a la nube
         modulo_debug_print("\r\nForzar download\r\n");
+        device = FSM_ON_FIELD;
+        fsm_set_state(FSM_ON_FIELD); 
+        git swhile(1);
+
         break;// No hacer nada
       case 8:
         //Almacenar hasta 20 datos
         modulo_debug_print("\r\nContador maximo 20 \r\n");
+        max_counter = 20;
+        mem_s_set_max_amount_data(&max_counter);
+        while(1);
         break;
       case 9:
         //Almacenar hasta 50
-          modulo_debug_print("\r\nContador maximo 20 \r\n");
+          modulo_debug_print("\r\nContador maximo 50 \r\n");
+           max_counter = 50;
+          mem_s_set_max_amount_data(&max_counter);
+          while(1);
         break;
 
         default:
@@ -265,7 +272,7 @@ static void mqtt_config(){
   uint8_t id[120];
   uint8_t interval;
   fsm_state_t state = FSM_ON_FIELD;
-  //mem_s_get_interval(&interval);
+  mem_s_get_interval(&interval);
   state = fsm_get_state();
   sprintf(id,ID_FORMAT,counter,max_counter,interval,((state == FSM_ON_FIELD)?"ON FIELD": "DOWNLOAD"));
   sim7000g_mqtt_publish(TAG_INIT,id,strlen(id));
@@ -304,8 +311,10 @@ int main(void)
         default:
         break;
       }
+
     }
-   check_flag_params();
+    check_flag_params();
+
     pwr_sleep();
  }
 }

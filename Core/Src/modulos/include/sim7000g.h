@@ -37,7 +37,6 @@ uint8_t sim7000g_get_parse(char* string);
 
 void sim_copy_buffer_cmd(uint8_t* buffer);
 
-void sim_get_values(char* buffer,int8_t* interval, uint8_t* max);
 
 uint8_t* sim_get_buffer_cmd();
 

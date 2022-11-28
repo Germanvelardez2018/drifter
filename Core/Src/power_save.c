@@ -112,7 +112,6 @@ void pwr_init(){
 
 
 void pwr_sleep(){    
-    
     //configuro alarma si flag no es SLEEP,
     if(__PWR_FLAG__ == RUN){
     __PWR_FLAG__ = SLEEP;

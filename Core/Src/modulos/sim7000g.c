@@ -161,11 +161,10 @@ PRIVATE uint8_t __GET_ONLINE_STATUS__(){
 // SI error retorna 0
 static uint8_t get_parse(char* string){
     uint8_t ret = PARSE_ERROR;
-    uint8_t buff[50]={0};
- 
-    
-    sprintf(buffer,"token 2: %s \r\n",&(string[17]));
-    modulo_debug_print(buffer);
+   // uint8_t buff[50]={0};
+
+ //   sprintf(buffer,"token: %s \r\n",&(string[17]));
+ //   modulo_debug_print(buffer);
     ret = (uint8_t) atoi(&(string[17]));
     return ret;
 }
@@ -262,10 +261,12 @@ uint8_t* sim7000g_get_buffer(){
 
 status_t sim7000g_check(){
     status_t ret = STATUS_ERROR;
-    ret = SEND_COMMAND(CMD_AT,CMD_OK,500);
+   // ret = SEND_COMMAND(CMD_AT,CMD_OK,500);
+    ret = send_command(CMD_AT,CMD_OK,500,0);
     modulo_debug_print("Check SIMG7000G\r\n");
     while ( ret == STATUS_ERROR){
-        ret = SEND_COMMAND(CMD_VERSION,CMD_OK,500);
+        //ret = SEND_COMMAND(CMD_VERSION,CMD_OK,500);
+        ret =send_command(CMD_VERSION,CMD_OK,500,0);
         delay(1000);
     }
     ret = SEND_COMMAND(CMD_ECHO_OFF,CMD_OK,500);
@@ -298,10 +299,10 @@ void sim_set_update_params(uint8_t value){
 
 
  HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+    HAL_ResumeTick();
     HAL_GPIO_TogglePin(LED_GPIO_Port, GPIO_PIN_2);
     buffer_cmd[18]=0; // quiero evitar la ultima (comilla)"
     sim_set_update_params(1);
-    // Si el micro duerme
 }
 
 
@@ -326,14 +327,14 @@ status_t sim7000g_init(){
 
 status_t sim7000g_resume(){
     status_t ret = STATUS_ERROR;
-      ret = SEND_COMMAND(CMD_LOW_PWR_OFF,CMD_OK,500);
+      ret = SEND_COMMAND(CMD_LOW_PWR_OFF,CMD_OK,450);
     return ret;
 }
 
 
 status_t sim7000g_sleep(){
     status_t ret = STATUS_ERROR;
-     ret = SEND_COMMAND(CMD_LOW_PWR_ON,CMD_OK,500);
+     ret = SEND_COMMAND(CMD_LOW_PWR_ON,CMD_OK,450);
     return ret;
 }
 
