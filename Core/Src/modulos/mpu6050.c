@@ -122,7 +122,12 @@ PRIVATE void mpu6050_calibration_routine(){
 
 
 
-
+status_t mpu6050_deinit(){
+    status_t ret = STATUS_ERROR;;
+    I2C_deinit();
+    ret = mpu6050_resume();
+    return ret;
+}
 status_t mpu6050_init(){
     I2C_init();
     status_t ret = STATUS_ERROR;

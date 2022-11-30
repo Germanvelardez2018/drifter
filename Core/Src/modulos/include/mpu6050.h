@@ -51,6 +51,9 @@ void mpu6050_calibrate_and_save_offset();
 status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len);
 
 
+status_t mpu6050_deinit();
+
+
 /**
  * @brief Configuramos el periferico y el modulo a utilizar
  * 

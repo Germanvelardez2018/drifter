@@ -39,10 +39,19 @@ typedef enum{
 
 
 
-
-
-
+/***
+ * 
+ * 
+*/
 void at45db_init();
+
+/***
+ * 
+ * 
+*/
+void at45db_deinit();
+
+
 
 /**
  * @brief 

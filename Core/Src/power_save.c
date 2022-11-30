@@ -28,6 +28,34 @@ PRIVATE sleep_interval_t __INTERVAL__ = 1;
 
 
 
+PRIVATE  void stop_functions(){
+      mem_s_deinit();
+      modulo_debug_deinit();
+     // sim7000g_deinit();
+      mpu6050_deinit();
+
+
+
+}
+
+
+
+
+PRIVATE void resume_functions(){
+      mem_s_init();
+      modulo_debug_init();
+      //sim7000g_init();
+      mpu6050_init();
+
+
+
+}
+
+
+
+
+
+
 
 PRIVATE sleep_interval_t pwr_get_interval(){
     return __INTERVAL__;
@@ -83,7 +111,6 @@ PRIVATE void __set_time__(){
     get_time(&h,&m,&s);
     __PWR_FLAG__ = SLEEP;
    __INTERVAL__ = 1;
-    //mem_s_set_interval(&__INTERVAL__);
     mem_s_get_interval(&__INTERVAL__);
     eh = (__INTERVAL__ >= 60)?1: 0;
     em = (__INTERVAL__ < 60)?__INTERVAL__ : 0;
@@ -100,6 +127,7 @@ pwr_mode_t pwr_get_mode(){
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc){
     HAL_ResumeTick();
+ //   resume_functions();
     modulo_debug_print("rtc iqr\n");
     __PWR_FLAG__= RUN;
 }
@@ -117,32 +145,9 @@ void pwr_sleep(){
     __PWR_FLAG__ = SLEEP;
     __set_time__();
     }
+  //  stop_functions();
     HAL_SuspendTick();
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 }
 
 
-
-/***
- *  NUEVAS CARACTERISTICAS EN EL DISPOSITIVO
- *  
- * 
- * 1) El periodo en modo bajo consumo pueden ser 
- *  ciertos valores puntuales predefinidos   :
- *                  1) 1 minuto
- *                  2) 5 minutos
- *                  3) 10 minutos
- *                  4) 30 minutos
- *                  5) 60 minutos
- *                  
- * 
- * 2) El dispositivo calibra sensor cuando 
- *  recibe el comando correspondiente
- * 
- * 
- * 
- * 
-*/
-
-
-// Errores, opcion 3 y4 generar que el intervalo sea 4 minutos y el micro se trabe, WDT mata aplicacion

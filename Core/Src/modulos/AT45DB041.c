@@ -109,6 +109,11 @@ extern   SPI_HandleTypeDef hspi1;
 // You need define this function with your HAL function.
 
 
+
+PRIVATE void hardware_deinit(){
+        SPI_deinit();
+}
+
 PRIVATE void hardware_init(){
         SPI_init();
         GPIO_init();
@@ -207,6 +212,13 @@ void at45db_init(){
         hardware_init();
         at45db_set_size_page(SIZE_PAGE_256);
 }
+
+
+void at45db_deinit(){
+      hardware_deinit();
+}
+
+
 
 
  uint8_t at45db_set_size_page( size_page_t size){

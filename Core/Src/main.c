@@ -292,12 +292,34 @@ static void mqtt_config()
  */
 int main(void)
 {
+
+
+
+#define TEST_CONSUMO          1
+
+
+
+// ANotaciones....micro run con un toggle cada 1 s                            44mA
+//                micro run con toggle 1s y encendido elemon board            68mA
+
+
+
+
+
+
+
+
+
   app_init();
   // Sirve para cargar valores por defecto a memoria flash
   modulo_debug_print("init program \r\n");
   mqtt_config();
   // ! Inicia el WDT
   modulo_debug_print("inicio el programa \r\n");
+
+
+
+
   MX_IWDG_Init();
   device = fsm_get_state();
   while (1)

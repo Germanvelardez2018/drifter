@@ -33,6 +33,18 @@ extern "C" {
 void  modulo_debug_init(void);
 
 
+
+
+/**
+ * @brief  Desinstalo el modulo para imprimir mensaje de debug
+ * 
+ * @return ** void 
+ */
+void  modulo_debug_deinit(void);
+
+
+
+
 /**
  * @brief Imprimo un mensaje de debug
  * 

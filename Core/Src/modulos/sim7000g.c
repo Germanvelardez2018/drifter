@@ -183,6 +183,12 @@ PRIVATE status_t uart_init(){
 
 
 
+PRIVATE status_t uart_deinit(){
+    status_t ret = STATUS_OK;
+    UART_SIMCOM_deinit();
+    return ret;
+}
+
 
 
 PRIVATE void PWRKEY_set(level_t level){
@@ -309,16 +315,22 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
 }
 
-
+  
 status_t sim7000g_init(){
     uart_init();
     // Necesario para alimentar la placa y encender el sim7000g   
     status_t ret = STATUS_OK;
-    modulo_debug_print("SIM init\n");
     PWRKEY_set(LEVEL_HIGH);
     BAT_ENA_set(LEVEL_HIGH);
     return ret;
 }
+
+
+void sim7000g_deinit(){
+     uart_deinit();
+    
+}
+
 
 
 status_t sim7000g_resume(){
