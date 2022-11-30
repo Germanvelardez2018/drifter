@@ -359,11 +359,16 @@ status_t sim7000g_set_gps(uint8_t value){
 }
 
 
+        //+CGNSINF: eliminado de la string
+
+#define OFFSET_GPS                  12      //(strlen("+CGNSINF:"))
 status_t sim7000g_get_NMEA( uint8_t* buff, uint8_t len){
     status_t ret = STATUS_OK;
     SEND_COMMAND(CMD_GETGPSINFO,CMD_OK,600);
-    uint8_t len_response = strlen(SIM7000G_BUFFER);
-    strcpy(buff,SIM7000G_BUFFER);
+    #define OFSSET_GPS_END                  8
+    uint8_t _len = strlen(SIM7000G_BUFFER +12) - OFFSET_GPS_END;
+    //strcpy(buff,SIM7000G_BUFFER + 12);
+    strncpy(buff,SIM7000G_BUFFER + OFFSET_GPS,_len);
     return ret;
 }
 
