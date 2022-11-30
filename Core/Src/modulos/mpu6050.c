@@ -259,7 +259,7 @@ status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
     float fx = (float) (x/(SCALA_DIV/2.0)); //      
     float fy = (float) (y/(SCALA_DIV/2.0)); // 
     float fz = (float) (z/(SCALA_DIV/2.0)); // 
-    sprintf(buffer,"t:%.2f , x:%.2f , y:%.2f , z:%.2f \n",ft,fx,fy,fz);
+    sprintf(buffer,"t:%.2f x:%.2f , y:%.2f , z:%.2f ",ft,fx,fy,fz);
     #if     1// PRINT_FLAG_MPU6050
     modulo_debug_print(buffer);
     #endif

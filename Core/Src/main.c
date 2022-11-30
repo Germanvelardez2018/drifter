@@ -45,7 +45,7 @@
 //#define DEFAULT_VALUES
 
 #define MSG_INIT "test drifter modular \n"
-#define SENSOR_FORMAT "{ gps: %s sensor: %s \r\n}"
+#define SENSOR_FORMAT "{ gps:\n\t %s\n sensor:\n\t %s }"
 #define TAG_INIT "SIMO_INIT"
 #define DEVICE_ID "device connected \r\n"
 #define ID_FORMAT "Dev: counter:%d, max_counter:%d, interval:%d,last state:%s \r\n"
@@ -221,7 +221,6 @@ static void inline on_download(void)
   modulo_debug_print(data_frame_buffer);
   MQTT_SEND_CMD(data_frame_buffer);
 
-
   while (counter != 0)
   {
     read_data(data_frame_buffer, counter);
@@ -229,7 +228,7 @@ static void inline on_download(void)
     MQTT_SEND_CMD(data_frame_buffer);
    // modulo_debug_print(data_frame_buffer);
     wdt_reset();
-    HAL_Delay(650);
+    HAL_Delay(750);
     counter = counter - 1;
     mem_s_set_counter(&counter);
   }
