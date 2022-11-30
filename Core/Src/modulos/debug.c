@@ -8,7 +8,7 @@ extern UART_HandleTypeDef huart2;
 
 
 void  modulo_debug_init(void){
-   UART_DEBUG_init();
+  // UART_DEBUG_init();
 }
 
 
