@@ -86,7 +86,6 @@ PRIVATE uint8_t max_counter;
 
 void inline get_data_frame_to_save(uint8_t *buffer, uint8_t len, uint8_t counter)
 {
-
   uint8_t gps[100] = {0};
   uint8_t sensor[60] = {0};
   memset(buffer, 0, len);
@@ -218,19 +217,19 @@ static void inline on_download(void)
 {
   modulo_debug_print(FSM_DOWNLOAD);
   counter = (max_counter < counter) ? max_counter : counter;
-  // counter = MAX_COUNTER;
-  sprintf(data_frame_buffer, "extraer :%d datos\n", counter);
+  sprintf(data_frame_buffer, "Extraer :%d datos\n", counter);
   modulo_debug_print(data_frame_buffer);
   MQTT_SEND_CMD(data_frame_buffer);
 
+
   while (counter != 0)
   {
-//    memset(data_frame_buffer, 0, 255);
     read_data(data_frame_buffer, counter);
-    sim7000g_mqtt_publish(MQTT_TOPIC, data_frame_buffer, strlen(data_frame_buffer));
-    modulo_debug_print(data_frame_buffer);
+   // sim7000g_mqtt_publish(MQTT_TOPIC, data_frame_buffer, strlen(data_frame_buffer));
+    MQTT_SEND_CMD(data_frame_buffer);
+   // modulo_debug_print(data_frame_buffer);
     wdt_reset();
-    HAL_Delay(800);
+    HAL_Delay(650);
     counter = counter - 1;
     mem_s_set_counter(&counter);
   }
@@ -241,6 +240,10 @@ static void inline on_download(void)
   modulo_debug_print(FSM_CHANGE2);
   MQTT_SEND_CMD(FSM_CHANGE2);
 }
+
+
+
+
 
 static void app_init()
 {
@@ -261,13 +264,21 @@ static void app_init()
   pwr_init();
   fsm_init();
   mpu6050_init(); //! Sensor
-  // Cargar parametros desde memoria flash
-  mem_s_get_max_amount_data(&max_counter);
-  mem_s_get_counter(&counter);
+  
 }
+
 
 static void mqtt_config()
 {
+  uint8_t id[120];
+  uint8_t interval;
+  // Cargar parametros desde memoria flash
+  mem_s_get_max_amount_data(&max_counter);
+  mem_s_get_counter(&counter);
+  fsm_state_t state = FSM_ON_FIELD;
+  mem_s_get_interval(&interval);
+  state = fsm_get_state();
+  //---------------------------
   sim7000g_check();
   sim7000g_get_signal();
   sim7000g_open_apn();
@@ -275,11 +286,9 @@ static void mqtt_config()
   sim7000g_set_gps(1);
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
-  uint8_t id[120];
-  uint8_t interval;
-  fsm_state_t state = FSM_ON_FIELD;
-  mem_s_get_interval(&interval);
-  state = fsm_get_state();
+  
+  
+  
   sprintf(id, ID_FORMAT, counter, max_counter, interval, ((state == FSM_ON_FIELD) ? "ON FIELD" : "DOWNLOAD"));
   sim7000g_mqtt_publish(TAG_INIT, id, strlen(id));
   gpio_interruption_init();
@@ -319,6 +328,7 @@ int main(void)
 
 
 
+  sim7000g_sleep();
 
   MX_IWDG_Init();
   device = fsm_get_state();

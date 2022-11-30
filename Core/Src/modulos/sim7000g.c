@@ -319,10 +319,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 status_t sim7000g_init(){
     uart_init();
     // Necesario para alimentar la placa y encender el sim7000g   
-    status_t ret = STATUS_OK;
     PWRKEY_set(LEVEL_HIGH);
     BAT_ENA_set(LEVEL_HIGH);
-    return ret;
+    return STATUS_OK;
 }
 
 
@@ -362,10 +361,10 @@ status_t sim7000g_set_gps(uint8_t value){
         //+CGNSINF: eliminado de la string
 
 #define OFFSET_GPS                  12      //(strlen("+CGNSINF:"))
+#define OFFSET_GPS_END                  8
 status_t sim7000g_get_NMEA( uint8_t* buff, uint8_t len){
     status_t ret = STATUS_OK;
     SEND_COMMAND(CMD_GETGPSINFO,CMD_OK,600);
-    #define OFSSET_GPS_END                  8
     uint8_t _len = strlen(SIM7000G_BUFFER +12) - OFFSET_GPS_END;
     //strcpy(buff,SIM7000G_BUFFER + 12);
     strncpy(buff,SIM7000G_BUFFER + OFFSET_GPS,_len);
@@ -424,7 +423,7 @@ status_t sim7000g_set_mqtt_config(uint8_t* url, uint8_t* user, uint8_t* password
 
 status_t sim7000g_mqtt_publish(uint8_t* topic, uint8_t* payload, uint8_t len_payload){
     status_t ret = STATUS_ERROR;
-    uint8_t  buffer[120]={0};
+    uint8_t  buffer[100]={0};
     if( (topic != NULL) || (payload != NULL)){
         sprintf(buffer,CMD_MQTT_PUBLISH,topic,len_payload);    
         ret = SEND_COMMAND(buffer,CMD_OK,650);
