@@ -68,7 +68,8 @@ extern  UART_HandleTypeDef huart2;
 
 
 // ! Modo sleep y resume
-#define CMD_LOW_PWR_ON                              "AT+CPSMS=1\r\n"
+//"<01000010>","<00001010>" 20 hs sleep, 20s wake up time
+#define CMD_LOW_PWR_ON                              "AT+CPSMS=1,\"01000010\",\"00001010\"\r\n"
 #define CMD_LOW_PWR_OFF                             "AT+CPSMS=0\r\n"
       
 
@@ -327,6 +328,8 @@ status_t sim7000g_init(){
 
 void sim7000g_deinit(){
      uart_deinit();
+     PWRKEY_set(LEVEL_LOW);
+    BAT_ENA_set(LEVEL_LOW);
     
 }
 

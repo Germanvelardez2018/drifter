@@ -183,9 +183,9 @@ void check_flag_params()
     }
 
     MQTT_SEND_CMD(buffer);
-    
-    while(1);
 
+    while (1)
+      ;
   }
 }
 
@@ -204,7 +204,6 @@ static void inline on_field()
     sim7000g_resume();
     MQTT_SEND_CMD(FSM_CHANGE1);
     sim7000g_sleep();
-
   }
   else
   {
@@ -216,7 +215,12 @@ static void inline on_field()
 static void inline on_download(void)
 {
   modulo_debug_print(FSM_DOWNLOAD);
-  counter = (max_counter < counter) ? max_counter : counter;
+  if (max_counter < counter)
+  {
+    counter = max_counter;
+    mem_s_set_counter(&counter);
+  }
+
   sprintf(data_frame_buffer, "Extraer :%d datos\n", counter);
   modulo_debug_print(data_frame_buffer);
   MQTT_SEND_CMD(data_frame_buffer);
@@ -224,11 +228,10 @@ static void inline on_download(void)
   while (counter != 0)
   {
     read_data(data_frame_buffer, counter);
-   // sim7000g_mqtt_publish(MQTT_TOPIC, data_frame_buffer, strlen(data_frame_buffer));
     MQTT_SEND_CMD(data_frame_buffer);
-   // modulo_debug_print(data_frame_buffer);
+    // modulo_debug_print(data_frame_buffer);
     wdt_reset();
-    HAL_Delay(750);
+    HAL_Delay(800);
     counter = counter - 1;
     mem_s_set_counter(&counter);
   }
@@ -240,13 +243,9 @@ static void inline on_download(void)
   MQTT_SEND_CMD(FSM_CHANGE2);
 }
 
-
-
-
-
 static void app_init()
 {
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
   SystemClock_Config();
   // Memoria
@@ -263,9 +262,7 @@ static void app_init()
   pwr_init();
   fsm_init();
   mpu6050_init(); //! Sensor
-  
 }
-
 
 static void mqtt_config()
 {
@@ -289,7 +286,7 @@ static void mqtt_config()
   sprintf(id, ID_FORMAT, counter, max_counter, interval, ((state == FSM_ON_FIELD) ? "ON FIELD" : "DOWNLOAD"));
   sim7000g_mqtt_publish(TAG_INIT, id, strlen(id));
   gpio_interruption_init();
-  sim7000g_sleep();
+  
 }
 
 /**
@@ -300,31 +297,12 @@ int main(void)
 {
 
 
-
-#define TEST_CONSUMO          1
-
-
-
-// ANotaciones....micro run con un toggle cada 1 s                            44mA
-//                micro run con toggle 1s y encendido elemon board            68mA
-
-
-
-
-
-
-
-
+  // ANotaciones....micro run con un toggle cada 1 s                            44mA
+  //                micro run con toggle 1s y encendido elemon board            68mA
 
   app_init();
-  // Sirve para cargar valores por defecto a memoria flash
-  modulo_debug_print("init program \r\n");
   mqtt_config();
-  // ! Inicia el WDT
-  modulo_debug_print("inicio el programa \r\n");
-
-
-
+  
   sim7000g_sleep();
 
   MX_IWDG_Init();
