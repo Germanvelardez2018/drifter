@@ -285,9 +285,7 @@ static void mqtt_config()
   sim7000g_set_gps(1);
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
-  
-  
-  
+
   sprintf(id, ID_FORMAT, counter, max_counter, interval, ((state == FSM_ON_FIELD) ? "ON FIELD" : "DOWNLOAD"));
   sim7000g_mqtt_publish(TAG_INIT, id, strlen(id));
   gpio_interruption_init();
