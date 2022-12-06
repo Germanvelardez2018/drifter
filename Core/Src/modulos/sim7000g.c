@@ -350,6 +350,7 @@ status_t sim7000g_sleep(){
 
 
 status_t sim7000g_set_gps(uint8_t value){
+    return STATUS_OK;
     status_t ret = STATUS_ERROR;
     if(value == 0){
      ret = SEND_COMMAND(CMD_GPS_OFF,CMD_OK,500);
@@ -366,7 +367,12 @@ status_t sim7000g_set_gps(uint8_t value){
 #define OFFSET_GPS                  12      //(strlen("+CGNSINF:"))
 #define OFFSET_GPS_END                  8
 status_t sim7000g_get_NMEA( uint8_t* buff, uint8_t len){
+    #define DUMMY_GPS           ("DUMMY GPS")
     status_t ret = STATUS_OK;
+    strcpy(buff,DUMMY_GPS);
+    return ret;
+
+
     SEND_COMMAND(CMD_GETGPSINFO,CMD_OK,600);
     uint8_t _len = strlen(SIM7000G_BUFFER +12) - OFFSET_GPS_END;
     //strcpy(buff,SIM7000G_BUFFER + 12);
