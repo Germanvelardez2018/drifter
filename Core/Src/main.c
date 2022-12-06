@@ -74,6 +74,10 @@ extern TIM_HandleTypeDef htim1;
 // En sim7000g.c
 extern DMA_HandleTypeDef hdma_usart2_tx;
 
+
+
+
+
 PRIVATE fsm_state_t device;
 
 #define DATAFRAME_SIZE 255
@@ -83,6 +87,10 @@ PRIVATE uint8_t counter = 0;
 PRIVATE pwr_mode_t modo = RUN;
 PRIVATE uint8_t flag_params = 0;
 PRIVATE uint8_t max_counter;
+PRIVATE uint8_t _GPS_ON_ = 0;
+
+
+
 
 void inline get_data_frame_to_save(uint8_t *buffer, uint8_t len, uint8_t counter)
 {
@@ -90,10 +98,12 @@ void inline get_data_frame_to_save(uint8_t *buffer, uint8_t len, uint8_t counter
   uint8_t sensor[60] = {0};
   memset(buffer, 0, len);
   mpu6050_get_measure(sensor, 60);
+  
   sim7000g_get_NMEA(gps, 100);
   sprintf(buffer, SENSOR_FORMAT, gps, sensor);
   modulo_debug_print(buffer);
   write_data(buffer, counter);
+
 }
 
 void check_flag_params()
@@ -181,17 +191,24 @@ void check_flag_params()
       modulo_debug_print(buffer);
       mem_s_set_interval(&interval);
     }
-
     MQTT_SEND_CMD(buffer);
-
-    while (1)
-      ;
+    while (1);
   }
 }
 
 static void inline on_field()
 {
-  // leo el contador
+
+  if(_GPS_ON_ == 0){
+    // gps apagado, encendor, dormir y volver
+
+    _GPS_ON_ = 1;;
+    sim7000g_set_gps(1);
+
+
+  }
+  else{
+// leo el contador
   modulo_debug_print(FSM_ON_FIELD);
   mem_s_get_counter(&counter);
   get_data_frame_to_save(data_frame_buffer, DATAFRAME_SIZE, counter);
@@ -210,10 +227,17 @@ static void inline on_field()
     counter = counter + 1;
     mem_s_set_counter(&counter);
   }
+  _GPS_ON_ = 0;
+  sim7000g_set_gps(0);
+  }
+  
 }
 
 static void inline on_download(void)
 {
+
+  sim7000g_resume();
+       
   modulo_debug_print(FSM_DOWNLOAD);
   if (max_counter < counter)
   {
@@ -229,18 +253,21 @@ static void inline on_download(void)
   {
     read_data(data_frame_buffer, counter);
     MQTT_SEND_CMD(data_frame_buffer);
-    // modulo_debug_print(data_frame_buffer);
     wdt_reset();
-    HAL_Delay(800);
+    HAL_Delay(750);
     counter = counter - 1;
     mem_s_set_counter(&counter);
   }
   wdt_reset();
+  counter = 0;
   mem_s_set_counter(&counter);
   device = FSM_ON_FIELD;
   fsm_set_state(FSM_ON_FIELD);
   modulo_debug_print(FSM_CHANGE2);
   MQTT_SEND_CMD(FSM_CHANGE2);
+
+  sim7000g_sleep();
+
 }
 
 static void app_init()
@@ -279,7 +306,6 @@ static void mqtt_config()
   sim7000g_get_signal();
   sim7000g_open_apn();
   sim7000g_get_operator();
-  sim7000g_set_gps(1);
   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
   sim7000g_resume();
 
@@ -302,7 +328,8 @@ int main(void)
 
   app_init();
   mqtt_config();
-  
+  sim7000g_set_gps(0);
+  _GPS_ON_ = 0;
   sim7000g_sleep();
 
   MX_IWDG_Init();
@@ -319,9 +346,7 @@ int main(void)
         on_field();
         break;
       case FSM_MEMORY_DOWNLOAD:
-        sim7000g_resume();
         on_download();
-        sim7000g_sleep();
         break;
       default:
         break;
@@ -329,7 +354,7 @@ int main(void)
     }
     check_flag_params();
 
-    pwr_sleep();
+    pwr_sleep(_GPS_ON_);
   }
 }
 

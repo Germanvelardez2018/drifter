@@ -6,6 +6,7 @@
 //define aqui el intervalo
 #define PRINT_INTERVAL                      ("SLEEP RUTINE\r\n%d:%d:%d=>%d:%d:%d\n")
 
+#define PRINT_GPS_INTERVAL                  ("SLEEP WHILE GPS TURNING ON\r\n%d:%d:%d=>%d:%d:%d\n")
 
 
 extern  RTC_HandleTypeDef hrtc;
@@ -105,18 +106,32 @@ PRIVATE status_t set_alarm(uint8_t hours, uint8_t minutes, uint8_t seconds){
 
 
 
-PRIVATE void __set_time__(){
+PRIVATE void __set_time__(uint8_t opt){
+
     uint8_t h = 0,m = 0,s = 0 ;
     uint8_t eh = 0,em = 0;
     get_time(&h,&m,&s);
     __PWR_FLAG__ = SLEEP;
    __INTERVAL__ = 1;
+
+    if(opt == 0){
+        // Sleep intervalo configurado
     mem_s_get_interval(&__INTERVAL__);
     eh = (__INTERVAL__ >= 60)?1: 0;
     em = (__INTERVAL__ < 60)?__INTERVAL__ : 0;
     set_alarm(h +eh, m +em, s);
     sprintf(buffer,PRINT_INTERVAL,h,m,s,h +eh,m + em,s);
+    }
+    else{
+        // SLeep intervalo predeterminado mientras enciende gps
+    #define GPS_INTERVAL                            (2)
+    set_alarm(h , m +GPS_INTERVAL, s);
+    sprintf(buffer,PRINT_GPS_INTERVAL,h,m,s,h ,m + GPS_INTERVAL,s);
+    }
     modulo_debug_print(buffer);
+
+
+    
 }
 
 
@@ -139,11 +154,11 @@ void pwr_init(){
 
 
 
-void pwr_sleep(){    
+void pwr_sleep(uint8_t option){    
     //configuro alarma si flag no es SLEEP,
     if(__PWR_FLAG__ == RUN){
     __PWR_FLAG__ = SLEEP;
-    __set_time__();
+    __set_time__(option);
     }
   //  stop_functions();
     HAL_SuspendTick();

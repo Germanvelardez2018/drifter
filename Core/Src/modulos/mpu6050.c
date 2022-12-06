@@ -261,7 +261,7 @@ status_t mpu6050_get_measure(uint8_t* buffer, uint8_t len){
     float fz = (float) (z/(SCALA_DIV/2.0)); // 
     sprintf(buffer,"t:%.2f x:%.2f , y:%.2f , z:%.2f ",ft,fx,fy,fz);
     #if     1// PRINT_FLAG_MPU6050
-    modulo_debug_print(buffer);
+   // modulo_debug_print(buffer);
     #endif
     mpu6050_sleep();
     return ret;

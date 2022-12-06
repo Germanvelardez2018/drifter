@@ -48,7 +48,7 @@ void pwr_init();
 
 
 // mando a dormir y me levanto un intervalo despues
-void pwr_sleep();
+void pwr_sleep(uint8_t option);
 
 #ifdef __cplusplus
 }
