@@ -40,25 +40,27 @@
 #define COUNTER (0)
 
 #define MAX_COUNTER (10)
-
+#define MAX_COUNTER_DEFAULT                   (20)
 // si esta definido default value, recargamos flash con valores default
 //#define DEFAULT_VALUES
 
-#define MSG_INIT "test drifter modular \n"
-#define SENSOR_FORMAT "{ gps:\n\t %s\n sensor:\n\t %s }"
-#define TAG_INIT "SIMO_INIT"
-#define DEVICE_ID "device connected \r\n"
-#define ID_FORMAT "Dev: counter:%d, max_counter:%d, interval:%d,last state:%s \r\n"
-#define FSM_ONFIELD "FSM: ON FIELD\r\n"
-#define FSM_DOWNLOAD "FSM: DOWNLOAD\r\n"
-#define FSM_CHANGE1 "ON FIELD => DOWNLOAD \r\n"
-#define FSM_CHANGE2 "DOWNLOAD => ON FIELD \r\n"
+#define MSG_INIT                              "test drifter modular \n"
+#define SENSOR_FORMAT                         "{ gps:\n\t %s\n sensor:\n\t %s }"
+#define TAG_INIT                              "SIMO_INIT"
+#define DEVICE_ID                             "device connected \r\n"
+#define ID_FORMAT                             "Dev: counter:%d, max_counter:%d, interval:%d,last state:%s \r\n"
+#define FSM_ONFIELD                           "FSM: ON FIELD\r\n"
+#define FSM_DOWNLOAD                          "FSM: DOWNLOAD\r\n"
+#define FSM_CHANGE1                           "ON FIELD => DOWNLOAD \r\n"
+#define FSM_CHANGE2                           "DOWNLOAD => ON FIELD \r\n"
 
-#define CMD_MSG1 "CMD: calibrando dispositivo\r\n "
-#define CMD_MSG2 "CMD: configurar intervalo %d\r\n"
-#define CMD_MSG7 "CMD: Forzar download \r\n"
-#define CMD_MSG8 "CMD: Contador maximo 20 \r\n"
-#define CMD_MSG9 "CMD: Contador maximo 50 \r\n"
+#define CMD_MSG1                              "CMD: calibrando dispositivo\r\n "
+#define CMD_MSG2                              "CMD: configurar intervalo %d\r\n"
+#define CMD_MSG7                              "CMD: Forzar download \r\n"
+#define CMD_MSG8                              "CMD: Contador maximo 20 \r\n"
+#define CMD_MSG9                              "CMD: Contador maximo 50 \r\n"
+#define  FORMAT_DOWNLOAD                      "\r\nCMD: valor extraido:%d\r\n"
+
 
 #define MQTT_SEND_CMD(msg) sim7000g_mqtt_publish(MQTT_TOPIC, msg, strlen(msg));
 
@@ -86,7 +88,7 @@ PRIVATE uint8_t buf[255];
 PRIVATE uint8_t counter = 0;
 PRIVATE pwr_mode_t modo = RUN;
 PRIVATE uint8_t flag_params = 0;
-PRIVATE uint8_t max_counter;
+PRIVATE uint8_t max_counter =MAX_COUNTER_DEFAULT;
 PRIVATE uint8_t _GPS_ON_ = 0;
 
 
@@ -98,13 +100,14 @@ void inline get_data_frame_to_save(uint8_t *buffer, uint8_t len, uint8_t counter
   uint8_t sensor[60] = {0};
   memset(buffer, 0, len);
   mpu6050_get_measure(sensor, 60);
-  
   sim7000g_get_NMEA(gps, 100);
   sprintf(buffer, SENSOR_FORMAT, gps, sensor);
   modulo_debug_print(buffer);
   write_data(buffer, counter);
 
 }
+
+
 
 void check_flag_params()
 {
@@ -121,10 +124,7 @@ void check_flag_params()
     uint8_t value = sim7000g_get_parse(cmd);
     sprintf(buffer, "\r\nCMD: valor extraido:%d\r\n", value);
     modulo_debug_print(buffer);
-    uint8_t interval = 0;
-    uint8_t enable = 0;
-    uint8_t reset = 1;
-
+    uint8_t interval = 0 ,enable = 0, reset = 1;
     switch (value)
     {
     case 0:
@@ -196,15 +196,41 @@ void check_flag_params()
   }
 }
 
+
+
+
+
+
+static void inline get_id_device(uint8_t* id_buffer){
+
+  uint8_t i;
+  uint8_t mc;
+  uint8_t c;
+  fsm_state_t state = FSM_ON_FIELD;
+  // Cargar parametros desde memoria flash
+  //-----------------------------------------------------
+    mem_s_get_max_amount_data(&mc);
+    mem_s_get_counter(&c);
+    mem_s_get_interval(&i);
+    state = fsm_get_state();
+
+  //---------------------------------------------------------
+  //Enviar estado
+   sprintf(id_buffer, ID_FORMAT, c, mc, i, ((state == FSM_ON_FIELD) ? "ON FIELD" : "DOWNLOAD"));
+}
+
+
+
+
+
+
 static void inline on_field()
 {
 
   if(_GPS_ON_ == 0){
     // gps apagado, encendor, dormir y volver
-
-    _GPS_ON_ = 1;;
+    _GPS_ON_ = 1;
     sim7000g_set_gps(1);
-
 
   }
   else{
@@ -254,7 +280,7 @@ static void inline on_download(void)
     read_data(data_frame_buffer, counter);
     MQTT_SEND_CMD(data_frame_buffer);
     wdt_reset();
-    HAL_Delay(750);
+    HAL_Delay(550);
     counter = counter - 1;
     mem_s_set_counter(&counter);
   }
@@ -291,27 +317,38 @@ static void app_init()
   mpu6050_init(); //! Sensor
 }
 
+
 static void mqtt_config()
 {
   uint8_t id[120];
   uint8_t interval;
   // Cargar parametros desde memoria flash
-  mem_s_get_max_amount_data(&max_counter);
-  mem_s_get_counter(&counter);
-  fsm_state_t state = FSM_ON_FIELD;
-  mem_s_get_interval(&interval);
-  state = fsm_get_state();
-  //---------------------------
-  sim7000g_check();
-  sim7000g_get_signal();
-  sim7000g_open_apn();
-  sim7000g_get_operator();
-  sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
-  sim7000g_resume();
-
-  sprintf(id, ID_FORMAT, counter, max_counter, interval, ((state == FSM_ON_FIELD) ? "ON FIELD" : "DOWNLOAD"));
-  sim7000g_mqtt_publish(TAG_INIT, id, strlen(id));
-  gpio_interruption_init();
+  //-----------------------------------------------------
+   // mem_s_get_max_amount_data(&max_counter);
+   // mem_s_get_counter(&counter);
+   // fsm_state_t state = FSM_ON_FIELD;
+   // mem_s_get_interval(&interval);
+   // state = fsm_get_state();
+  //------------------------------------------------------
+  // Configurar el modulo SIM
+  //------------------------------------------------------
+   sim7000g_check();
+   sim7000g_get_signal();
+   sim7000g_open_apn();
+   sim7000g_get_operator();
+   sim7000g_set_mqtt_config(MQTT_URL, MQTT_ID, MQTT_PASS, MQTT_QOS);
+   sim7000g_resume();
+   gpio_interruption_init();
+  //---------------------------------------------------------
+  //Enviar estado
+  // sprintf(id, ID_FORMAT, counter, max_counter, interval, ((state == FSM_ON_FIELD) ? "ON FIELD" : "DOWNLOAD"));
+   
+   get_id_device(id);
+   // get parameters from extern memory 
+    mem_s_get_max_amount_data(&max_counter);
+    mem_s_get_counter(&counter);
+   sim7000g_mqtt_publish(TAG_INIT, id, strlen(id));
+  //---------------------------------------------------------
   
 }
 
