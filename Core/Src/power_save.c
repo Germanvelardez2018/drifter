@@ -42,6 +42,12 @@ PRIVATE  void stop_functions(){
 
 
 
+void pwr_set_run(){
+        __PWR_FLAG__= RUN;
+}
+
+
+
 PRIVATE void resume_functions(){
       mem_s_init();
       modulo_debug_init();

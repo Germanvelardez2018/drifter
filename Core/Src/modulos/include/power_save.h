@@ -40,6 +40,8 @@ typedef enum{
 
 
 
+void pwr_set_run();
+
 pwr_mode_t pwr_get_mode();
 
 

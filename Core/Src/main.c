@@ -53,7 +53,7 @@
 #define FSM_DOWNLOAD                          "FSM: DOWNLOAD\r\n"
 #define FSM_CHANGE1                           "ON FIELD => DOWNLOAD \r\n"
 #define FSM_CHANGE2                           "DOWNLOAD => ON FIELD \r\n"
-
+#define CMD_MGS0                              "CMD:Obtener el estado del dispositivo \r\n"
 #define CMD_MSG1                              "CMD: calibrando dispositivo\r\n "
 #define CMD_MSG2                              "CMD: configurar intervalo %d\r\n"
 #define CMD_MSG7                              "CMD: Forzar download \r\n"
@@ -84,12 +84,32 @@ PRIVATE fsm_state_t device;
 
 #define DATAFRAME_SIZE 255
 PRIVATE uint8_t data_frame_buffer[DATAFRAME_SIZE];
-PRIVATE uint8_t buf[255];
+//PRIVATE uint8_t buf[255];
 PRIVATE uint8_t counter = 0;
 PRIVATE pwr_mode_t modo = RUN;
 PRIVATE uint8_t flag_params = 0;
 PRIVATE uint8_t max_counter =MAX_COUNTER_DEFAULT;
 PRIVATE uint8_t _GPS_ON_ = 0;
+
+
+
+
+
+static void inline get_id_device(uint8_t* id_buffer){
+  uint8_t i;
+  uint8_t mc;
+  uint8_t c;
+  fsm_state_t state = FSM_ON_FIELD;
+  // Cargar parametros desde memoria flash
+  //-----------------------------------------------------
+    mem_s_get_max_amount_data(&mc);
+    mem_s_get_counter(&c);
+    mem_s_get_interval(&i);
+    state = fsm_get_state();
+  //---------------------------------------------------------
+  //Enviar estado
+   sprintf(id_buffer, ID_FORMAT, c, mc, i, ((state == FSM_ON_FIELD) ? "ON FIELD" : "DOWNLOAD"));
+}
 
 
 
@@ -152,10 +172,12 @@ void check_flag_params()
       enable = 1;
       break;
     case 6:
-      // Get calibration
-      modulo_debug_print(CMD_MSG1);
+      // Obtener el estado del dispositivo
+      modulo_debug_print(CMD_MGS0);
       sprintf(buffer, CMD_MSG1, interval);
-      mpu6050_calibrate_and_save_offset();
+      //mpu6050_calibrate_and_save_offset();
+      get_id_device(buffer);
+      MQTT_SEND_CMD(buffer);
       break;
     case 7:
       // Forzar envio de datos a la nube
@@ -191,32 +213,11 @@ void check_flag_params()
       modulo_debug_print(buffer);
       mem_s_set_interval(&interval);
     }
+    pwr_set_run();
+
     MQTT_SEND_CMD(buffer);
-    while (1);
+   // while (1);
   }
-}
-
-
-
-
-
-
-static void inline get_id_device(uint8_t* id_buffer){
-
-  uint8_t i;
-  uint8_t mc;
-  uint8_t c;
-  fsm_state_t state = FSM_ON_FIELD;
-  // Cargar parametros desde memoria flash
-  //-----------------------------------------------------
-    mem_s_get_max_amount_data(&mc);
-    mem_s_get_counter(&c);
-    mem_s_get_interval(&i);
-    state = fsm_get_state();
-
-  //---------------------------------------------------------
-  //Enviar estado
-   sprintf(id_buffer, ID_FORMAT, c, mc, i, ((state == FSM_ON_FIELD) ? "ON FIELD" : "DOWNLOAD"));
 }
 
 
@@ -261,20 +262,16 @@ static void inline on_field()
 
 static void inline on_download(void)
 {
-
-  sim7000g_resume();
-       
+  sim7000g_resume(); 
   modulo_debug_print(FSM_DOWNLOAD);
   if (max_counter < counter)
   {
     counter = max_counter;
     mem_s_set_counter(&counter);
   }
-
   sprintf(data_frame_buffer, "Extraer :%d datos\n", counter);
   modulo_debug_print(data_frame_buffer);
   MQTT_SEND_CMD(data_frame_buffer);
-
   while (counter != 0)
   {
     read_data(data_frame_buffer, counter);
@@ -291,10 +288,11 @@ static void inline on_download(void)
   fsm_set_state(FSM_ON_FIELD);
   modulo_debug_print(FSM_CHANGE2);
   MQTT_SEND_CMD(FSM_CHANGE2);
-
   sim7000g_sleep();
-
 }
+
+
+
 
 static void app_init()
 {
@@ -321,14 +319,6 @@ static void app_init()
 static void mqtt_config()
 {
   uint8_t id[120];
-  uint8_t interval;
-  // Cargar parametros desde memoria flash
-  //-----------------------------------------------------
-   // mem_s_get_max_amount_data(&max_counter);
-   // mem_s_get_counter(&counter);
-   // fsm_state_t state = FSM_ON_FIELD;
-   // mem_s_get_interval(&interval);
-   // state = fsm_get_state();
   //------------------------------------------------------
   // Configurar el modulo SIM
   //------------------------------------------------------
@@ -340,13 +330,9 @@ static void mqtt_config()
    sim7000g_resume();
    gpio_interruption_init();
   //---------------------------------------------------------
-  //Enviar estado
-  // sprintf(id, ID_FORMAT, counter, max_counter, interval, ((state == FSM_ON_FIELD) ? "ON FIELD" : "DOWNLOAD"));
-   
    get_id_device(id);
-   // get parameters from extern memory 
-    mem_s_get_max_amount_data(&max_counter);
-    mem_s_get_counter(&counter);
+   mem_s_get_max_amount_data(&max_counter);
+   mem_s_get_counter(&counter);
    sim7000g_mqtt_publish(TAG_INIT, id, strlen(id));
   //---------------------------------------------------------
   
@@ -359,16 +345,11 @@ static void mqtt_config()
 int main(void)
 {
 
-
-  // ANotaciones....micro run con un toggle cada 1 s                            44mA
-  //                micro run con toggle 1s y encendido elemon board            68mA
-
   app_init();
   mqtt_config();
   sim7000g_set_gps(0);
   _GPS_ON_ = 0;
   sim7000g_sleep();
-
   MX_IWDG_Init();
   device = fsm_get_state();
   while (1)
@@ -390,8 +371,15 @@ int main(void)
       }
     }
     check_flag_params();
+    if(device == FSM_MEMORY_DOWNLOAD){
+      // si estamos en modo download, apago GPS. no duermo el micro, mando a descargar info
+      sim7000g_set_gps(0);
+      _GPS_ON_ = 0;
 
-    pwr_sleep(_GPS_ON_);
+    }else{
+      pwr_sleep(_GPS_ON_);
+
+    }
   }
 }
 
