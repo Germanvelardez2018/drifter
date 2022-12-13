@@ -150,6 +150,8 @@ void check_flag_params()
     case 0:
       // ERROR en parse
       modulo_debug_print("error parse\r\n");
+      MQTT_SEND_CMD("Error en device \r\n");
+
       break;
     case 1:
       interval = SLEEP_1MINUTE;
@@ -213,11 +215,9 @@ void check_flag_params()
       modulo_debug_print(buffer);
       mem_s_set_interval(&interval);
     }
-    pwr_set_run();
-
+    pwr_set_run(); // Se usa para decirle a sistema que actualice parametros y reinicie la logica del main sin esperar el intervalo de sleep
     MQTT_SEND_CMD(buffer);
-   // while (1);
-  }
+    }
 }
 
 
@@ -232,7 +232,6 @@ static void inline on_field()
     // gps apagado, encendor, dormir y volver
     _GPS_ON_ = 1;
     sim7000g_set_gps(1);
-
   }
   else{
 // leo el contador
