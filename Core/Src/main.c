@@ -283,7 +283,11 @@ static void inline on_download(void)
   }
   wdt_reset();
   counter = 0;
+  read_data(data_frame_buffer, counter);
+  MQTT_SEND_CMD(data_frame_buffer);
   mem_s_set_counter(&counter);
+  wdt_reset();
+
   device = FSM_ON_FIELD;
   fsm_set_state(FSM_ON_FIELD);
   modulo_debug_print(FSM_CHANGE2);
